@@ -47,7 +47,7 @@
     emptyResetBtn: $("#emptyResetBtn"),
     productGrid: $("#productGrid"),
     featuredGrid: $("#featuredGrid"),
-    exploreGrid: $("#exploreGrid"),
+    prelovedGrid: $("#prelovedGrid"),
     resultCount: $("#resultCount"),
     emptyState: $("#emptyState"),
     paginationWrap: $("#paginationWrap"),
@@ -55,7 +55,6 @@
     prevPageBtn: $("#prevPageBtn"),
     nextPageBtn: $("#nextPageBtn"),
     categoryGrid: $("#categoryGrid"),
-    brandCloud: $("#brandCloud"),
     modal: $("#productModal"),
     modalContent: $("#productModalContent"),
     cartDrawer: $("#cartDrawer"),
@@ -204,7 +203,8 @@
     state.page = 1;
     const controlMap = {
       category: elements.categoryFilter,
-      brand: elements.brandFilter
+      brand: elements.brandFilter,
+      condition: elements.conditionFilter
     };
     if (controlMap[type]) controlMap[type].value = value;
     applyFilters();
@@ -315,11 +315,20 @@
   }
 
   function renderCuratedSections() {
-    const featured = selectDiverseProducts(products, 5);
-    const excluded = new Set(featured.map(product => product.id));
-    const explore = selectDiverseProducts([...products].reverse(), 5, excluded);
+    const regularProducts = products.filter(product => product.condition !== "Preloved" && product.brand !== "PRELOVED");
+    const featured = selectDiverseProducts(regularProducts, 5);
+    const preloved = products
+      .filter(product => product.condition === "Preloved" || product.brand === "PRELOVED")
+      .filter(product => productAvailability(product) !== "out")
+      .sort((a, b) =>
+        Number(Boolean(b.images?.find(Boolean))) - Number(Boolean(a.images?.find(Boolean))) ||
+        b.totalStock - a.totalStock ||
+        a.name.localeCompare(b.name, "id")
+      )
+      .slice(0, 5);
+
     elements.featuredGrid.innerHTML = featured.map(renderProductCard).join("");
-    elements.exploreGrid.innerHTML = explore.map(renderProductCard).join("");
+    elements.prelovedGrid.innerHTML = preloved.map(renderProductCard).join("");
   }
 
   function matchesSearch(product, query) {
@@ -682,6 +691,12 @@
 
       const brand = event.target.closest("[data-brand]");
       if (brand) setCatalogFilter("brand", brand.dataset.brand);
+
+      const condition = event.target.closest("[data-condition]");
+      if (condition) {
+        event.preventDefault();
+        setCatalogFilter("condition", condition.dataset.condition);
+      }
     });
 
     elements.prevPageBtn.addEventListener("click", () => setPage(state.page - 1));
@@ -728,7 +743,6 @@
   renderHero();
   renderCategories();
   renderCuratedSections();
-  renderBrands();
   bindEvents();
   renderCart();
   applyFilters();
