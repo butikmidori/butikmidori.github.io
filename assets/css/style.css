@@ -2120,3 +2120,61 @@ body[data-page="catalog"] .catalog-header h2 {
     order: 2 !important;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v2.5.4 — Responsive image promo banner
+   ========================================================= */
+
+.promo-image-section {
+  padding-top: 42px !important;
+  padding-bottom: 42px !important;
+}
+
+.responsive-promo-banner {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #f4f1e8;
+  box-shadow: 0 10px 30px rgba(24, 41, 31, .06);
+  text-decoration: none;
+}
+
+.responsive-promo-banner picture,
+.responsive-promo-banner img {
+  display: block;
+  width: 100%;
+}
+
+.responsive-promo-banner img {
+  height: auto;
+  aspect-ratio: 45 / 13;
+  object-fit: cover;
+  object-position: center;
+  transition: transform .3s ease;
+}
+
+.responsive-promo-banner:hover img {
+  transform: scale(1.012);
+}
+
+.responsive-promo-banner:focus-visible {
+  outline: 3px solid rgba(117, 143, 59, .35);
+  outline-offset: 4px;
+}
+
+@media (max-width: 760px) {
+  .promo-image-section {
+    padding-top: 25px !important;
+    padding-bottom: 25px !important;
+  }
+
+  .responsive-promo-banner {
+    border-radius: 16px;
+  }
+
+  .responsive-promo-banner img {
+    aspect-ratio: 16 / 9;
+  }
+}
