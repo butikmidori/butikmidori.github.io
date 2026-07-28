@@ -710,3 +710,28 @@ body { background: #fff; color: var(--ink); }
   .product-title { font-size: 10px; }
   .product-actions { grid-template-columns: 1fr 31px; }
 }
+
+
+/* mi.do.ri Webstore V2.2 — revised homepage order */
+.featured-section {
+  padding-top: 48px;
+  background: #fff;
+}
+.category-section {
+  padding-top: 50px;
+  background: #fafbf8;
+}
+.preloved-section {
+  padding-top: 50px;
+  background: #fafbf8;
+}
+.preloved-section .product-card {
+  background: #fff;
+}
+@media (max-width: 720px) {
+  .featured-section,
+  .category-section,
+  .preloved-section {
+    padding-top: 34px;
+  }
+}
