@@ -9,7 +9,7 @@
 
   const store = catalog.store;
   const products = catalog.products.filter(product => product.status === "Aktif");
-  const brands = catalog.brands;
+  const brands = catalog.brands || [];
 
   const state = {
     query: "",
@@ -21,7 +21,7 @@
     availability: "",
     sort: "recommended",
     page: 1,
-    perPage: 24,
+    perPage: 25,
     filtered: [],
     cart: loadCart()
   };
@@ -46,6 +46,8 @@
     resetFiltersBtn: $("#resetFiltersBtn"),
     emptyResetBtn: $("#emptyResetBtn"),
     productGrid: $("#productGrid"),
+    featuredGrid: $("#featuredGrid"),
+    exploreGrid: $("#exploreGrid"),
     resultCount: $("#resultCount"),
     emptyState: $("#emptyState"),
     paginationWrap: $("#paginationWrap"),
@@ -58,30 +60,15 @@
     modalContent: $("#productModalContent"),
     cartDrawer: $("#cartDrawer"),
     openCartBtn: $("#openCartBtn"),
+    promoOpenCartBtn: $("#promoOpenCartBtn"),
     cartCount: $("#cartCount"),
     cartItems: $("#cartItems"),
     cartEmpty: $("#cartEmpty"),
     cartTotal: $("#cartTotal"),
     sendCartBtn: $("#sendCartBtn"),
     clearCartBtn: $("#clearCartBtn"),
-    toast: $("#toast")
-  };
-
-  const categorySymbols = {
-    Dress: "D",
-    Shirt: "S",
-    Blouse: "B",
-    Hijab: "H",
-    Set: "2",
-    Pants: "P",
-    Skirt: "R",
-    Tunic: "T",
-    Outer: "O",
-    Aksesoris: "✦",
-    Bag: "B",
-    Sweater: "W",
-    Vest: "V",
-    Shoes: "S"
+    toast: $("#toast"),
+    heroProductImage: $("#heroProductImage")
   };
 
   function escapeHtml(value = "") {
@@ -131,15 +118,14 @@
   }
 
   function placeholderClass(product) {
-    return `placeholder-${(product.brandCode % 5) + 1}`;
+    return `placeholder-${(Number(product.brandCode || 0) % 5) + 1}`;
   }
 
   function imageMarkup(product, className = "") {
     const image = product.images?.find(Boolean);
-    if (image) {
-      return `<img class="${className}" src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" loading="lazy" onerror="this.outerHTML=this.nextElementSibling.outerHTML"><div class="product-placeholder ${placeholderClass(product)}" hidden><span><strong>${escapeHtml(productInitials(product))}</strong><small>${escapeHtml(product.brand)}</small></span></div>`;
-    }
-    return `<div class="product-placeholder ${placeholderClass(product)} ${className}"><span><strong>${escapeHtml(productInitials(product))}</strong><small>${escapeHtml(product.brand)}</small></span></div>`;
+    const placeholder = `<div class="product-placeholder ${placeholderClass(product)} ${className}" ${image ? "hidden" : ""}><span><strong>${escapeHtml(productInitials(product))}</strong><small>${escapeHtml(product.brand)}</small></span></div>`;
+    if (!image) return placeholder;
+    return `<img class="${className}" src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false">${placeholder}`;
   }
 
   function productUrl(product) {
@@ -165,11 +151,11 @@
     showToast.timer = setTimeout(() => elements.toast.classList.remove("show"), 2300);
   }
 
-  function fillSelect(select, values, formatter = value => value) {
+  function fillSelect(select, values) {
     values.forEach(value => {
       const option = document.createElement("option");
       option.value = value;
-      option.textContent = formatter(value);
+      option.textContent = value;
       select.appendChild(option);
     });
   }
@@ -191,10 +177,38 @@
   }
 
   function renderSummary() {
-    $("#statProducts").textContent = catalog.summary.products.toLocaleString("id-ID");
-    $("#statBrands").textContent = catalog.summary.brands.toLocaleString("id-ID");
-    $("#statVariants").textContent = catalog.summary.variants.toLocaleString("id-ID");
+    const values = {
+      statProducts: catalog.summary.products.toLocaleString("id-ID"),
+      statBrands: catalog.summary.brands.toLocaleString("id-ID"),
+      statVariants: catalog.summary.variants.toLocaleString("id-ID")
+    };
+    Object.entries(values).forEach(([id, value]) => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = value;
+    });
+    const heroVariants = $("#heroVariants");
+    if (heroVariants) heroVariants.textContent = `${values.statVariants} varian`;
     $("#currentYear").textContent = new Date().getFullYear();
+  }
+
+  function renderHero() {
+    const heroProduct = products.find(p => p.images?.some(Boolean)) || products.find(p => p.id === "PRD0001");
+    if (!heroProduct || !elements.heroProductImage) return;
+    const image = heroProduct.images?.find(Boolean);
+    if (image) elements.heroProductImage.src = image;
+    elements.heroProductImage.alt = heroProduct.name;
+  }
+
+  function setCatalogFilter(type, value) {
+    state[type] = value;
+    state.page = 1;
+    const controlMap = {
+      category: elements.categoryFilter,
+      brand: elements.brandFilter
+    };
+    if (controlMap[type]) controlMap[type].value = value;
+    applyFilters();
+    $("#katalog").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function renderCategories() {
@@ -202,32 +216,23 @@
       acc[product.category] = (acc[product.category] || 0) + 1;
       return acc;
     }, {});
-
     const preferred = ["Dress", "Shirt", "Hijab", "Set", "Blouse", "Pants", "Aksesoris", "Tunic"];
     const ordered = [
       ...preferred.filter(category => counts[category]),
       ...Object.keys(counts).filter(category => !preferred.includes(category)).sort()
     ].slice(0, 8);
 
-    elements.categoryGrid.innerHTML = ordered.map(category => `
-      <button class="category-card" type="button" data-category="${escapeHtml(category)}">
-        <span class="category-symbol">${escapeHtml(categorySymbols[category] || category[0])}</span>
-        <span>
+    elements.categoryGrid.innerHTML = ordered.map(category => {
+      const representative = products
+        .filter(product => product.category === category)
+        .sort((a, b) => Number(Boolean(b.images?.find(Boolean))) - Number(Boolean(a.images?.find(Boolean))) || b.totalStock - a.totalStock)[0];
+      return `
+        <button class="category-card" type="button" data-category="${escapeHtml(category)}">
+          <span class="category-image">${imageMarkup(representative, "category-product-image")}</span>
           <h3>${escapeHtml(category)}</h3>
           <p>${counts[category]} produk</p>
-        </span>
-      </button>
-    `).join("");
-
-    elements.categoryGrid.addEventListener("click", event => {
-      const card = event.target.closest("[data-category]");
-      if (!card) return;
-      state.category = card.dataset.category;
-      elements.categoryFilter.value = state.category;
-      state.page = 1;
-      applyFilters();
-      document.querySelector("#katalog").scrollIntoView({ behavior: "smooth" });
-    });
+        </button>`;
+    }).join("");
   }
 
   function renderBrands() {
@@ -241,16 +246,80 @@
         <span>${brand.productCount}</span>
       </button>
     `).join("");
+  }
 
-    elements.brandCloud.addEventListener("click", event => {
-      const chip = event.target.closest("[data-brand]");
-      if (!chip) return;
-      state.brand = chip.dataset.brand;
-      elements.brandFilter.value = state.brand;
-      state.page = 1;
-      applyFilters();
-      document.querySelector("#katalog").scrollIntoView({ behavior: "smooth" });
-    });
+  function productBadges(product) {
+    const availability = productAvailability(product);
+    return [
+      product.isNew ? `<span class="badge">Baru</span>` : "",
+      product.condition === "Preloved" ? `<span class="badge badge-preloved">Preloved</span>` : "",
+      availability === "limited" ? `<span class="badge badge-limited">Stok terbatas</span>` : "",
+      availability === "out" ? `<span class="badge badge-out">Habis</span>` : ""
+    ].join("");
+  }
+
+  function renderProductCard(product) {
+    const availability = productAvailability(product);
+    const info = [
+      product.colors.length ? `${product.colors.length} warna` : "",
+      product.sizes.length ? product.sizes.slice(0, 3).join(", ") : "",
+      `${product.variantCount} varian`
+    ].filter(Boolean).join(" · ");
+
+    return `
+      <article class="product-card">
+        <div class="product-image-wrap">
+          ${imageMarkup(product, "product-image")}
+          <div class="product-badges">${productBadges(product)}</div>
+          <button class="product-favorite" type="button" data-quick-add="${product.id}" aria-label="Tambah ${escapeHtml(product.name)} ke daftar pilihan">♡</button>
+        </div>
+        <div class="product-body">
+          <p class="product-brand">${escapeHtml(product.brand)}</p>
+          <h3 class="product-title">${escapeHtml(product.name)}</h3>
+          <div class="product-rating">● <span>${stockLabel(availability)}</span></div>
+          <p class="product-price">${formatPrice(product)}</p>
+          <p class="product-card-info" title="${escapeHtml(info)}">${escapeHtml(info)}</p>
+          <div class="product-actions">
+            <button class="button button-primary" type="button" data-open-product="${product.id}">Pilih produk</button>
+            <a class="quick-wa" href="${whatsappProductUrl(product)}" target="_blank" rel="noopener" aria-label="Tanya ${escapeHtml(product.name)} via WhatsApp">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L0 24l6.5-1.7a11.8 11.8 0 0 0 5.6 1.4h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.1-1.2-6-3.5-8.4Z"></path></svg>
+            </a>
+          </div>
+        </div>
+      </article>`;
+  }
+
+  function selectDiverseProducts(candidates, limit, excludedIds = new Set()) {
+    const sorted = candidates
+      .filter(product => !excludedIds.has(product.id) && product.brand !== "BOX" && productAvailability(product) !== "out")
+      .sort((a, b) =>
+        Number(Boolean(b.images?.find(Boolean))) - Number(Boolean(a.images?.find(Boolean))) ||
+        b.totalStock - a.totalStock ||
+        a.brandCode - b.brandCode
+      );
+
+    const selected = [];
+    const usedBrands = new Set();
+    for (const product of sorted) {
+      if (!usedBrands.has(product.brand)) {
+        selected.push(product);
+        usedBrands.add(product.brand);
+      }
+      if (selected.length === limit) return selected;
+    }
+    for (const product of sorted) {
+      if (!selected.some(item => item.id === product.id)) selected.push(product);
+      if (selected.length === limit) break;
+    }
+    return selected;
+  }
+
+  function renderCuratedSections() {
+    const featured = selectDiverseProducts(products, 5);
+    const excluded = new Set(featured.map(product => product.id));
+    const explore = selectDiverseProducts([...products].reverse(), 5, excluded);
+    elements.featuredGrid.innerHTML = featured.map(renderProductCard).join("");
+    elements.exploreGrid.innerHTML = explore.map(renderProductCard).join("");
   }
 
   function matchesSearch(product, query) {
@@ -270,7 +339,6 @@
 
   function applyFilters() {
     const query = normalize(state.query);
-
     let filtered = products.filter(product => {
       if (!matchesSearch(product, query)) return false;
       if (state.brand && product.brand !== state.brand) return false;
@@ -289,7 +357,8 @@
         case "price-desc": return b.priceMax - a.priceMax;
         case "stock-desc": return b.totalStock - a.totalStock;
         default:
-          return Number(b.isFeatured) - Number(a.isFeatured)
+          return Number(Boolean(b.images?.find(Boolean))) - Number(Boolean(a.images?.find(Boolean)))
+            || Number(b.isFeatured) - Number(a.isFeatured)
             || Number(b.isNew) - Number(a.isNew)
             || Number(productAvailability(a) === "out") - Number(productAvailability(b) === "out")
             || a.brandCode - b.brandCode
@@ -300,15 +369,13 @@
     state.filtered = filtered;
     const totalPages = Math.max(1, Math.ceil(filtered.length / state.perPage));
     state.page = Math.min(state.page, totalPages);
-
     updateActiveFilterCount();
     renderProducts();
     renderPagination();
   }
 
   function updateActiveFilterCount() {
-    const count = [state.brand, state.category, state.size, state.segment, state.condition, state.availability]
-      .filter(Boolean).length;
+    const count = [state.brand, state.category, state.size, state.segment, state.condition, state.availability].filter(Boolean).length;
     elements.activeFilterCount.textContent = count;
     elements.activeFilterCount.classList.toggle("visible", count > 0);
   }
@@ -317,64 +384,21 @@
     elements.resultCount.textContent = state.filtered.length.toLocaleString("id-ID");
     const start = (state.page - 1) * state.perPage;
     const pageItems = state.filtered.slice(start, start + state.perPage);
-
     elements.productGrid.classList.toggle("hidden", !pageItems.length);
-    elements.emptyState.classList.toggle("hidden", !!pageItems.length);
-
-    elements.productGrid.innerHTML = pageItems.map(product => {
-      const availability = productAvailability(product);
-      const badges = [
-        product.isNew ? `<span class="badge">Baru</span>` : "",
-        product.condition === "Preloved" ? `<span class="badge badge-preloved">Preloved</span>` : "",
-        availability === "limited" ? `<span class="badge badge-limited">Stok terbatas</span>` : "",
-        availability === "out" ? `<span class="badge badge-out">Habis</span>` : ""
-      ].join("");
-
-      const sizeText = product.sizes.length
-        ? product.sizes.slice(0, 4).join(", ") + (product.sizes.length > 4 ? " +" : "")
-        : "Tanpa ukuran";
-
-      return `
-        <article class="product-card">
-          <div class="product-image-wrap">
-            ${imageMarkup(product, "product-image")}
-            <div class="product-badges">${badges}</div>
-            <button class="product-favorite" type="button" data-quick-add="${product.id}" aria-label="Simpan ${escapeHtml(product.name)}">♡</button>
-          </div>
-          <div class="product-body">
-            <p class="product-brand">${escapeHtml(product.brand)}</p>
-            <h3 class="product-title">${escapeHtml(product.name)}</h3>
-            <div class="product-meta">
-              <span>${escapeHtml(product.category)}</span>
-              <span>${escapeHtml(sizeText)}</span>
-              <span>${product.variantCount} varian</span>
-            </div>
-            <p class="product-price">${formatPrice(product)}</p>
-            <div class="product-actions">
-              <button class="button button-primary" type="button" data-open-product="${product.id}">Lihat detail</button>
-              <a class="quick-wa" href="${whatsappProductUrl(product)}" target="_blank" rel="noopener" aria-label="Tanya ${escapeHtml(product.name)} via WhatsApp">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L0 24l6.5-1.7a11.8 11.8 0 0 0 5.6 1.4h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.1-1.2-6-3.5-8.4Z"/></svg>
-              </a>
-            </div>
-          </div>
-        </article>
-      `;
-    }).join("");
+    elements.emptyState.classList.toggle("hidden", Boolean(pageItems.length));
+    elements.productGrid.innerHTML = pageItems.map(renderProductCard).join("");
   }
 
   function renderPagination() {
     const totalPages = Math.ceil(state.filtered.length / state.perPage);
     elements.paginationWrap.classList.toggle("hidden", totalPages <= 1);
     if (totalPages <= 1) return;
-
     elements.prevPageBtn.disabled = state.page === 1;
     elements.nextPageBtn.disabled = state.page === totalPages;
-
     const visiblePages = [];
     const start = Math.max(1, state.page - 2);
     const end = Math.min(totalPages, state.page + 2);
     for (let page = start; page <= end; page++) visiblePages.push(page);
-
     elements.pageNumbers.innerHTML = visiblePages.map(page => `
       <button class="page-number ${page === state.page ? "active" : ""}" type="button" data-page="${page}" aria-label="Halaman ${page}">${page}</button>
     `).join("");
@@ -385,7 +409,7 @@
     state.page = Math.min(Math.max(1, page), totalPages);
     renderProducts();
     renderPagination();
-    document.querySelector("#katalog").scrollIntoView({ behavior: "smooth", block: "start" });
+    $("#katalog").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function findProduct(id) {
@@ -393,8 +417,9 @@
   }
 
   function availableVariants(product) {
-    const active = product.variants.filter(v => v.status === "Aktif");
-    return active.sort((a, b) => Number(b.stock > 0) - Number(a.stock > 0) || a.color.localeCompare(b.color, "id") || a.size.localeCompare(b.size, "id"));
+    return product.variants
+      .filter(v => v.status === "Aktif")
+      .sort((a, b) => Number(b.stock > 0) - Number(a.stock > 0) || (a.color || "").localeCompare(b.color || "", "id") || (a.size || "").localeCompare(b.size || "", "id"));
   }
 
   function openProduct(product, updateUrl = true) {
@@ -405,9 +430,7 @@
 
     elements.modalContent.innerHTML = `
       <article class="modal-product">
-        <div class="modal-gallery">
-          <div class="modal-main-image">${imageMarkup(product)}</div>
-        </div>
+        <div class="modal-gallery"><div class="modal-main-image">${imageMarkup(product)}</div></div>
         <div class="modal-info">
           <p class="product-brand">${escapeHtml(product.brand)}</p>
           <h2 id="modalProductName">${escapeHtml(product.name)}</h2>
@@ -419,8 +442,7 @@
             ${variants.map(variant => `
               <option value="${escapeHtml(variant.sku)}" ${variant === defaultVariant ? "selected" : ""} ${variant.stock <= 0 ? "disabled" : ""}>
                 ${escapeHtml(variant.color || "Tanpa warna")} · ${escapeHtml(variant.size || "Tanpa ukuran")} · ${variant.stock > 0 ? stockLabel(variant.stock <= 2 ? "limited" : "available") : "Habis"}
-              </option>
-            `).join("")}
+              </option>`).join("")}
           </select>
 
           <div class="variant-status">
@@ -442,16 +464,12 @@
             <a class="button button-wa" id="modalWhatsAppBtn" href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">Tanya via WhatsApp</a>
           </div>
         </div>
-      </article>
-    `;
+      </article>`;
 
     const variantSelect = $("#variantSelect");
     const addButton = $("#modalAddCartBtn");
     const waButton = $("#modalWhatsAppBtn");
-
-    function selectedVariant() {
-      return product.variants.find(v => v.sku === variantSelect.value);
-    }
+    const selectedVariant = () => product.variants.find(v => v.sku === variantSelect.value);
 
     variantSelect?.addEventListener("change", () => {
       const variant = selectedVariant();
@@ -490,7 +508,7 @@
 
   function loadCart() {
     try {
-      const raw = localStorage.getItem("midori-cart-v1");
+      const raw = localStorage.getItem("midori-cart-v2") || localStorage.getItem("midori-cart-v1");
       return raw ? JSON.parse(raw) : [];
     } catch {
       return [];
@@ -498,7 +516,7 @@
   }
 
   function saveCart() {
-    localStorage.setItem("midori-cart-v1", JSON.stringify(state.cart));
+    localStorage.setItem("midori-cart-v2", JSON.stringify(state.cart));
     renderCart();
   }
 
@@ -508,24 +526,24 @@
       return;
     }
     const existing = state.cart.find(item => item.sku === variant.sku);
-    if (!existing) {
-      state.cart.push({
-        productId: product.id,
-        name: product.name,
-        brand: product.brand,
-        image: product.images?.[0] || "",
-        placeholder: productInitials(product),
-        placeholderClass: placeholderClass(product),
-        sku: variant.sku,
-        color: variant.color,
-        size: variant.size,
-        price: variant.price
-      });
-      saveCart();
-      showToast("Produk ditambahkan ke daftar pilihan.");
-    } else {
+    if (existing) {
       showToast("Produk ini sudah ada di daftar pilihan.");
+      return;
     }
+    state.cart.push({
+      productId: product.id,
+      name: product.name,
+      brand: product.brand,
+      image: product.images?.[0] || "",
+      placeholder: productInitials(product),
+      placeholderClass: placeholderClass(product),
+      sku: variant.sku,
+      color: variant.color,
+      size: variant.size,
+      price: variant.price
+    });
+    saveCart();
+    showToast("Produk ditambahkan ke daftar pilihan.");
   }
 
   function removeFromCart(sku) {
@@ -545,7 +563,7 @@
       <article class="cart-item">
         <div class="cart-thumb">
           ${item.image
-            ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">`
+            ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><div class="product-placeholder ${escapeHtml(item.placeholderClass)}" hidden><span><strong>${escapeHtml(item.placeholder)}</strong><small>${escapeHtml(item.brand)}</small></span></div>`
             : `<div class="product-placeholder ${escapeHtml(item.placeholderClass)}"><span><strong>${escapeHtml(item.placeholder)}</strong><small>${escapeHtml(item.brand)}</small></span></div>`}
         </div>
         <div>
@@ -556,8 +574,7 @@
           <div class="cart-item-price">${formatCurrency(item.price)}</div>
         </div>
         <button class="remove-cart-item" type="button" data-remove-sku="${escapeHtml(item.sku)}" aria-label="Hapus ${escapeHtml(item.name)}">×</button>
-      </article>
-    `).join("");
+      </article>`).join("");
 
     const total = state.cart.reduce((sum, item) => sum + Number(item.price || 0), 0);
     elements.cartTotal.textContent = formatCurrency(total);
@@ -587,16 +604,10 @@
   }
 
   function resetFilters() {
-    state.query = "";
-    state.brand = "";
-    state.category = "";
-    state.size = "";
-    state.segment = "";
-    state.condition = "";
-    state.availability = "";
-    state.sort = "recommended";
-    state.page = 1;
-
+    Object.assign(state, {
+      query: "", brand: "", category: "", size: "", segment: "",
+      condition: "", availability: "", sort: "recommended", page: 1
+    });
     elements.searchInput.value = "";
     elements.brandFilter.value = "";
     elements.categoryFilter.value = "";
@@ -605,8 +616,22 @@
     elements.conditionFilter.value = "";
     elements.availabilityFilter.value = "";
     elements.sortSelect.value = "recommended";
-
     applyFilters();
+  }
+
+  function handleProductAction(event) {
+    const detailButton = event.target.closest("[data-open-product]");
+    if (detailButton) {
+      openProduct(findProduct(detailButton.dataset.openProduct));
+      return;
+    }
+    const quickAdd = event.target.closest("[data-quick-add]");
+    if (quickAdd) {
+      const product = findProduct(quickAdd.dataset.quickAdd);
+      const variant = product?.variants.find(v => v.stock > 0 && v.status === "Aktif");
+      if (product && variant) addToCart(product, variant);
+      else showToast("Produk ini sedang habis.");
+    }
   }
 
   function bindEvents() {
@@ -614,7 +639,6 @@
       const open = elements.mainNav.classList.toggle("open");
       elements.navToggle.setAttribute("aria-expanded", String(open));
     });
-
     $$("#mainNav a").forEach(link => link.addEventListener("click", () => {
       elements.mainNav.classList.remove("open");
       elements.navToggle.setAttribute("aria-expanded", "false");
@@ -646,24 +670,18 @@
       });
     });
 
-    elements.toggleFiltersBtn.addEventListener("click", () => {
-      elements.filtersPanel.classList.toggle("open");
-    });
-
+    elements.toggleFiltersBtn.addEventListener("click", () => elements.filtersPanel.classList.toggle("open"));
     elements.resetFiltersBtn.addEventListener("click", resetFilters);
     elements.emptyResetBtn.addEventListener("click", resetFilters);
 
-    elements.productGrid.addEventListener("click", event => {
-      const detailButton = event.target.closest("[data-open-product]");
-      if (detailButton) openProduct(findProduct(detailButton.dataset.openProduct));
+    document.addEventListener("click", event => {
+      if (event.target.closest("[data-product-grid]")) handleProductAction(event);
 
-      const quickAdd = event.target.closest("[data-quick-add]");
-      if (quickAdd) {
-        const product = findProduct(quickAdd.dataset.quickAdd);
-        const variant = product?.variants.find(v => v.stock > 0);
-        if (product && variant) addToCart(product, variant);
-        else showToast("Produk ini sedang habis.");
-      }
+      const category = event.target.closest("[data-category]");
+      if (category) setCatalogFilter("category", category.dataset.category);
+
+      const brand = event.target.closest("[data-brand]");
+      if (brand) setCatalogFilter("brand", brand.dataset.brand);
     });
 
     elements.prevPageBtn.addEventListener("click", () => setPage(state.page - 1));
@@ -673,9 +691,10 @@
       if (button) setPage(Number(button.dataset.page));
     });
 
-    $$("[data-close-modal]").forEach(button => button.addEventListener("click", closeProduct));
+    $$('[data-close-modal]').forEach(button => button.addEventListener("click", closeProduct));
     elements.openCartBtn.addEventListener("click", openCart);
-    $$("[data-close-cart]").forEach(button => button.addEventListener("click", closeCart));
+    elements.promoOpenCartBtn?.addEventListener("click", openCart);
+    $$('[data-close-cart]').forEach(button => button.addEventListener("click", closeCart));
 
     elements.cartItems.addEventListener("click", event => {
       const removeButton = event.target.closest("[data-remove-sku]");
@@ -706,7 +725,9 @@
 
   setupFilters();
   renderSummary();
+  renderHero();
   renderCategories();
+  renderCuratedSections();
   renderBrands();
   bindEvents();
   renderCart();
