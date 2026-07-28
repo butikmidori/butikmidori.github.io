@@ -10,12 +10,12 @@
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/images/logo-midori.png">
   <title>Katalog mi.do.ri — Multibrand Muslim Fashion</title>
-  <meta name="midori-version" content="2.5.1">
+  <meta name="midori-version" content="2.5.2">
   <link rel="icon" href="assets/images/logo-midori.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.5.1">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.5.2">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -122,9 +122,8 @@
           <div>
             <span class="eyebrow">Full catalog</span>
             <h2>Seluruh koleksi mi.do.ri</h2>
-            <p>Cari berdasarkan nama produk, brand, kategori, warna, ukuran, atau kode barang.</p>
+            <p>Cari berdasarkan nama produk, brand, kategori, warna, atau kode barang.</p>
           </div>
-          <div class="catalog-count-card"><strong id="statVariants">—</strong><span>Total varian</span></div>
         </div>
 
         <div class="catalog-toolbar">
@@ -132,11 +131,6 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
             <input id="searchInput" type="search" placeholder="Cari produk, brand, kategori, atau SKU…" autocomplete="off">
           </label>
-          <button class="button button-filter" id="toggleFiltersBtn" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"></path></svg>
-            Filter
-            <span class="active-filter-count" id="activeFilterCount">0</span>
-          </button>
           <label class="sort-box">
             <span class="sr-only">Urutkan produk</span>
             <select id="sortSelect">
@@ -149,10 +143,9 @@
           </label>
         </div>
 
-        <div class="filters-panel" id="filtersPanel">
+        <div class="filters-panel open" id="filtersPanel">
           <div class="filter-field"><label for="brandFilter">Brand</label><select id="brandFilter"><option value="">Semua brand</option></select></div>
           <div class="filter-field"><label for="categoryFilter">Kategori</label><select id="categoryFilter"><option value="">Semua kategori</option></select></div>
-          <div class="filter-field"><label for="sizeFilter">Ukuran</label><select id="sizeFilter"><option value="">Semua ukuran</option></select></div>
           <div class="filter-field"><label for="segmentFilter">Segmen</label><select id="segmentFilter"><option value="">Semua segmen</option><option value="Dewasa">Dewasa</option><option value="Anak">Anak</option></select></div>
           <div class="filter-field"><label for="conditionFilter">Kondisi</label><select id="conditionFilter"><option value="">Semua kondisi</option><option value="Baru">Baru</option><option value="Preloved">Preloved</option></select></div>
           <div class="filter-field"><label for="availabilityFilter">Ketersediaan</label><select id="availabilityFilter"><option value="">Semua stok</option><option value="available">Tersedia</option><option value="limited">Stok terbatas</option><option value="out">Habis</option></select></div>
@@ -238,7 +231,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="assets/data/catalog-data.js?v=2.5.1"></script>
-  <script src="assets/js/app.js?v=2.5.1"></script>
+  <script src="assets/data/catalog-data.js?v=2.5.2"></script>
+  <script src="assets/js/app.js?v=2.5.2"></script>
 </body>
 </html>
