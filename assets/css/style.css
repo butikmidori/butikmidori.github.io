@@ -1186,3 +1186,92 @@ body { background: #fff; color: var(--ink); }
     left: 10px !important;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v2.3.4 — Medium badge sizing + detail stock badge
+   ========================================================= */
+
+/* Badge SALE dibuat ukuran menengah: tetap menonjol, tidak mendominasi foto. */
+.product-card .badge-discount {
+  min-width: 78px !important;
+  min-height: 74px !important;
+  padding: 10px 12px 11px !important;
+  border-radius: 17px !important;
+  font-size: 0.74rem !important;
+  line-height: 1.02 !important;
+  letter-spacing: 0.045em !important;
+  box-shadow: 0 10px 22px rgba(214, 37, 35, 0.28) !important;
+}
+
+.product-card .badge-discount strong,
+.product-card .badge-discount .discount-value {
+  font-size: 1.26rem !important;
+  line-height: 1 !important;
+}
+
+/* Badge stok terbatas dibuat lebih ringkas tetapi tetap mudah dibaca. */
+.product-card .product-image-wrap > .badge-stock-bottom-left,
+.product-card .product-image-wrap > .badge-limited {
+  left: 14px !important;
+  bottom: 14px !important;
+  padding: 8px 15px !important;
+  font-size: 0.76rem !important;
+  min-height: 36px;
+  border-radius: 999px !important;
+  box-shadow: 0 7px 16px rgba(102, 80, 0, 0.16) !important;
+}
+
+/* Badge stok terbatas pada detail produk. */
+.detail-stock-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffe681 0%, #ffd34e 100%);
+  color: #3f3a10;
+  border: 1px solid rgba(93, 76, 0, 0.16);
+  box-shadow: 0 7px 16px rgba(102, 80, 0, 0.13);
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.detail-stock-badge[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .product-card .badge-discount {
+    min-width: 70px !important;
+    min-height: 66px !important;
+    padding: 9px 10px 10px !important;
+    border-radius: 15px !important;
+    font-size: 0.68rem !important;
+  }
+
+  .product-card .badge-discount strong,
+  .product-card .badge-discount .discount-value {
+    font-size: 1.12rem !important;
+  }
+
+  .product-card .product-image-wrap > .badge-stock-bottom-left,
+  .product-card .product-image-wrap > .badge-limited {
+    left: 10px !important;
+    bottom: 10px !important;
+    min-height: 32px;
+    padding: 7px 12px !important;
+    font-size: 0.69rem !important;
+  }
+
+  .detail-stock-badge {
+    margin-top: 10px;
+    padding: 7px 12px;
+    font-size: 0.71rem;
+  }
+}
