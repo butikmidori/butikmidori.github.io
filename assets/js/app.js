@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "2.3.1";
+  const APP_VERSION = "2.3.2";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const catalog = window.MIDORI_CATALOG;
@@ -313,7 +313,7 @@ Apakah masih tersedia?`;
     const availability = productAvailability(product);
     const promo = isPromoActive(product);
     return [
-      promo ? `<span class="badge badge-discount" title="${escapeHtml(product.promoLabel || `Diskon ${promoPercent(product)}%`)}">-${promoPercent(product)}%</span>` : "",
+      promo ? `<span class="badge badge-discount" title="${escapeHtml(product.promoLabel || `Diskon ${promoPercent(product)}%`)}"><small>SALE</small><strong>-${promoPercent(product)}%</strong></span>` : "",
       product.isNew ? `<span class="badge">Baru</span>` : "",
       product.condition === "Preloved" ? `<span class="badge badge-preloved">Preloved</span>` : "",
       availability === "limited" ? `<span class="badge badge-limited">Stok terbatas</span>` : "",
