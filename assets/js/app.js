@@ -1,6 +1,9 @@
 (() => {
   "use strict";
 
+  const APP_VERSION = "2.2.1";
+  window.MIDORI_APP_VERSION = APP_VERSION;
+
   const catalog = window.MIDORI_CATALOG;
   if (!catalog || !Array.isArray(catalog.products)) {
     document.body.innerHTML = "<p style='padding:40px;font-family:sans-serif'>Data katalog tidak ditemukan.</p>";
@@ -151,6 +154,7 @@
   }
 
   function fillSelect(select, values) {
+    if (!select) return;
     values.forEach(value => {
       const option = document.createElement("option");
       option.value = value;
@@ -187,7 +191,8 @@
     });
     const heroVariants = $("#heroVariants");
     if (heroVariants) heroVariants.textContent = `${values.statVariants} varian`;
-    $("#currentYear").textContent = new Date().getFullYear();
+    const currentYear = $("#currentYear");
+    if (currentYear) currentYear.textContent = new Date().getFullYear();
   }
 
   function renderHero() {
@@ -208,10 +213,11 @@
     };
     if (controlMap[type]) controlMap[type].value = value;
     applyFilters();
-    $("#katalog").scrollIntoView({ behavior: "smooth", block: "start" });
+    $("#katalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function renderCategories() {
+    if (!elements.categoryGrid) return;
     const counts = products.reduce((acc, product) => {
       acc[product.category] = (acc[product.category] || 0) + 1;
       return acc;
@@ -233,19 +239,6 @@
           <p>${counts[category]} produk</p>
         </button>`;
     }).join("");
-  }
-
-  function renderBrands() {
-    const activeBrands = brands
-      .filter(brand => brand.productCount > 0 && brand.status === "Aktif")
-      .sort((a, b) => a.name.localeCompare(b.name, "id"));
-
-    elements.brandCloud.innerHTML = activeBrands.map(brand => `
-      <button class="brand-chip" type="button" data-brand="${escapeHtml(brand.name)}">
-        ${escapeHtml(brand.name)}
-        <span>${brand.productCount}</span>
-      </button>
-    `).join("");
   }
 
   function productBadges(product) {
@@ -327,8 +320,14 @@
       )
       .slice(0, 5);
 
-    elements.featuredGrid.innerHTML = featured.map(renderProductCard).join("");
-    elements.prelovedGrid.innerHTML = preloved.map(renderProductCard).join("");
+    if (elements.featuredGrid) {
+      elements.featuredGrid.innerHTML = featured.map(renderProductCard).join("");
+    }
+    if (elements.prelovedGrid) {
+      elements.prelovedGrid.innerHTML = preloved.length
+        ? preloved.map(renderProductCard).join("")
+        : '<div class="section-empty-note">Belum ada produk preloved aktif.</div>';
+    }
   }
 
   function matchesSearch(product, query) {
@@ -385,11 +384,13 @@
 
   function updateActiveFilterCount() {
     const count = [state.brand, state.category, state.size, state.segment, state.condition, state.availability].filter(Boolean).length;
+    if (!elements.activeFilterCount) return;
     elements.activeFilterCount.textContent = count;
     elements.activeFilterCount.classList.toggle("visible", count > 0);
   }
 
   function renderProducts() {
+    if (!elements.productGrid || !elements.resultCount || !elements.emptyState) return;
     elements.resultCount.textContent = state.filtered.length.toLocaleString("id-ID");
     const start = (state.page - 1) * state.perPage;
     const pageItems = state.filtered.slice(start, start + state.perPage);
@@ -399,6 +400,7 @@
   }
 
   function renderPagination() {
+    if (!elements.paginationWrap || !elements.pageNumbers || !elements.prevPageBtn || !elements.nextPageBtn) return;
     const totalPages = Math.ceil(state.filtered.length / state.perPage);
     elements.paginationWrap.classList.toggle("hidden", totalPages <= 1);
     if (totalPages <= 1) return;
@@ -418,7 +420,7 @@
     state.page = Math.min(Math.max(1, page), totalPages);
     renderProducts();
     renderPagination();
-    $("#katalog").scrollIntoView({ behavior: "smooth", block: "start" });
+    $("#katalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function findProduct(id) {
@@ -644,7 +646,7 @@
   }
 
   function bindEvents() {
-    elements.navToggle.addEventListener("click", () => {
+    elements.navToggle?.addEventListener("click", () => {
       const open = elements.mainNav.classList.toggle("open");
       elements.navToggle.setAttribute("aria-expanded", String(open));
     });
@@ -654,7 +656,7 @@
     }));
 
     let searchTimer;
-    elements.searchInput.addEventListener("input", event => {
+    elements.searchInput?.addEventListener("input", event => {
       clearTimeout(searchTimer);
       searchTimer = setTimeout(() => {
         state.query = event.target.value;
@@ -672,16 +674,16 @@
       [elements.availabilityFilter, "availability"],
       [elements.sortSelect, "sort"]
     ].forEach(([element, key]) => {
-      element.addEventListener("change", event => {
+      element?.addEventListener("change", event => {
         state[key] = event.target.value;
         state.page = 1;
         applyFilters();
       });
     });
 
-    elements.toggleFiltersBtn.addEventListener("click", () => elements.filtersPanel.classList.toggle("open"));
-    elements.resetFiltersBtn.addEventListener("click", resetFilters);
-    elements.emptyResetBtn.addEventListener("click", resetFilters);
+    elements.toggleFiltersBtn?.addEventListener("click", () => elements.filtersPanel?.classList.toggle("open"));
+    elements.resetFiltersBtn?.addEventListener("click", resetFilters);
+    elements.emptyResetBtn?.addEventListener("click", resetFilters);
 
     document.addEventListener("click", event => {
       if (event.target.closest("[data-product-grid]")) handleProductAction(event);
@@ -699,25 +701,25 @@
       }
     });
 
-    elements.prevPageBtn.addEventListener("click", () => setPage(state.page - 1));
-    elements.nextPageBtn.addEventListener("click", () => setPage(state.page + 1));
-    elements.pageNumbers.addEventListener("click", event => {
+    elements.prevPageBtn?.addEventListener("click", () => setPage(state.page - 1));
+    elements.nextPageBtn?.addEventListener("click", () => setPage(state.page + 1));
+    elements.pageNumbers?.addEventListener("click", event => {
       const button = event.target.closest("[data-page]");
       if (button) setPage(Number(button.dataset.page));
     });
 
     $$('[data-close-modal]').forEach(button => button.addEventListener("click", closeProduct));
-    elements.openCartBtn.addEventListener("click", openCart);
+    elements.openCartBtn?.addEventListener("click", openCart);
     elements.promoOpenCartBtn?.addEventListener("click", openCart);
     $$('[data-close-cart]').forEach(button => button.addEventListener("click", closeCart));
 
-    elements.cartItems.addEventListener("click", event => {
+    elements.cartItems?.addEventListener("click", event => {
       const removeButton = event.target.closest("[data-remove-sku]");
       if (removeButton) removeFromCart(removeButton.dataset.removeSku);
     });
 
-    elements.sendCartBtn.addEventListener("click", sendCartToWhatsApp);
-    elements.clearCartBtn.addEventListener("click", () => {
+    elements.sendCartBtn?.addEventListener("click", sendCartToWhatsApp);
+    elements.clearCartBtn?.addEventListener("click", () => {
       if (!state.cart.length) return;
       state.cart = [];
       saveCart();
@@ -738,13 +740,25 @@
     if (product) setTimeout(() => openProduct(product, false), 50);
   }
 
-  setupFilters();
-  renderSummary();
-  renderHero();
-  renderCategories();
-  renderCuratedSections();
-  bindEvents();
-  renderCart();
-  applyFilters();
-  openProductFromUrl();
+  try {
+    setupFilters();
+    renderSummary();
+    renderHero();
+    renderCategories();
+    renderCuratedSections();
+    bindEvents();
+    renderCart();
+    applyFilters();
+    openProductFromUrl();
+    document.documentElement.dataset.midoriApp = APP_VERSION;
+  } catch (error) {
+    console.error(`mi.do.ri Webstore ${APP_VERSION} gagal dimuat:`, error);
+    const catalogSection = document.querySelector("#katalog .container");
+    if (catalogSection) {
+      const notice = document.createElement("div");
+      notice.className = "app-error-notice";
+      notice.innerHTML = `<strong>Katalog gagal dimuat.</strong><span>${escapeHtml(error?.message || "Kesalahan JavaScript")}</span>`;
+      catalogSection.prepend(notice);
+    }
+  }
 })();
