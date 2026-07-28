@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "2.3.2";
+  const APP_VERSION = "2.3.3";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const catalog = window.MIDORI_CATALOG;
@@ -315,8 +315,7 @@ Apakah masih tersedia?`;
     return [
       promo ? `<span class="badge badge-discount" title="${escapeHtml(product.promoLabel || `Diskon ${promoPercent(product)}%`)}"><small>SALE</small><strong>-${promoPercent(product)}%</strong></span>` : "",
       product.isNew ? `<span class="badge">Baru</span>` : "",
-      product.condition === "Preloved" ? `<span class="badge badge-preloved">Preloved</span>` : "",
-      availability === "limited" ? `<span class="badge badge-limited">Stok terbatas</span>` : "",
+      product.condition === "Preloved" ? "" : "",
       availability === "out" ? `<span class="badge badge-out">Habis</span>` : ""
     ].join("");
   }
@@ -334,6 +333,7 @@ Apakah masih tersedia?`;
         <div class="product-image-wrap">
           ${imageMarkup(product, "product-image")}
           <div class="product-badges">${productBadges(product)}</div>
+          ${availability === "limited" ? `<span class="badge badge-limited badge-stock-bottom-left">Stok terbatas</span>` : ""}
           <button class="product-favorite" type="button" data-quick-add="${product.id}" aria-label="Tambah ${escapeHtml(product.name)} ke daftar pilihan">♡</button>
         </div>
         <div class="product-body">
