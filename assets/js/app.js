@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "2.5.1";
+  const APP_VERSION = "2.5.2";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
@@ -164,7 +164,6 @@
     brand: "",
     category: "",
     mainCategory: "",
-    size: "",
     segment: "",
     condition: "",
     availability: "",
@@ -187,14 +186,11 @@
     searchInput: $("#searchInput"),
     brandFilter: $("#brandFilter"),
     categoryFilter: $("#categoryFilter"),
-    sizeFilter: $("#sizeFilter"),
     segmentFilter: $("#segmentFilter"),
     conditionFilter: $("#conditionFilter"),
     availabilityFilter: $("#availabilityFilter"),
     sortSelect: $("#sortSelect"),
-    toggleFiltersBtn: $("#toggleFiltersBtn"),
     filtersPanel: $("#filtersPanel"),
-    activeFilterCount: $("#activeFilterCount"),
     resetFiltersBtn: $("#resetFiltersBtn"),
     emptyResetBtn: $("#emptyResetBtn"),
     productGrid: $("#productGrid"),
@@ -385,17 +381,9 @@ Apakah masih tersedia?`;
   function setupFilters() {
     const activeBrands = [...new Set(products.map(p => p.brand))].sort((a, b) => a.localeCompare(b, "id"));
     const categories = [...new Set(products.map(p => p.category))].sort((a, b) => a.localeCompare(b, "id"));
-    const sizes = [...new Set(products.flatMap(p => p.sizes).filter(Boolean))].sort((a, b) => {
-      const order = ["XS", "S", "S-M", "M", "M-L", "L", "L-XL", "XL", "XXL", "XXXL"];
-      const ai = order.indexOf(a.toUpperCase());
-      const bi = order.indexOf(b.toUpperCase());
-      if (ai >= 0 || bi >= 0) return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
-      return a.localeCompare(b, "id", { numeric: true });
-    });
 
     fillSelect(elements.brandFilter, activeBrands);
     fillSelect(elements.categoryFilter, categories);
-    fillSelect(elements.sizeFilter, sizes);
   }
 
   function catalogUrl(parameters = {}) {
@@ -423,7 +411,6 @@ Apakah masih tersedia?`;
     state.category = detailCategory;
     state.mainCategory = getMainCategoryGroup(mainCategory) ? mainCategory : "";
     state.condition = params.get("kondisi") || "";
-    state.size = params.get("ukuran") || "";
     state.segment = params.get("segmen") || "";
     state.availability = params.get("stok") || "";
     state.sort = params.get("urut") || "recommended";
@@ -432,7 +419,6 @@ Apakah masih tersedia?`;
     if (elements.brandFilter) elements.brandFilter.value = state.brand;
     if (elements.categoryFilter) elements.categoryFilter.value = state.category;
     if (elements.conditionFilter) elements.conditionFilter.value = state.condition;
-    if (elements.sizeFilter) elements.sizeFilter.value = state.size;
     if (elements.segmentFilter) elements.segmentFilter.value = state.segment;
     if (elements.availabilityFilter) elements.availabilityFilter.value = state.availability;
     if (elements.sortSelect) elements.sortSelect.value = state.sort;
@@ -454,7 +440,6 @@ Apakah masih tersedia?`;
     if (state.category) url.searchParams.set("kategori", state.category);
     if (state.mainCategory) url.searchParams.set("kelompok", state.mainCategory);
     if (state.condition) url.searchParams.set("kondisi", state.condition);
-    if (state.size) url.searchParams.set("ukuran", state.size);
     if (state.segment) url.searchParams.set("segmen", state.segment);
     if (state.availability) url.searchParams.set("stok", state.availability);
     if (state.sort && state.sort !== "recommended") {
@@ -469,25 +454,20 @@ Apakah masih tersedia?`;
   function renderSummary() {
     const values = {
       statProducts: catalog.summary.products.toLocaleString("id-ID"),
-      statBrands: catalog.summary.brands.toLocaleString("id-ID"),
-      statVariants: catalog.summary.variants.toLocaleString("id-ID")
+      statBrands: catalog.summary.brands.toLocaleString("id-ID")
     };
     Object.entries(values).forEach(([id, value]) => {
       const node = document.getElementById(id);
       if (node) node.textContent = value;
     });
-    const heroVariants = $("#heroVariants");
-    if (heroVariants) heroVariants.textContent = `${values.statVariants} varian`;
     const currentYear = $("#currentYear");
     if (currentYear) currentYear.textContent = new Date().getFullYear();
   }
 
   function renderHero() {
-    const heroProduct = products.find(p => p.images?.some(Boolean)) || products.find(p => p.id === "PRD0001");
-    if (!heroProduct || !elements.heroProductImage) return;
-    const image = heroProduct.images?.find(Boolean);
-    if (image) elements.heroProductImage.src = image;
-    elements.heroProductImage.alt = heroProduct.name;
+    if (!elements.heroProductImage) return;
+    elements.heroProductImage.src = "assets/images/hero/hero-koleksi.webp";
+    elements.heroProductImage.alt = "Koleksi utama mi.do.ri";
   }
 
   function setCatalogFilter(type, value) {
@@ -699,7 +679,6 @@ Apakah masih tersedia?`;
         state.mainCategory &&
         !productMatchesMainCategory(product, state.mainCategory)
       ) return false;
-      if (state.size && !product.sizes.includes(state.size)) return false;
       if (state.segment && product.segment !== state.segment) return false;
       if (state.condition && product.condition !== state.condition) return false;
       if (state.availability && productAvailability(product) !== state.availability) return false;
@@ -736,7 +715,6 @@ Apakah masih tersedia?`;
       state.brand,
       state.category,
       state.mainCategory,
-      state.size,
       state.segment,
       state.condition,
       state.availability
@@ -993,14 +971,13 @@ Apakah masih tersedia?`;
   function resetFilters() {
     Object.assign(state, {
       query: "", brand: "", category: "", mainCategory: "",
-      size: "", segment: "", condition: "", availability: "",
+      segment: "", condition: "", availability: "",
       sort: "recommended", page: 1
     });
 
     if (elements.searchInput) elements.searchInput.value = "";
     if (elements.brandFilter) elements.brandFilter.value = "";
     if (elements.categoryFilter) elements.categoryFilter.value = "";
-    if (elements.sizeFilter) elements.sizeFilter.value = "";
     if (elements.segmentFilter) elements.segmentFilter.value = "";
     if (elements.conditionFilter) elements.conditionFilter.value = "";
     if (elements.availabilityFilter) elements.availabilityFilter.value = "";
@@ -1061,7 +1038,6 @@ Apakah masih tersedia?`;
     [
       [elements.brandFilter, "brand"],
       [elements.categoryFilter, "category"],
-      [elements.sizeFilter, "size"],
       [elements.segmentFilter, "segment"],
       [elements.conditionFilter, "condition"],
       [elements.availabilityFilter, "availability"],
@@ -1079,7 +1055,6 @@ Apakah masih tersedia?`;
       });
     });
 
-    elements.toggleFiltersBtn?.addEventListener("click", () => elements.filtersPanel?.classList.toggle("open"));
     elements.resetFiltersBtn?.addEventListener("click", resetFilters);
     elements.emptyResetBtn?.addEventListener("click", resetFilters);
 
