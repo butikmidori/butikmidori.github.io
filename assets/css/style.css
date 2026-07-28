@@ -1394,3 +1394,24 @@ body { background: #fff; color: var(--ink); }
     font-size: 0.64rem !important;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v2.3.6 — Simplified product information
+   ========================================================= */
+
+/* Setelah Kondisi dan Jumlah Varian dihapus, spesifikasi detail
+   ditata menjadi empat informasi dalam susunan 2 × 2. */
+.modal-specs {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  column-gap: 32px;
+  row-gap: 22px;
+}
+
+@media (max-width: 520px) {
+  .modal-specs {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    column-gap: 18px;
+    row-gap: 18px;
+  }
+}
