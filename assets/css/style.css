@@ -1429,3 +1429,72 @@ textarea {
   font-family: "Poppins", ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
+
+
+/* =========================================================
+   mi.do.ri v2.4.2 — Poppins Regular for product presentation
+   Semua teks utama pada kartu dan detail produk menggunakan
+   font-weight 400. Badge promo tetap tegas agar mudah dikenali.
+   ========================================================= */
+
+/* Kartu produk */
+.product-card .product-brand,
+.product-card .product-title,
+.product-card .product-rating,
+.product-card .product-rating span,
+.product-card .product-price,
+.product-card .product-price .current-price,
+.product-card .product-price .original-price,
+.product-card .product-price .discounted-price,
+.product-card .product-price.has-promo .discounted-price,
+.product-card .product-card-info,
+.product-card .product-actions .button {
+  font-weight: 400 !important;
+}
+
+/* Detail produk */
+.modal-info .product-brand,
+.modal-info h2,
+.modal-info .modal-price,
+.modal-info .modal-price .current-price,
+.modal-info .modal-price .original-price,
+.modal-info .modal-price .discounted-price,
+.modal-info .modal-description,
+.modal-info .variant-label,
+.modal-info .variant-select,
+.modal-info .variant-status,
+.modal-info .variant-status strong,
+.modal-info .modal-specs span,
+.modal-info .modal-specs strong,
+.modal-info .modal-actions .button,
+.modal-info .saving-note,
+.modal-info .detail-stock-badge {
+  font-weight: 400 !important;
+}
+
+/* Harga tetap mudah dibedakan melalui ukuran dan warna, bukan ketebalan. */
+.product-card .product-price .discounted-price,
+.product-card .product-price.has-promo .discounted-price,
+.modal-info .modal-price .discounted-price {
+  letter-spacing: 0 !important;
+}
+
+/* Label kecil tetap terbaca meski regular. */
+.product-card .product-brand,
+.modal-info .product-brand,
+.modal-info .variant-label,
+.modal-info .modal-specs span {
+  letter-spacing: .045em !important;
+}
+
+/* Badge SALE dan stok tetap tegas sebagai penanda visual. */
+.product-card .badge-discount,
+.product-card .badge-discount small,
+.product-card .badge-discount strong,
+.product-card .product-image-wrap > .badge-stock-bottom-left,
+.product-card .product-image-wrap > .badge-limited,
+.modal-product-badges .badge-discount,
+.modal-product-badges .badge-discount small,
+.modal-product-badges .badge-discount strong {
+  font-weight: 700 !important;
+}
