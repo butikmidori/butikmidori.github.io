@@ -10,12 +10,12 @@
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/images/logo-midori.png">
   <title>mi.do.ri — Multibrand Muslim Fashion</title>
-  <meta name="midori-version" content="2.5.0">
+  <meta name="midori-version" content="2.5.1">
   <link rel="icon" href="assets/images/logo-midori.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.5.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.5.1">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -60,9 +60,29 @@
 
       <nav class="main-nav" id="mainNav" aria-label="Navigasi utama">
         <a href="#beranda" class="active" aria-current="page">Beranda</a>
-        <a href="#pilihan">Pilihan</a>
-        <a href="#kategori">Kategori</a>
-        <a href="#preloved">Preloved</a>
+        <div class="nav-dropdown" id="categoryNavDropdown">
+          <button
+            class="nav-dropdown-toggle"
+            id="categoryNavToggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="categoryNavMenu"
+          >
+            <span>Kategori</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+              <path d="m5 7.5 5 5 5-5"></path>
+            </svg>
+          </button>
+          <div class="nav-dropdown-menu" id="categoryNavMenu" role="menu">
+            <a role="menuitem" href="katalog.html?kelompok=hijab-khimar#katalog">Hijab &amp; Khimar</a>
+            <a role="menuitem" href="katalog.html?kelompok=dress-set#katalog">Dress &amp; Set</a>
+            <a role="menuitem" href="katalog.html?kelompok=atasan#katalog">Atasan</a>
+            <a role="menuitem" href="katalog.html?kelompok=outerwear#katalog">Outerwear</a>
+            <a role="menuitem" href="katalog.html?kelompok=bawahan#katalog">Bawahan</a>
+            <a role="menuitem" href="katalog.html?kelompok=perlengkapan-ibadah#katalog">Perlengkapan Ibadah</a>
+            <a role="menuitem" href="katalog.html?kelompok=aksesori-pelengkap#katalog">Aksesori &amp; Pelengkap</a>
+          </div>
+        </div>
         <a href="katalog.html">Katalog</a>
         <a href="#lokasi">Lokasi</a>
       </nav>
@@ -237,7 +257,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="assets/data/catalog-data.js?v=2.5.0"></script>
-  <script src="assets/js/app.js?v=2.5.0"></script>
+  <script src="assets/data/catalog-data.js?v=2.5.1"></script>
+  <script src="assets/js/app.js?v=2.5.1"></script>
 </body>
 </html>
