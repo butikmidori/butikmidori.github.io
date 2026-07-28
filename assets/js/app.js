@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "2.3.4";
+  const APP_VERSION = "2.3.5";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const catalog = window.MIDORI_CATALOG;
