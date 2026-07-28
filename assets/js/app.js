@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "2.5.0";
+  const APP_VERSION = "2.5.1";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
@@ -181,6 +181,9 @@
   const elements = {
     navToggle: $("#navToggle"),
     mainNav: $("#mainNav"),
+    categoryNavDropdown: $("#categoryNavDropdown"),
+    categoryNavToggle: $("#categoryNavToggle"),
+    categoryNavMenu: $("#categoryNavMenu"),
     searchInput: $("#searchInput"),
     brandFilter: $("#brandFilter"),
     categoryFilter: $("#categoryFilter"),
@@ -1025,10 +1028,24 @@ Apakah masih tersedia?`;
     elements.navToggle?.addEventListener("click", () => {
       const open = elements.mainNav.classList.toggle("open");
       elements.navToggle.setAttribute("aria-expanded", String(open));
+
+      if (!open) {
+        elements.categoryNavDropdown?.classList.remove("open");
+        elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
+      }
     });
+
+    elements.categoryNavToggle?.addEventListener("click", event => {
+      event.stopPropagation();
+      const open = elements.categoryNavDropdown.classList.toggle("open");
+      elements.categoryNavToggle.setAttribute("aria-expanded", String(open));
+    });
+
     $$("#mainNav a").forEach(link => link.addEventListener("click", () => {
       elements.mainNav.classList.remove("open");
-      elements.navToggle.setAttribute("aria-expanded", "false");
+      elements.navToggle?.setAttribute("aria-expanded", "false");
+      elements.categoryNavDropdown?.classList.remove("open");
+      elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
     }));
 
     let searchTimer;
@@ -1067,6 +1084,14 @@ Apakah masih tersedia?`;
     elements.emptyResetBtn?.addEventListener("click", resetFilters);
 
     document.addEventListener("click", event => {
+      if (
+        elements.categoryNavDropdown &&
+        !elements.categoryNavDropdown.contains(event.target)
+      ) {
+        elements.categoryNavDropdown.classList.remove("open");
+        elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
+      }
+
       if (event.target.closest("[data-product-grid]")) handleProductAction(event);
 
       const mainCategory = event.target.closest("[data-main-category]");
@@ -1116,6 +1141,10 @@ Apakah masih tersedia?`;
 
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
+
+      elements.categoryNavDropdown?.classList.remove("open");
+      elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
+
       if (elements.modal.classList.contains("open")) closeProduct();
       if (elements.cartDrawer.classList.contains("open")) closeCart();
     });
