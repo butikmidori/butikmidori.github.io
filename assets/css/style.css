@@ -1988,3 +1988,69 @@ body[data-page="catalog"] .catalog-header h2 {
     font-size: 12px;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v2.5.2 — Catalog and hero simplification
+   ========================================================= */
+
+/* Header katalog tanpa kartu Total Varian. */
+.catalog-header {
+  display: block !important;
+}
+
+/* Toolbar kini hanya berisi pencarian dan pengurutan. */
+.catalog-toolbar {
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 260px) !important;
+}
+
+/* Panel filter selalu terlihat. */
+.filters-panel,
+.filters-panel.open {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto !important;
+}
+
+/* Hero lebih lapang setelah tombol dan statistik dihapus. */
+.hero-copy > p {
+  margin-bottom: 0;
+}
+
+/* Foto utama memakai file tetap dan mengisi bidang hero. */
+.hero-product-image {
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
+@media (max-width: 1100px) {
+  .filters-panel,
+  .filters-panel.open {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .filters-panel .button-reset {
+    align-self: end;
+  }
+}
+
+@media (max-width: 760px) {
+  .catalog-toolbar {
+    grid-template-columns: 1fr !important;
+  }
+
+  .filters-panel,
+  .filters-panel.open {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .filters-panel .button-reset {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .filters-panel,
+  .filters-panel.open {
+    grid-template-columns: 1fr !important;
+  }
+}
