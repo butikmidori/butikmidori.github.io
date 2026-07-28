@@ -735,3 +735,118 @@ body { background: #fff; color: var(--ink); }
     padding-top: 34px;
   }
 }
+
+
+/* Runtime diagnostic — v2.2.1 */
+.app-error-notice{display:flex;gap:10px;align-items:center;margin:0 0 22px;padding:14px 16px;border:1px solid #e5b7b7;border-radius:12px;background:#fff4f4;color:#7f1d1d}.app-error-notice span{font-size:.9rem}.section-empty-note{grid-column:1/-1;padding:28px;border:1px dashed #d7ddd2;border-radius:14px;text-align:center;color:#667064;background:#fafbf8}
+
+/* =========================================================
+   PROMO / DISKON — mi.do.ri Webstore v2.3
+   ========================================================= */
+.badge-discount {
+  color: #fff;
+  background: #d9362b;
+  box-shadow: 0 5px 14px rgba(217, 54, 43, .24);
+}
+
+.product-price,
+.modal-price,
+.cart-item-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px 8px;
+}
+
+.product-price .current-price,
+.modal-price .current-price,
+.cart-item-price .current-price {
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
+.product-price .original-price,
+.modal-price .original-price,
+.cart-item-price .original-price {
+  color: #8d948f;
+  font-size: .78em;
+  font-weight: 700;
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.product-price .discounted-price,
+.modal-price .discounted-price,
+.cart-item-price .discounted-price {
+  color: #c72f25;
+  font-weight: 950;
+}
+
+.product-price.has-promo {
+  margin-top: 6px;
+}
+
+.product-price.has-promo .discounted-price {
+  font-size: 1.08em;
+}
+
+.modal-price.has-promo {
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.modal-price.has-promo .original-price {
+  width: 100%;
+  font-size: 16px;
+}
+
+.modal-price.has-promo .discounted-price {
+  font-size: 27px;
+}
+
+.saving-note {
+  color: #6a741e;
+  background: #f3f5d6;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+
+.modal-gallery {
+  position: relative;
+}
+
+.modal-product-badges {
+  position: absolute;
+  z-index: 4;
+  top: 32px;
+  left: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: calc(100% - 64px);
+}
+
+.cart-item-price.has-promo {
+  margin-top: 7px;
+}
+
+.cart-item-price.has-promo .original-price {
+  width: 100%;
+  font-size: 10px;
+}
+
+.cart-item-price.has-promo .discounted-price {
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .modal-product-badges {
+    top: 22px;
+    left: 22px;
+    max-width: calc(100% - 44px);
+  }
+  .modal-price.has-promo .discounted-price { font-size: 23px; }
+}
