@@ -2054,3 +2054,69 @@ body[data-page="catalog"] .catalog-header h2 {
     grid-template-columns: 1fr !important;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v2.5.3 — Desktop hero two-column repair
+   ========================================================= */
+
+/* Desktop dan tablet landscape: teks di kiri, foto di kanan. */
+@media (min-width: 761px) {
+  .hero-shell {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    min-height: 430px !important;
+    overflow: hidden !important;
+  }
+
+  .hero-copy {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    order: initial !important;
+    min-width: 0;
+  }
+
+  .hero-media {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    order: initial !important;
+    position: relative !important;
+    min-width: 0;
+    min-height: 430px !important;
+    overflow: hidden !important;
+  }
+
+  .hero-photo-card {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    aspect-ratio: auto !important;
+    border-radius: 0 !important;
+  }
+
+  .hero-product-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+  }
+}
+
+/* Ponsel tetap seperti sebelumnya: foto di atas, teks di bawah. */
+@media (max-width: 760px) {
+  .hero-shell {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .hero-media {
+    order: 1 !important;
+  }
+
+  .hero-copy {
+    order: 2 !important;
+  }
+}
