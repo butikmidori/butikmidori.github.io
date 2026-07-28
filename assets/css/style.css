@@ -791,9 +791,27 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round
   display: flex;
   flex-direction: column;
 }
-.modal-main-image { border-radius: 22px; overflow: hidden; flex: 1; min-height: 480px; }
-.modal-main-image .product-placeholder { min-height: 480px; }
-.modal-main-image img { width: 100%; height: 100%; object-fit: cover; }
+.modal-main-image {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  min-height: 0;
+  flex: none;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #e8f0eb;
+}
+.modal-main-image .product-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.modal-main-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center top;
+}
 .modal-info { padding: 48px 40px 40px; }
 .modal-info h2 { font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.05; letter-spacing: -.045em; margin: 10px 0 13px; }
 .modal-price { font-size: 1.35rem; font-weight: 950; color: var(--green); margin: 0 0 18px; }
@@ -991,7 +1009,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round
   .footer-grid > :last-child { grid-column: 1 / -1; }
   .modal-product { grid-template-columns: 1fr; }
   .modal-gallery { min-height: auto; }
-  .modal-main-image, .modal-main-image .product-placeholder { min-height: 430px; }
+  .modal-main-image, .modal-main-image .product-placeholder { min-height: 0; }
 }
 
 @media (max-width: 560px) {
@@ -1044,7 +1062,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round
   .footer-bottom { flex-direction: column; }
   .modal-dialog { width: 100%; max-height: 100vh; margin: 0; border-radius: 0; }
   .modal-gallery { padding: 20px; }
-  .modal-main-image, .modal-main-image .product-placeholder { min-height: 370px; }
+  .modal-main-image, .modal-main-image .product-placeholder { min-height: 0; }
   .modal-info { padding: 28px 20px 25px; }
   .modal-specs { grid-template-columns: 1fr 1fr; }
   .modal-actions { grid-template-columns: 1fr; }
