@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b6f3c">
-  <meta name="description" content="Beranda mi.do.ri Multibrand Muslim Fashion Pangkalpinang. Temukan produk pilihan, kategori utama, dan koleksi preloved.">
+  <meta name="description" content="Katalog lengkap mi.do.ri Multibrand Muslim Fashion Pangkalpinang. Cari produk berdasarkan brand, kategori, warna, ukuran, dan stok.">
   <meta property="og:title" content="mi.do.ri — Multibrand Muslim Fashion">
   <meta property="og:description" content="Temukan koleksi muslim fashion dari berbagai brand pilihan di mi.do.ri.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/images/logo-midori.png">
-  <title>mi.do.ri — Multibrand Muslim Fashion</title>
+  <title>Katalog mi.do.ri — Multibrand Muslim Fashion</title>
   <meta name="midori-version" content="2.5.0">
   <link rel="icon" href="assets/images/logo-midori.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,8 +37,8 @@
   }
   </script>
 </head>
-<body data-page="home">
-  <a class="skip-link" href="#pilihan">Langsung ke produk pilihan</a>
+<body data-page="catalog">
+  <a class="skip-link" href="#katalog">Langsung ke daftar produk</a>
 
   <div class="top-strip">
     <div class="container top-strip-inner">
@@ -47,7 +47,7 @@
     </div>
   </div>
 
-  <header class="site-header" id="beranda">
+  <header class="site-header">
     <div class="container nav-wrap">
       <a href="index.html" class="brand-lockup" aria-label="mi.do.ri Beranda">
         <img src="assets/images/logo-midori.png" alt="Logo mi.do.ri">
@@ -59,16 +59,16 @@
       </button>
 
       <nav class="main-nav" id="mainNav" aria-label="Navigasi utama">
-        <a href="#beranda" class="active" aria-current="page">Beranda</a>
-        <a href="#pilihan">Pilihan</a>
-        <a href="#kategori">Kategori</a>
-        <a href="#preloved">Preloved</a>
-        <a href="katalog.html">Katalog</a>
+        <a href="index.html#beranda">Beranda</a>
+        <a href="index.html#pilihan">Pilihan</a>
+        <a href="index.html#kategori">Kategori</a>
+        <a href="index.html#preloved">Preloved</a>
+        <a href="#katalog" class="active" aria-current="page">Katalog</a>
         <a href="#lokasi">Lokasi</a>
       </nav>
 
       <div class="nav-actions">
-        <a class="icon-button search-jump" href="katalog.html" aria-label="Cari produk">
+        <a class="icon-button search-jump" href="#katalog" aria-label="Cari produk">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
         </a>
         <button class="icon-button cart-button" id="openCartBtn" type="button" aria-label="Buka daftar pilihan">
@@ -81,102 +81,83 @@
   </header>
 
   <main>
-    <section class="hero-section">
-      <div class="container">
-        <div class="hero-shell">
-          <div class="hero-copy">
-            <span class="hero-kicker"><i></i> New arrivals</span>
-            <h1>Temukan koleksi terbaik untuk gayamu.</h1>
-            <p>Jelajahi muslim fashion dari berbagai brand pilihan. Pilih produk, warna, dan ukuran lalu konfirmasi stok langsung melalui WhatsApp.</p>
-            <div class="hero-actions">
-              <a class="button button-primary" href="#pilihan">Belanja Sekarang</a>
-              <a class="button button-soft" href="https://www.instagram.com/butikmidori/" target="_blank" rel="noopener">Lihat Detail</a>
-            </div>
-            <div class="hero-proof">
-              <div class="proof-bubbles" aria-hidden="true"><span>M</span><span>D</span><span>R</span><span>+</span></div>
-              <p><strong id="statProducts">—</strong> produk dari <strong id="statBrands">—</strong> brand dalam satu katalog.</p>
-            </div>
-          </div>
-
-          <div class="hero-media">
-            <div class="hero-photo-card">
-              <div class="hero-photo-fallback">
-                <img src="assets/images/logo-midori.png" alt="">
-                <span>Foto koleksi utama</span>
-              </div>
-              <img id="heroProductImage" class="hero-product-image" src="assets/images/products/prd0001-01.webp" alt="Koleksi mi.do.ri" onerror="this.hidden=true">
-            </div>
-            <div class="hero-floating-card card-top">
-              <span class="mini-icon">✦</span>
-              <div><strong>Multibrand Store</strong><small>22 brand terdata</small></div>
-            </div>
-            <div class="hero-floating-card card-bottom">
-              <span class="mini-dot"></span>
-              <div><strong id="heroVariants">— varian</strong><small>Siap dijelajahi</small></div>
-            </div>
-            <div class="hero-shape hero-shape-one"></div>
-            <div class="hero-shape hero-shape-two"></div>
-          </div>
+    <section class="catalog-page-intro" id="atas">
+      <div class="container catalog-page-intro-inner">
+        <div>
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html">Beranda</a>
+            <span>/</span>
+            <span>Katalog</span>
+          </nav>
+          <span class="eyebrow">Katalog mi.do.ri</span>
+          <h1>Temukan koleksi yang kamu cari.</h1>
+          <p>Pilih kategori, cari produk, atau gunakan filter untuk menemukan koleksi mi.do.ri.</p>
         </div>
+        <a class="button button-soft" href="index.html#kategori">Lihat kategori utama</a>
       </div>
     </section>
-    <section class="section featured-section" id="pilihan">
+    <section class="section catalog-section" id="katalog">
       <div class="container">
-        <div class="section-heading">
+        <div class="catalog-header">
           <div>
-            <span class="eyebrow">Best selling products</span>
-            <h2>Produk pilihan mi.do.ri</h2>
-            <p>Koleksi yang paling menarik untuk kamu lihat lebih dulu.</p>
+            <span class="eyebrow">Full catalog</span>
+            <h2>Seluruh koleksi mi.do.ri</h2>
+            <p>Cari berdasarkan nama produk, brand, kategori, warna, ukuran, atau kode barang.</p>
           </div>
-          <a class="text-link" href="katalog.html">Lihat seluruh produk <span>→</span></a>
+          <div class="catalog-count-card"><strong id="statVariants">—</strong><span>Total varian</span></div>
         </div>
-        <div class="product-grid product-grid-featured" id="featuredGrid" data-product-grid></div>
-      </div>
-    </section>
 
-    <section class="section category-section" id="kategori">
-      <div class="container">
-        <div class="section-heading">
-          <div>
-            <span class="eyebrow">7 kategori utama</span>
-            <h2>Belanja berdasarkan kategori</h2>
-            <p>Pilih kelompok produk untuk melihat koleksi yang sesuai.</p>
-          </div>
-          <a class="text-link" href="katalog.html">Lihat katalog lengkap <span>→</span></a>
+        <div class="catalog-toolbar">
+          <label class="search-box" for="searchInput">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+            <input id="searchInput" type="search" placeholder="Cari produk, brand, kategori, atau SKU…" autocomplete="off">
+          </label>
+          <button class="button button-filter" id="toggleFiltersBtn" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"></path></svg>
+            Filter
+            <span class="active-filter-count" id="activeFilterCount">0</span>
+          </button>
+          <label class="sort-box">
+            <span class="sr-only">Urutkan produk</span>
+            <select id="sortSelect">
+              <option value="recommended">Rekomendasi</option>
+              <option value="name-asc">Nama A–Z</option>
+              <option value="price-asc">Harga terendah</option>
+              <option value="price-desc">Harga tertinggi</option>
+              <option value="stock-desc">Stok terbanyak</option>
+            </select>
+          </label>
         </div>
-        <div class="category-grid" id="categoryGrid"></div>
-      </div>
-    </section>
 
-    <section class="section promo-section">
-      <div class="container">
-        <div class="promo-banner">
-          <div class="promo-copy">
-            <span class="eyebrow">Special offer</span>
-            <h2>Simpan pilihanmu dan tanyakan stok lewat WhatsApp.</h2>
-            <p>Pilih beberapa produk favorit, lalu kirim semuanya dalam satu pesan ke mi.do.ri.</p>
-            <button class="button button-primary" id="promoOpenCartBtn" type="button">Lihat Pilihan Saya</button>
-          </div>
-          <div class="promo-visual" aria-hidden="true">
-            <div class="shopping-bag"><span>mi.do.ri</span></div>
-            <div class="discount-tag">Chat<br>&amp; Shop</div>
-            <div class="promo-leaf leaf-one"></div>
-            <div class="promo-leaf leaf-two"></div>
-          </div>
+        <div class="filters-panel" id="filtersPanel">
+          <div class="filter-field"><label for="brandFilter">Brand</label><select id="brandFilter"><option value="">Semua brand</option></select></div>
+          <div class="filter-field"><label for="categoryFilter">Kategori</label><select id="categoryFilter"><option value="">Semua kategori</option></select></div>
+          <div class="filter-field"><label for="sizeFilter">Ukuran</label><select id="sizeFilter"><option value="">Semua ukuran</option></select></div>
+          <div class="filter-field"><label for="segmentFilter">Segmen</label><select id="segmentFilter"><option value="">Semua segmen</option><option value="Dewasa">Dewasa</option><option value="Anak">Anak</option></select></div>
+          <div class="filter-field"><label for="conditionFilter">Kondisi</label><select id="conditionFilter"><option value="">Semua kondisi</option><option value="Baru">Baru</option><option value="Preloved">Preloved</option></select></div>
+          <div class="filter-field"><label for="availabilityFilter">Ketersediaan</label><select id="availabilityFilter"><option value="">Semua stok</option><option value="available">Tersedia</option><option value="limited">Stok terbatas</option><option value="out">Habis</option></select></div>
+          <button class="button button-reset" id="resetFiltersBtn" type="button">Reset filter</button>
         </div>
-      </div>
-    </section>
-    <section class="section preloved-section" id="preloved">
-      <div class="container">
-        <div class="section-heading">
-          <div>
-            <span class="eyebrow">Preloved collection</span>
-            <h2>Preloved pilihan mi.do.ri</h2>
-            <p>Koleksi preloved terkurasi dengan stok terbatas. Konfirmasi kondisi dan ketersediaannya melalui WhatsApp.</p>
-          </div>
-          <a class="text-link" href="katalog.html?kondisi=Preloved">Lihat semua preloved <span>→</span></a>
+
+        <div class="catalog-meta">
+          <p><strong id="resultCount">0</strong> produk ditemukan</p>
+          <p class="catalog-note">Ketersediaan dapat berubah. Konfirmasi stok melalui WhatsApp.</p>
         </div>
-        <div class="product-grid product-grid-preloved" id="prelovedGrid" data-product-grid></div>
+
+        <div class="product-grid catalog-product-grid" id="productGrid" data-product-grid aria-live="polite"></div>
+
+        <div class="empty-state hidden" id="emptyState">
+          <div class="empty-icon">◎</div>
+          <h3>Produk belum ditemukan</h3>
+          <p>Coba ubah kata pencarian atau reset filter.</p>
+          <button class="button button-primary" id="emptyResetBtn" type="button">Tampilkan semua produk</button>
+        </div>
+
+        <div class="pagination-wrap" id="paginationWrap">
+          <button class="page-button" id="prevPageBtn" type="button">← Sebelumnya</button>
+          <div class="page-numbers" id="pageNumbers"></div>
+          <button class="page-button" id="nextPageBtn" type="button">Berikutnya →</button>
+        </div>
       </div>
     </section>
 
@@ -206,11 +187,11 @@
         <img src="assets/images/logo-midori.png" alt="mi.do.ri">
         <p>Multibrand Muslim Fashion di Kota Pangkalpinang. Jelajahi koleksi dan konfirmasi stok melalui WhatsApp.</p>
       </div>
-      <div><h3>Quick Links</h3><a href="#beranda">Beranda</a><a href="#pilihan">Koleksi Pilihan</a><a href="#kategori">Kategori</a><a href="#preloved">Preloved</a><a href="katalog.html">Katalog</a></div>
+      <div><h3>Quick Links</h3><a href="index.html#beranda">Beranda</a><a href="index.html#pilihan">Koleksi Pilihan</a><a href="index.html#kategori">Kategori</a><a href="index.html#preloved">Preloved</a><a href="#katalog">Katalog</a></div>
       <div><h3>Informasi</h3><a href="#lokasi">Lokasi Butik</a><a href="https://www.instagram.com/butikmidori/" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@butik.midori" target="_blank" rel="noopener">TikTok</a></div>
       <div><h3>Hubungi kami</h3><a href="https://wa.me/628117177667" target="_blank" rel="noopener">0811.717.7667</a><p>Jl. Soekarno Hatta No.17, Girimaya, Kota Pangkalpinang</p></div>
     </div>
-    <div class="container footer-bottom"><p>© <span id="currentYear"></span> mi.do.ri. Katalog produk tanpa pembayaran langsung.</p><a href="#beranda">Kembali ke atas ↑</a></div>
+    <div class="container footer-bottom"><p>© <span id="currentYear"></span> mi.do.ri. Katalog produk tanpa pembayaran langsung.</p><a href="#atas">Kembali ke atas ↑</a></div>
   </footer>
 
   <a class="floating-wa" href="https://wa.me/628117177667" target="_blank" rel="noopener" aria-label="Chat WhatsApp mi.do.ri">
