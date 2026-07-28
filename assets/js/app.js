@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "2.3.3";
+  const APP_VERSION = "2.3.4";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const catalog = window.MIDORI_CATALOG;
@@ -516,6 +516,9 @@ Apakah masih tersedia?`;
           <p class="product-brand">${escapeHtml(product.brand)}</p>
           <h2 id="modalProductName">${escapeHtml(product.name)}</h2>
           <div class="modal-price${isPromoActive(product) ? " has-promo" : ""}" id="modalPrice">${defaultVariant ? variantPriceMarkup(product, defaultVariant) : productPriceMarkup(product)}</div>
+          <div id="detailStockBadge" class="detail-stock-badge" hidden>
+            Stok terbatas
+          </div>
           <p class="modal-description">${escapeHtml(product.description || `Koleksi ${product.category.toLowerCase()} dari ${product.brand}. Pilih varian yang diinginkan untuk menanyakan ketersediaan.`)}</p>
 
           <label class="variant-label" for="variantSelect">Pilih warna dan ukuran</label>
@@ -554,6 +557,7 @@ Apakah masih tersedia?`;
 
     variantSelect?.addEventListener("change", () => {
       const variant = selectedVariant();
+  updateDetailStockBadge(variant);
       if (!variant) return;
       $("#modalPrice").innerHTML = variantPriceMarkup(product, variant);
       $("#modalSku").textContent = variant.sku;
@@ -847,3 +851,15 @@ Apakah masih tersedia?`;
     }
   }
 })();
+
+
+function updateDetailStockBadge(variant) {
+  const badge = document.getElementById("detailStockBadge");
+  if (!badge) return;
+
+  const stock = Number(variant?.stock || 0);
+  const isLimited = stock > 0 && stock <= 2;
+
+  badge.hidden = !isLimited;
+  badge.textContent = "Stok terbatas";
+}
