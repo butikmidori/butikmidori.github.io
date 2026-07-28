@@ -850,3 +850,262 @@ body { background: #fff; color: var(--ink); }
   }
   .modal-price.has-promo .discounted-price { font-size: 23px; }
 }
+
+
+/* =========================================================
+   PRODUCT CARD READABILITY & PROMO BADGE — v2.3.2
+   Memperbesar seluruh informasi produk pada desktop dan mobile.
+   ========================================================= */
+.product-body {
+  padding: 15px 15px 16px;
+}
+
+.product-brand {
+  margin-bottom: 6px;
+  color: #60742f;
+  font-size: 11px;
+  line-height: 1.25;
+  letter-spacing: .09em;
+}
+
+.product-title {
+  min-height: 44px;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 850;
+  letter-spacing: -.015em;
+}
+
+.product-rating {
+  gap: 7px;
+  margin-top: 9px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.product-rating span {
+  color: #59645d;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.product-price {
+  gap: 7px 10px;
+  margin: 12px 0 11px;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.product-price .current-price {
+  font-size: 16px;
+}
+
+.product-price .original-price {
+  font-size: 12px;
+  line-height: 1.2;
+  text-decoration-thickness: 2px;
+}
+
+.product-price .discounted-price,
+.product-price.has-promo .discounted-price {
+  color: #c92e27;
+  font-size: 18px;
+  line-height: 1.15;
+  font-weight: 950;
+}
+
+.product-card-info {
+  margin: 0 0 13px;
+  color: #69736c;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.product-actions {
+  grid-template-columns: 1fr 42px;
+  gap: 8px;
+}
+
+.product-actions .button {
+  min-height: 42px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.quick-wa {
+  min-height: 42px;
+  border-radius: 8px;
+}
+
+.product-favorite {
+  width: 38px;
+  height: 38px;
+  top: 13px;
+  right: 13px;
+  font-size: 21px;
+}
+
+.product-badges {
+  top: 13px;
+  left: 13px;
+  gap: 7px;
+}
+
+.badge {
+  padding: 6px 9px;
+  border-radius: 7px;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.badge-discount {
+  min-width: 70px;
+  min-height: 58px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 12px;
+  border: 2px solid rgba(255,255,255,.82);
+  border-radius: 13px 13px 13px 3px;
+  color: #fff;
+  background: linear-gradient(145deg, #ff513f 0%, #d92525 58%, #b7161c 100%);
+  box-shadow: 0 10px 24px rgba(201, 38, 37, .34), inset 0 1px 0 rgba(255,255,255,.28);
+  transform: rotate(-2deg);
+  text-shadow: 0 1px 2px rgba(105, 0, 0, .24);
+}
+
+.badge-discount::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  left: 6px;
+  bottom: -4px;
+  border-radius: 1px;
+  background: #b7161c;
+  transform: rotate(45deg);
+  z-index: -1;
+}
+
+.badge-discount small,
+.badge-discount strong {
+  display: block;
+  color: inherit;
+}
+
+.badge-discount small {
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+
+.badge-discount strong {
+  font-size: 17px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: -.03em;
+}
+
+@media (max-width: 760px) {
+  .product-body {
+    padding: 13px 12px 14px;
+  }
+
+  .product-brand {
+    margin-bottom: 5px;
+    font-size: 10px;
+  }
+
+  .product-title {
+    min-height: 42px;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .product-rating,
+  .product-rating span {
+    font-size: 11px;
+  }
+
+  .product-price {
+    gap: 5px 8px;
+    margin: 10px 0 9px;
+    font-size: 15px;
+  }
+
+  .product-price .current-price {
+    font-size: 15px;
+  }
+
+  .product-price .original-price {
+    font-size: 11px;
+  }
+
+  .product-price .discounted-price,
+  .product-price.has-promo .discounted-price {
+    font-size: 17px;
+  }
+
+  .product-card-info {
+    margin-bottom: 11px;
+    font-size: 10px;
+  }
+
+  .product-actions {
+    grid-template-columns: 1fr 39px;
+    gap: 7px;
+  }
+
+  .product-actions .button,
+  .quick-wa {
+    min-height: 39px;
+    font-size: 11px;
+  }
+
+  .product-badges {
+    top: 10px;
+    left: 10px;
+  }
+
+  .badge-discount {
+    min-width: 62px;
+    min-height: 52px;
+    padding: 7px 9px;
+    border-radius: 11px 11px 11px 3px;
+  }
+
+  .badge-discount small {
+    font-size: 8px;
+  }
+
+  .badge-discount strong {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 430px) {
+  .product-title {
+    font-size: 13px;
+  }
+
+  .product-brand {
+    font-size: 9px;
+  }
+
+  .product-rating,
+  .product-rating span {
+    font-size: 10px;
+  }
+
+  .product-price .discounted-price,
+  .product-price.has-promo .discounted-price {
+    font-size: 16px;
+  }
+
+  .product-card-info {
+    font-size: 9.5px;
+  }
+}
