@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "2.5.4";
+  const APP_VERSION = "2.5.6";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
@@ -631,26 +631,53 @@ Apakah masih tersedia?`;
     return selected;
   }
 
+  function curatedHomeOrder(product) {
+    const order = Number(product.homeOrder);
+
+    return Number.isFinite(order) && order > 0
+      ? order
+      : Number.MAX_SAFE_INTEGER;
+  }
+
+  function sortCuratedHomeProducts(a, b) {
+    return curatedHomeOrder(a) - curatedHomeOrder(b)
+      || Number(Boolean(b.images?.find(Boolean))) -
+        Number(Boolean(a.images?.find(Boolean)))
+      || b.totalStock - a.totalStock
+      || a.name.localeCompare(b.name, "id");
+  }
+
   function renderCuratedSections() {
-    const regularProducts = products.filter(product => product.condition !== "Preloved" && product.brand !== "PRELOVED");
-    const featured = selectDiverseProducts(regularProducts, 5);
-    const preloved = products
-      .filter(product => product.condition === "Preloved" || product.brand === "PRELOVED")
-      .filter(product => productAvailability(product) !== "out")
-      .sort((a, b) =>
-        Number(Boolean(b.images?.find(Boolean))) - Number(Boolean(a.images?.find(Boolean))) ||
-        b.totalStock - a.totalStock ||
-        a.name.localeCompare(b.name, "id")
+    const selectedProducts = products
+      .filter(product => product.isFeatured === true)
+      .filter(product => productAvailability(product) !== "out");
+
+    const featured = selectedProducts
+      .filter(product =>
+        product.condition !== "Preloved" &&
+        product.brand !== "PRELOVED"
       )
+      .sort(sortCuratedHomeProducts)
+      .slice(0, 5);
+
+    const preloved = selectedProducts
+      .filter(product =>
+        product.condition === "Preloved" ||
+        product.brand === "PRELOVED"
+      )
+      .sort(sortCuratedHomeProducts)
       .slice(0, 5);
 
     if (elements.featuredGrid) {
-      elements.featuredGrid.innerHTML = featured.map(renderProductCard).join("");
+      elements.featuredGrid.innerHTML = featured.length
+        ? featured.map(renderProductCard).join("")
+        : '<div class="section-empty-note">Belum ada Featured Product yang dipilih di Google Sheets.</div>';
     }
+
     if (elements.prelovedGrid) {
       elements.prelovedGrid.innerHTML = preloved.length
         ? preloved.map(renderProductCard).join("")
-        : '<div class="section-empty-note">Belum ada produk preloved aktif.</div>';
+        : '<div class="section-empty-note">Belum ada produk Preloved yang dipilih di Google Sheets.</div>';
     }
   }
 
