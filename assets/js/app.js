@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "2.4.3";
+  const APP_VERSION = "2.4.4";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
@@ -99,36 +99,43 @@
     {
       id: "hijab-khimar",
       label: "Hijab & Khimar",
+      icon: "assets/images/categories/category-hijab-khimar.webp",
       categories: ["Hijab", "Bergo", "Khimar"]
     },
     {
       id: "dress-set",
       label: "Dress & Set",
+      icon: "assets/images/categories/category-dress-set.webp",
       categories: ["Dress", "Set"]
     },
     {
       id: "atasan",
       label: "Atasan",
+      icon: "assets/images/categories/category-atasan.webp",
       categories: ["Shirt", "Blouse", "Tunic"]
     },
     {
       id: "outerwear",
       label: "Outerwear",
+      icon: "assets/images/categories/category-outerwear.webp",
       categories: ["Sweater", "Outer"]
     },
     {
       id: "bawahan",
       label: "Bawahan",
+      icon: "assets/images/categories/category-bawahan.webp",
       categories: ["Pants", "Skirt", "Saroong", "Sarong", "Sarung"]
     },
     {
       id: "perlengkapan-ibadah",
       label: "Perlengkapan Ibadah",
+      icon: "assets/images/categories/category-perlengkapan-ibadah.webp",
       categories: ["Mukena", "Sajadah"]
     },
     {
       id: "aksesori-pelengkap",
       label: "Aksesori & Pelengkap",
+      icon: "assets/images/categories/category-aksesori-pelengkap.webp",
       categories: ["Aksesoris", "Accessories", "Manset", "Bag", "Shoes"]
     }
   ];
@@ -464,15 +471,14 @@ Apakah masih tersedia?`;
       const representative = groupProducts[0];
       const productCount = groupProducts.length;
 
-      const visual = representative
-        ? imageMarkup(representative, "category-product-image")
-        : `
-          <div class="product-placeholder category-product-image category-main-placeholder">
-            <span>
-              <strong>${escapeHtml(categoryInitials(group.label))}</strong>
-              <small>mi.do.ri</small>
-            </span>
-          </div>`;
+      const visual = `
+        <img
+          class="category-icon-image"
+          src="${escapeHtml(group.icon)}"
+          alt="${escapeHtml(group.label)}"
+          loading="lazy"
+          decoding="async"
+        >`;
 
       return `
         <button
