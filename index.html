@@ -10,12 +10,12 @@
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/images/logo-midori.png">
   <title>mi.do.ri — Multibrand Muslim Fashion</title>
-  <meta name="midori-version" content="2.5.3">
+  <meta name="midori-version" content="2.5.4">
   <link rel="icon" href="assets/images/logo-midori.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.5.3">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.5.4">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -156,22 +156,26 @@
       </div>
     </section>
 
-    <section class="section promo-section">
+    <section class="section promo-section promo-image-section">
       <div class="container">
-        <div class="promo-banner">
-          <div class="promo-copy">
-            <span class="eyebrow">Special offer</span>
-            <h2>Simpan pilihanmu dan tanyakan stok lewat WhatsApp.</h2>
-            <p>Pilih beberapa produk favorit, lalu kirim semuanya dalam satu pesan ke mi.do.ri.</p>
-            <button class="button button-primary" id="promoOpenCartBtn" type="button">Lihat Pilihan Saya</button>
-          </div>
-          <div class="promo-visual" aria-hidden="true">
-            <div class="shopping-bag"><span>mi.do.ri</span></div>
-            <div class="discount-tag">Chat<br>&amp; Shop</div>
-            <div class="promo-leaf leaf-one"></div>
-            <div class="promo-leaf leaf-two"></div>
-          </div>
-        </div>
+        <a
+          class="responsive-promo-banner"
+          href="katalog.html"
+          aria-label="Lihat katalog mi.do.ri"
+        >
+          <picture>
+            <source
+              media="(max-width: 760px)"
+              srcset="assets/images/banner/banner-promo-mobile.webp"
+            >
+            <img
+              src="assets/images/banner/banner-promo-desktop.webp"
+              alt="Banner promo mi.do.ri"
+              loading="lazy"
+              decoding="async"
+            >
+          </picture>
+        </a>
       </div>
     </section>
     <section class="section preloved-section" id="preloved">
@@ -245,7 +249,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="assets/data/catalog-data.js?v=2.5.3"></script>
-  <script src="assets/js/app.js?v=2.5.3"></script>
+  <script src="assets/data/catalog-data.js?v=2.5.4"></script>
+  <script src="assets/js/app.js?v=2.5.4"></script>
 </body>
 </html>
