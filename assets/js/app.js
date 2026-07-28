@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "2.3.5";
+  const APP_VERSION = "2.3.6";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const catalog = window.MIDORI_CATALOG;
@@ -324,8 +324,7 @@ Apakah masih tersedia?`;
     const availability = productAvailability(product);
     const info = [
       product.colors.length ? `${product.colors.length} warna` : "",
-      product.sizes.length ? product.sizes.slice(0, 3).join(", ") : "",
-      `${product.variantCount} varian`
+      product.sizes.length ? product.sizes.slice(0, 3).join(", ") : ""
     ].filter(Boolean).join(" · ");
 
     return `
@@ -537,10 +536,8 @@ Apakah masih tersedia?`;
           <div class="modal-specs">
             <div><span>Kategori</span><strong>${escapeHtml(product.category)}</strong></div>
             <div><span>Segmen</span><strong>${escapeHtml(product.segment)}</strong></div>
-            <div><span>Kondisi</span><strong>${escapeHtml(product.condition)}</strong></div>
             <div><span>Warna</span><strong>${escapeHtml(product.colors.join(", ") || "-")}</strong></div>
             <div><span>Ukuran</span><strong>${escapeHtml(product.sizes.join(", ") || "-")}</strong></div>
-            <div><span>Jumlah varian</span><strong>${product.variantCount}</strong></div>
           </div>
 
           <div class="modal-actions">
@@ -555,9 +552,11 @@ Apakah masih tersedia?`;
     const waButton = $("#modalWhatsAppBtn");
     const selectedVariant = () => product.variants.find(v => v.sku === variantSelect.value);
 
+    updateDetailStockBadge(defaultVariant);
+
     variantSelect?.addEventListener("change", () => {
       const variant = selectedVariant();
-  updateDetailStockBadge(variant);
+      updateDetailStockBadge(variant);
       if (!variant) return;
       $("#modalPrice").innerHTML = variantPriceMarkup(product, variant);
       $("#modalSku").textContent = variant.sku;
