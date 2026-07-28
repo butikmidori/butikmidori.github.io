@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "2.2.1";
+  const APP_VERSION = "2.3.1";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const catalog = window.MIDORI_CATALOG;
@@ -103,6 +103,61 @@
     return `${formatCurrency(product.priceMin)} – ${formatCurrency(product.priceMax)}`;
   }
 
+
+  function parsePromoDate(value, endOfDay = false) {
+    if (!value) return null;
+    const date = new Date(`${value}T${endOfDay ? "23:59:59" : "00:00:00"}`);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function promoPercent(product) {
+    const value = Math.round(Number(product?.discountPercent || 0));
+    return Math.min(100, Math.max(0, value));
+  }
+
+  function isPromoActive(product, now = new Date()) {
+    if (!product || product.promoActive !== true || promoPercent(product) <= 0) return false;
+    const start = parsePromoDate(product.promoStart, false);
+    const end = parsePromoDate(product.promoEnd, true);
+    if (start && now < start) return false;
+    if (end && now > end) return false;
+    return true;
+  }
+
+  function discountedPrice(value, product) {
+    const price = Number(value || 0);
+    if (!isPromoActive(product)) return price;
+    return Math.round(price * (100 - promoPercent(product)) / 100);
+  }
+
+  function formatProductPriceText(product) {
+    if (!isPromoActive(product)) return formatPrice(product);
+    const min = discountedPrice(product.priceMin, product);
+    const max = discountedPrice(product.priceMax, product);
+    return min === max ? formatCurrency(min) : `${formatCurrency(min)} – ${formatCurrency(max)}`;
+  }
+
+  function productPriceMarkup(product, compact = false) {
+    if (!isPromoActive(product)) return `<span class="current-price">${formatPrice(product)}</span>`;
+    return `<span class="original-price">${formatPrice(product)}</span><span class="discounted-price">${formatProductPriceText(product)}</span>${compact ? "" : `<span class="saving-note">Hemat ${promoPercent(product)}%</span>`}`;
+  }
+
+  function variantPriceMarkup(product, variant) {
+    if (!variant) return productPriceMarkup(product);
+    if (!isPromoActive(product)) return `<span class="current-price">${formatCurrency(variant.price)}</span>`;
+    const finalPrice = discountedPrice(variant.price, product);
+    return `<span class="original-price">${formatCurrency(variant.price)}</span><span class="discounted-price">${formatCurrency(finalPrice)}</span><span class="saving-note">Hemat ${formatCurrency(variant.price - finalPrice)}</span>`;
+  }
+
+  function whatsappPriceLines(product, variant = null) {
+    const normal = variant ? Number(variant.price || 0) : Number(product.priceMin || 0);
+    if (!isPromoActive(product)) return `Harga: ${variant ? formatCurrency(normal) : formatPrice(product)}`;
+    const promo = variant ? discountedPrice(normal, product) : formatProductPriceText(product);
+    return variant
+      ? `Harga normal: ${formatCurrency(normal)}\nHarga promo: ${formatCurrency(promo)} (-${promoPercent(product)}%)`
+      : `Harga normal: ${formatPrice(product)}\nHarga promo: ${promo} (-${promoPercent(product)}%)`;
+  }
+
   function productAvailability(product) {
     const availableVariants = product.variants.filter(v => v.stock > 0 && v.status === "Aktif");
     if (!availableVariants.length) return "out";
@@ -140,9 +195,22 @@
   function whatsappProductUrl(product, variant = null) {
     const chosen = variant || product.variants.find(v => v.stock > 0) || product.variants[0];
     const details = chosen
-      ? `\nKode: ${chosen.sku}\nWarna/Motif: ${chosen.color || "-"}\nUkuran: ${chosen.size || "-"}`
+      ? `
+Kode: ${chosen.sku}
+Warna/Motif: ${chosen.color || "-"}
+Ukuran: ${chosen.size || "-"}`
       : "";
-    const message = `Halo mi.do.ri, saya tertarik dengan produk:\n\n${product.name}\nBrand: ${product.brand}${details}\nHarga: ${chosen ? formatCurrency(chosen.price) : formatPrice(product)}\n\nLink katalog: ${productUrl(product)}\n\nApakah masih tersedia?`;
+    const promoLabel = isPromoActive(product) && product.promoLabel ? `
+Promo: ${product.promoLabel}` : "";
+    const message = `Halo mi.do.ri, saya tertarik dengan produk:
+
+${product.name}
+Brand: ${product.brand}${details}${promoLabel}
+${whatsappPriceLines(product, chosen)}
+
+Link katalog: ${productUrl(product)}
+
+Apakah masih tersedia?`;
     return `https://wa.me/${store.whatsapp}?text=${encodeURIComponent(message)}`;
   }
 
@@ -243,7 +311,9 @@
 
   function productBadges(product) {
     const availability = productAvailability(product);
+    const promo = isPromoActive(product);
     return [
+      promo ? `<span class="badge badge-discount" title="${escapeHtml(product.promoLabel || `Diskon ${promoPercent(product)}%`)}">-${promoPercent(product)}%</span>` : "",
       product.isNew ? `<span class="badge">Baru</span>` : "",
       product.condition === "Preloved" ? `<span class="badge badge-preloved">Preloved</span>` : "",
       availability === "limited" ? `<span class="badge badge-limited">Stok terbatas</span>` : "",
@@ -270,7 +340,7 @@
           <p class="product-brand">${escapeHtml(product.brand)}</p>
           <h3 class="product-title">${escapeHtml(product.name)}</h3>
           <div class="product-rating">● <span>${stockLabel(availability)}</span></div>
-          <p class="product-price">${formatPrice(product)}</p>
+          <div class="product-price${isPromoActive(product) ? " has-promo" : ""}">${productPriceMarkup(product, true)}</div>
           <p class="product-card-info" title="${escapeHtml(info)}">${escapeHtml(info)}</p>
           <div class="product-actions">
             <button class="button button-primary" type="button" data-open-product="${product.id}">Pilih produk</button>
@@ -361,8 +431,8 @@
     filtered.sort((a, b) => {
       switch (state.sort) {
         case "name-asc": return a.name.localeCompare(b.name, "id");
-        case "price-asc": return a.priceMin - b.priceMin;
-        case "price-desc": return b.priceMax - a.priceMax;
+        case "price-asc": return discountedPrice(a.priceMin, a) - discountedPrice(b.priceMin, b);
+        case "price-desc": return discountedPrice(b.priceMax, b) - discountedPrice(a.priceMax, a);
         case "stock-desc": return b.totalStock - a.totalStock;
         default:
           return Number(Boolean(b.images?.find(Boolean))) - Number(Boolean(a.images?.find(Boolean)))
@@ -441,11 +511,11 @@
 
     elements.modalContent.innerHTML = `
       <article class="modal-product">
-        <div class="modal-gallery"><div class="modal-main-image">${imageMarkup(product)}</div></div>
+        <div class="modal-gallery"><div class="modal-product-badges">${productBadges(product)}</div><div class="modal-main-image">${imageMarkup(product)}</div></div>
         <div class="modal-info">
           <p class="product-brand">${escapeHtml(product.brand)}</p>
           <h2 id="modalProductName">${escapeHtml(product.name)}</h2>
-          <p class="modal-price" id="modalPrice">${defaultVariant ? formatCurrency(defaultVariant.price) : formatPrice(product)}</p>
+          <div class="modal-price${isPromoActive(product) ? " has-promo" : ""}" id="modalPrice">${defaultVariant ? variantPriceMarkup(product, defaultVariant) : productPriceMarkup(product)}</div>
           <p class="modal-description">${escapeHtml(product.description || `Koleksi ${product.category.toLowerCase()} dari ${product.brand}. Pilih varian yang diinginkan untuk menanyakan ketersediaan.`)}</p>
 
           <label class="variant-label" for="variantSelect">Pilih warna dan ukuran</label>
@@ -485,7 +555,7 @@
     variantSelect?.addEventListener("change", () => {
       const variant = selectedVariant();
       if (!variant) return;
-      $("#modalPrice").textContent = formatCurrency(variant.price);
+      $("#modalPrice").innerHTML = variantPriceMarkup(product, variant);
       $("#modalSku").textContent = variant.sku;
       $("#modalStock").textContent = `${variant.stock} unit · ${stockLabel(variant.stock <= 0 ? "out" : variant.stock <= 2 ? "limited" : "available")}`;
       addButton.disabled = variant.stock <= 0;
@@ -519,15 +589,27 @@
 
   function loadCart() {
     try {
-      const raw = localStorage.getItem("midori-cart-v2") || localStorage.getItem("midori-cart-v1");
-      return raw ? JSON.parse(raw) : [];
+      const raw = localStorage.getItem("midori-cart-v3");
+      const saved = raw ? JSON.parse(raw) : [];
+      return saved.map(item => {
+        const product = products.find(productItem => productItem.id === item.productId);
+        const variant = product?.variants.find(variantItem => variantItem.sku === item.sku);
+        if (!product || !variant) return item;
+        return {
+          ...item,
+          originalPrice: variant.price,
+          price: discountedPrice(variant.price, product),
+          discountPercent: isPromoActive(product) ? promoPercent(product) : 0,
+          promoLabel: isPromoActive(product) ? (product.promoLabel || "Promo") : ""
+        };
+      });
     } catch {
       return [];
     }
   }
 
   function saveCart() {
-    localStorage.setItem("midori-cart-v2", JSON.stringify(state.cart));
+    localStorage.setItem("midori-cart-v3", JSON.stringify(state.cart));
     renderCart();
   }
 
@@ -551,7 +633,10 @@
       sku: variant.sku,
       color: variant.color,
       size: variant.size,
-      price: variant.price
+      originalPrice: variant.price,
+      price: discountedPrice(variant.price, product),
+      discountPercent: isPromoActive(product) ? promoPercent(product) : 0,
+      promoLabel: isPromoActive(product) ? (product.promoLabel || "Promo") : ""
     });
     saveCart();
     showToast("Produk ditambahkan ke daftar pilihan.");
@@ -582,7 +667,7 @@
           <p>${escapeHtml(item.brand)}</p>
           <p>${escapeHtml(item.color || "Tanpa warna")} · ${escapeHtml(item.size || "Tanpa ukuran")}</p>
           <p>SKU ${escapeHtml(item.sku)}</p>
-          <div class="cart-item-price">${formatCurrency(item.price)}</div>
+          <div class="cart-item-price${item.discountPercent ? " has-promo" : ""}">${item.discountPercent && item.originalPrice ? `<span class="original-price">${formatCurrency(item.originalPrice)}</span><span class="discounted-price">${formatCurrency(item.price)}</span>` : `<span class="current-price">${formatCurrency(item.price)}</span>`}</div>
         </div>
         <button class="remove-cart-item" type="button" data-remove-sku="${escapeHtml(item.sku)}" aria-label="Hapus ${escapeHtml(item.name)}">×</button>
       </article>`).join("");
@@ -607,7 +692,7 @@
   function sendCartToWhatsApp() {
     if (!state.cart.length) return;
     const lines = state.cart.map((item, index) =>
-      `${index + 1}. ${item.name}\n   Brand: ${item.brand}\n   Kode: ${item.sku}\n   Warna/Motif: ${item.color || "-"}\n   Ukuran: ${item.size || "-"}\n   Harga: ${formatCurrency(item.price)}`
+      `${index + 1}. ${item.name}\n   Brand: ${item.brand}\n   Kode: ${item.sku}\n   Warna/Motif: ${item.color || "-"}\n   Ukuran: ${item.size || "-"}\n   ${item.discountPercent && item.originalPrice ? `Harga normal: ${formatCurrency(item.originalPrice)}\n   Harga promo: ${formatCurrency(item.price)} (-${item.discountPercent}%)` : `Harga: ${formatCurrency(item.price)}`}`
     );
     const total = state.cart.reduce((sum, item) => sum + Number(item.price || 0), 0);
     const message = `Halo mi.do.ri, saya ingin menanyakan ketersediaan produk berikut:\n\n${lines.join("\n\n")}\n\nPerkiraan total: ${formatCurrency(total)}\n\nMohon konfirmasi stok dan cara pemesanannya. Terima kasih.`;
