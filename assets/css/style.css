@@ -1109,3 +1109,80 @@ body { background: #fff; color: var(--ink); }
     font-size: 9.5px;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v2.3.3 — Product badge refinement
+   ========================================================= */
+
+/* Badge Preloved tidak ditampilkan pada kartu produk. */
+.product-card .badge-preloved,
+.product-card .product-badge.badge-preloved,
+.product-card [data-badge="preloved"] {
+  display: none !important;
+}
+
+/* Area foto menjadi acuan posisi badge. */
+.product-card .product-image,
+.product-card .product-media,
+.product-card .product-card-media,
+.product-card .product-image-wrap {
+  position: relative;
+}
+
+/* Stok terbatas dipindahkan ke sisi kiri bawah area foto. */
+.product-card .product-image-wrap > .badge-stock-bottom-left,
+.product-card .product-image-wrap > .badge-limited {
+  position: absolute !important;
+  left: 14px !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: 14px !important;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 28px);
+  padding: 8px 13px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffe681 0%, #ffd34e 100%);
+  color: #3f3a10;
+  border: 1px solid rgba(93, 76, 0, 0.16);
+  box-shadow: 0 6px 16px rgba(102, 80, 0, 0.18);
+  font-size: 0.75rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+/* Badge diskon tetap di kiri atas dan tidak bertabrakan. */
+.product-card .badge-discount {
+  top: 14px !important;
+  left: 14px !important;
+  bottom: auto !important;
+}
+
+/* Tombol favorit tetap di kanan atas. */
+.product-card .favorite-button,
+.product-card .wishlist-button,
+.product-card .product-favorite {
+  top: 14px;
+  right: 14px;
+}
+
+@media (max-width: 640px) {
+  .product-card .product-image-wrap > .badge-stock-bottom-left,
+  .product-card .product-image-wrap > .badge-limited {
+    left: 10px !important;
+    bottom: 10px !important;
+    max-width: calc(100% - 20px);
+    padding: 7px 11px;
+    font-size: 0.69rem;
+  }
+
+  .product-card .badge-discount {
+    top: 10px !important;
+    left: 10px !important;
+  }
+}
