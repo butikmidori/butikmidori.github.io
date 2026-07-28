@@ -1,13 +1,94 @@
-(() => {
+(async () => {
   "use strict";
 
-  const APP_VERSION = "2.3.6";
+  const APP_VERSION = "2.4.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
-  const catalog = window.MIDORI_CATALOG;
+  const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
+  const LIVE_CATALOG_TIMEOUT = 12000;
+
+  let catalog;
+  try {
+    catalog = await loadCatalog();
+  } catch (error) {
+    console.error("Data katalog tidak dapat dimuat:", error);
+    document.body.innerHTML = `<div style="max-width:720px;margin:80px auto;padding:32px;font-family:Arial,sans-serif;text-align:center"><h1 style="font-size:24px">Katalog belum dapat dimuat</h1><p style="line-height:1.6;color:#5d665f">Silakan muat ulang halaman beberapa saat lagi atau hubungi mi.do.ri melalui WhatsApp.</p><a href="https://wa.me/628117177667" style="display:inline-block;margin-top:12px;padding:12px 18px;border-radius:999px;background:#0b6f3c;color:white;text-decoration:none;font-weight:700">Chat WhatsApp</a></div>`;
+    return;
+  }
+
   if (!catalog || !Array.isArray(catalog.products)) {
     document.body.innerHTML = "<p style='padding:40px;font-family:sans-serif'>Data katalog tidak ditemukan.</p>";
     return;
+  }
+
+
+  async function loadCatalog() {
+    const fallback = window.MIDORI_CATALOG;
+
+    try {
+      const liveCatalog = await loadCatalogJsonp();
+
+      if (liveCatalog?.error) {
+        throw new Error(liveCatalog.message || "Google Sheets API mengembalikan error.");
+      }
+
+      if (!liveCatalog || !Array.isArray(liveCatalog.products)) {
+        throw new Error("Format data Google Sheets tidak valid.");
+      }
+
+      window.MIDORI_CATALOG = liveCatalog;
+      window.MIDORI_CATALOG_SOURCE = "google-sheets";
+      document.documentElement.dataset.catalogSource = "google-sheets";
+      console.info(`mi.do.ri: katalog live dimuat (${liveCatalog.summary?.products || liveCatalog.products.length} produk).`);
+      return liveCatalog;
+    } catch (error) {
+      console.warn("mi.do.ri: gagal mengambil data live, menggunakan data cadangan.", error);
+
+      if (fallback && Array.isArray(fallback.products)) {
+        window.MIDORI_CATALOG_SOURCE = "fallback";
+        document.documentElement.dataset.catalogSource = "fallback";
+        return fallback;
+      }
+
+      throw error;
+    }
+  }
+
+  function loadCatalogJsonp() {
+    return new Promise((resolve, reject) => {
+      const callbackName = `MIDORI_receiveCatalog_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const script = document.createElement("script");
+      let settled = false;
+
+      const cleanup = () => {
+        clearTimeout(timer);
+        script.remove();
+        try {
+          delete window[callbackName];
+        } catch (_) {
+          window[callbackName] = undefined;
+        }
+      };
+
+      const finish = (handler, value) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        handler(value);
+      };
+
+      window[callbackName] = data => finish(resolve, data);
+
+      script.async = true;
+      script.src = `${LIVE_CATALOG_URL}?callback=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
+      script.onerror = () => finish(reject, new Error("Koneksi ke Google Sheets API gagal."));
+
+      const timer = setTimeout(() => {
+        finish(reject, new Error("Google Sheets API melewati batas waktu."));
+      }, LIVE_CATALOG_TIMEOUT);
+
+      document.head.appendChild(script);
+    });
   }
 
   const store = catalog.store;
