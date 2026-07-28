@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "2.4.0";
+  const APP_VERSION = "2.4.3";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
@@ -95,10 +95,68 @@
   const products = catalog.products.filter(product => product.status === "Aktif");
   const brands = catalog.brands || [];
 
+  const MAIN_CATEGORY_GROUPS = [
+    {
+      id: "hijab-khimar",
+      label: "Hijab & Khimar",
+      categories: ["Hijab", "Bergo", "Khimar"]
+    },
+    {
+      id: "dress-set",
+      label: "Dress & Set",
+      categories: ["Dress", "Set"]
+    },
+    {
+      id: "atasan",
+      label: "Atasan",
+      categories: ["Shirt", "Blouse", "Tunic"]
+    },
+    {
+      id: "outerwear",
+      label: "Outerwear",
+      categories: ["Sweater", "Outer"]
+    },
+    {
+      id: "bawahan",
+      label: "Bawahan",
+      categories: ["Pants", "Skirt", "Saroong", "Sarong", "Sarung"]
+    },
+    {
+      id: "perlengkapan-ibadah",
+      label: "Perlengkapan Ibadah",
+      categories: ["Mukena", "Sajadah"]
+    },
+    {
+      id: "aksesori-pelengkap",
+      label: "Aksesori & Pelengkap",
+      categories: ["Aksesoris", "Accessories", "Manset", "Bag", "Shoes"]
+    }
+  ];
+
+  function getMainCategoryGroup(groupId) {
+    return MAIN_CATEGORY_GROUPS.find(group => group.id === groupId) || null;
+  }
+
+  function productMatchesMainCategory(product, groupId) {
+    const group = getMainCategoryGroup(groupId);
+    return Boolean(group && group.categories.includes(product.category));
+  }
+
+  function categoryInitials(label) {
+    return label
+      .split(/\s+|&/)
+      .map(part => part.trim())
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(part => part.charAt(0).toUpperCase())
+      .join("");
+  }
+
   const state = {
     query: "",
     brand: "",
     category: "",
+    mainCategory: "",
     size: "",
     segment: "",
     condition: "",
@@ -354,38 +412,78 @@ Apakah masih tersedia?`;
 
   function setCatalogFilter(type, value) {
     state[type] = value;
+
+    if (type === "category") {
+      state.mainCategory = "";
+    }
+
     state.page = 1;
+
     const controlMap = {
       category: elements.categoryFilter,
       brand: elements.brandFilter,
       condition: elements.conditionFilter
     };
-    if (controlMap[type]) controlMap[type].value = value;
+
+    if (controlMap[type]) {
+      controlMap[type].value = value;
+    }
+
+    applyFilters();
+    $("#katalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function setMainCategoryFilter(groupId) {
+    const group = getMainCategoryGroup(groupId);
+    if (!group) return;
+
+    state.mainCategory = group.id;
+    state.category = "";
+    state.page = 1;
+
+    if (elements.categoryFilter) {
+      elements.categoryFilter.value = "";
+    }
+
     applyFilters();
     $("#katalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function renderCategories() {
     if (!elements.categoryGrid) return;
-    const counts = products.reduce((acc, product) => {
-      acc[product.category] = (acc[product.category] || 0) + 1;
-      return acc;
-    }, {});
-    const preferred = ["Dress", "Shirt", "Hijab", "Set", "Blouse", "Pants", "Aksesoris", "Tunic"];
-    const ordered = [
-      ...preferred.filter(category => counts[category]),
-      ...Object.keys(counts).filter(category => !preferred.includes(category)).sort()
-    ].slice(0, 8);
 
-    elements.categoryGrid.innerHTML = ordered.map(category => {
-      const representative = products
-        .filter(product => product.category === category)
-        .sort((a, b) => Number(Boolean(b.images?.find(Boolean))) - Number(Boolean(a.images?.find(Boolean))) || b.totalStock - a.totalStock)[0];
+    elements.categoryGrid.innerHTML = MAIN_CATEGORY_GROUPS.map(group => {
+      const groupProducts = products
+        .filter(product => group.categories.includes(product.category))
+        .sort((a, b) =>
+          Number(Boolean(b.images?.find(Boolean))) -
+            Number(Boolean(a.images?.find(Boolean))) ||
+          b.totalStock - a.totalStock
+        );
+
+      const representative = groupProducts[0];
+      const productCount = groupProducts.length;
+
+      const visual = representative
+        ? imageMarkup(representative, "category-product-image")
+        : `
+          <div class="product-placeholder category-product-image category-main-placeholder">
+            <span>
+              <strong>${escapeHtml(categoryInitials(group.label))}</strong>
+              <small>mi.do.ri</small>
+            </span>
+          </div>`;
+
       return `
-        <button class="category-card" type="button" data-category="${escapeHtml(category)}">
-          <span class="category-image">${imageMarkup(representative, "category-product-image")}</span>
-          <h3>${escapeHtml(category)}</h3>
-          <p>${counts[category]} produk</p>
+        <button
+          class="category-card"
+          type="button"
+          data-main-category="${escapeHtml(group.id)}"
+          aria-label="Lihat kategori ${escapeHtml(group.label)}"
+        >
+          <span class="category-image">${visual}</span>
+          <h3>${escapeHtml(group.label)}</h3>
+          <p>${productCount.toLocaleString("id-ID")} produk</p>
         </button>`;
     }).join("");
   }
@@ -501,6 +599,10 @@ Apakah masih tersedia?`;
       if (!matchesSearch(product, query)) return false;
       if (state.brand && product.brand !== state.brand) return false;
       if (state.category && product.category !== state.category) return false;
+      if (
+        state.mainCategory &&
+        !productMatchesMainCategory(product, state.mainCategory)
+      ) return false;
       if (state.size && !product.sizes.includes(state.size)) return false;
       if (state.segment && product.segment !== state.segment) return false;
       if (state.condition && product.condition !== state.condition) return false;
@@ -533,7 +635,15 @@ Apakah masih tersedia?`;
   }
 
   function updateActiveFilterCount() {
-    const count = [state.brand, state.category, state.size, state.segment, state.condition, state.availability].filter(Boolean).length;
+    const count = [
+      state.brand,
+      state.category,
+      state.mainCategory,
+      state.size,
+      state.segment,
+      state.condition,
+      state.availability
+    ].filter(Boolean).length;
     if (!elements.activeFilterCount) return;
     elements.activeFilterCount.textContent = count;
     elements.activeFilterCount.classList.toggle("visible", count > 0);
@@ -785,8 +895,9 @@ Apakah masih tersedia?`;
 
   function resetFilters() {
     Object.assign(state, {
-      query: "", brand: "", category: "", size: "", segment: "",
-      condition: "", availability: "", sort: "recommended", page: 1
+      query: "", brand: "", category: "", mainCategory: "",
+      size: "", segment: "", condition: "", availability: "",
+      sort: "recommended", page: 1
     });
     elements.searchInput.value = "";
     elements.brandFilter.value = "";
@@ -845,6 +956,11 @@ Apakah masih tersedia?`;
     ].forEach(([element, key]) => {
       element?.addEventListener("change", event => {
         state[key] = event.target.value;
+
+        if (key === "category") {
+          state.mainCategory = "";
+        }
+
         state.page = 1;
         applyFilters();
       });
@@ -857,8 +973,15 @@ Apakah masih tersedia?`;
     document.addEventListener("click", event => {
       if (event.target.closest("[data-product-grid]")) handleProductAction(event);
 
+      const mainCategory = event.target.closest("[data-main-category]");
+      if (mainCategory) {
+        setMainCategoryFilter(mainCategory.dataset.mainCategory);
+      }
+
       const category = event.target.closest("[data-category]");
-      if (category) setCatalogFilter("category", category.dataset.category);
+      if (category) {
+        setCatalogFilter("category", category.dataset.category);
+      }
 
       const brand = event.target.closest("[data-brand]");
       if (brand) setCatalogFilter("brand", brand.dataset.brand);
