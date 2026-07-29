@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "2.5.6";
+  const APP_VERSION = "2.5.7";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
@@ -823,12 +823,12 @@ Apakah masih tersedia?`;
 
           <div class="variant-status">
             <span>Kode: <strong id="modalSku">${escapeHtml(defaultVariant?.sku || "-")}</strong></span>
-            <span id="modalStock">${defaultVariant ? `${defaultVariant.stock} unit · ${stockLabel(defaultVariant.stock <= 0 ? "out" : defaultVariant.stock <= 2 ? "limited" : "available")}` : stockLabel(availability)}</span>
+            <span id="modalStock">${defaultVariant ? `${defaultVariant.stock} produk · ${stockLabel(defaultVariant.stock <= 0 ? "out" : defaultVariant.stock <= 2 ? "limited" : "available")}` : stockLabel(availability)}</span>
           </div>
 
           <div class="modal-specs">
             <div><span>Kategori</span><strong>${escapeHtml(product.category)}</strong></div>
-            <div><span>Segmen</span><strong>${escapeHtml(product.segment)}</strong></div>
+            <div><span>Bahan</span><strong>${escapeHtml(product.material || "-")}</strong></div>
             <div><span>Warna</span><strong>${escapeHtml(product.colors.join(", ") || "-")}</strong></div>
             <div><span>Ukuran</span><strong>${escapeHtml(product.sizes.join(", ") || "-")}</strong></div>
           </div>
@@ -853,7 +853,7 @@ Apakah masih tersedia?`;
       if (!variant) return;
       $("#modalPrice").innerHTML = variantPriceMarkup(product, variant);
       $("#modalSku").textContent = variant.sku;
-      $("#modalStock").textContent = `${variant.stock} unit · ${stockLabel(variant.stock <= 0 ? "out" : variant.stock <= 2 ? "limited" : "available")}`;
+      $("#modalStock").textContent = `${variant.stock} produk · ${stockLabel(variant.stock <= 0 ? "out" : variant.stock <= 2 ? "limited" : "available")}`;
       addButton.disabled = variant.stock <= 0;
       waButton.href = whatsappProductUrl(product, variant);
     });
