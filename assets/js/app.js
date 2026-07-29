@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "3.0.1";
+  const APP_VERSION = "3.0.2";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
@@ -183,6 +183,9 @@
     categoryNavDropdown: $("#categoryNavDropdown"),
     categoryNavToggle: $("#categoryNavToggle"),
     categoryNavMenu: $("#categoryNavMenu"),
+    brandNavDropdown: $("#brandNavDropdown"),
+    brandNavToggle: $("#brandNavToggle"),
+    brandNavMenu: $("#brandNavMenu"),
     searchInput: $("#searchInput"),
     brandFilter: $("#brandFilter"),
     categoryFilter: $("#categoryFilter"),
@@ -390,6 +393,27 @@ Apakah masih tersedia?`;
 
     fillSelect(elements.brandFilter, activeBrands);
     fillSelect(elements.categoryFilter, categories);
+  }
+
+  function renderBrandNavigation() {
+    if (!elements.brandNavMenu) return;
+
+    const activeBrands = [...new Set(
+      products
+        .map(product => String(product.brand || "").trim())
+        .filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, "id-ID"));
+
+    const allActive = !state.brand;
+    const links = [
+      `<a role="menuitem" class="${allActive ? "is-active" : ""}" href="katalog.html#katalog"${allActive ? ' aria-current="page"' : ""}>Semua Brand</a>`,
+      ...activeBrands.map(brand => {
+        const active = normalize(state.brand) === normalize(brand);
+        return `<a role="menuitem" class="${active ? "is-active" : ""}" href="katalog.html?brand=${encodeURIComponent(brand)}#katalog"${active ? ' aria-current="page"' : ""}>${escapeHtml(brand)}</a>`;
+      })
+    ];
+
+    elements.brandNavMenu.innerHTML = links.join("");
   }
 
   function catalogUrl(parameters = {}) {
@@ -1323,13 +1347,25 @@ Apakah masih tersedia?`;
       if (!open) {
         elements.categoryNavDropdown?.classList.remove("open");
         elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
+        elements.brandNavDropdown?.classList.remove("open");
+        elements.brandNavToggle?.setAttribute("aria-expanded", "false");
       }
     });
 
     elements.categoryNavToggle?.addEventListener("click", event => {
       event.stopPropagation();
+      elements.brandNavDropdown?.classList.remove("open");
+      elements.brandNavToggle?.setAttribute("aria-expanded", "false");
       const open = elements.categoryNavDropdown.classList.toggle("open");
       elements.categoryNavToggle.setAttribute("aria-expanded", String(open));
+    });
+
+    elements.brandNavToggle?.addEventListener("click", event => {
+      event.stopPropagation();
+      elements.categoryNavDropdown?.classList.remove("open");
+      elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
+      const open = elements.brandNavDropdown.classList.toggle("open");
+      elements.brandNavToggle.setAttribute("aria-expanded", String(open));
     });
 
     $$("#mainNav a").forEach(link => link.addEventListener("click", () => {
@@ -1337,6 +1373,8 @@ Apakah masih tersedia?`;
       elements.navToggle?.setAttribute("aria-expanded", "false");
       elements.categoryNavDropdown?.classList.remove("open");
       elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
+      elements.brandNavDropdown?.classList.remove("open");
+      elements.brandNavToggle?.setAttribute("aria-expanded", "false");
     }));
 
     let searchTimer;
@@ -1379,6 +1417,14 @@ Apakah masih tersedia?`;
       ) {
         elements.categoryNavDropdown.classList.remove("open");
         elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
+      }
+
+      if (
+        elements.brandNavDropdown &&
+        !elements.brandNavDropdown.contains(event.target)
+      ) {
+        elements.brandNavDropdown.classList.remove("open");
+        elements.brandNavToggle?.setAttribute("aria-expanded", "false");
       }
 
       if (event.target.closest("[data-product-grid]")) handleProductAction(event);
@@ -1433,6 +1479,8 @@ Apakah masih tersedia?`;
 
       elements.categoryNavDropdown?.classList.remove("open");
       elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
+      elements.brandNavDropdown?.classList.remove("open");
+      elements.brandNavToggle?.setAttribute("aria-expanded", "false");
 
       if (elements.modal.classList.contains("open")) closeProduct();
       if (elements.cartDrawer.classList.contains("open")) closeCart();
@@ -1449,6 +1497,7 @@ Apakah masih tersedia?`;
   try {
     setupFilters();
     applyUrlFilters();
+    renderBrandNavigation();
     renderSummary();
     renderHero();
     renderCategories();
