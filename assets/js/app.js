@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "3.0.0";
+  const APP_VERSION = "3.0.1";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
@@ -215,7 +215,13 @@
     sendCartBtn: $("#sendCartBtn"),
     clearCartBtn: $("#clearCartBtn"),
     toast: $("#toast"),
-    heroProductImage: $("#heroProductImage")
+    heroProductImage: $("#heroProductImage"),
+    heroSlider: $("#heroSlider"),
+    heroSliderTrack: $("#heroSliderTrack"),
+    heroSliderPrev: $("#heroSliderPrev"),
+    heroSliderNext: $("#heroSliderNext"),
+    heroSliderDots: $("#heroSliderDots"),
+    heroSliderStatus: $("#heroSliderStatus")
   };
 
   const IS_CATALOG_PAGE = Boolean(elements.productGrid);
@@ -465,9 +471,175 @@ Apakah masih tersedia?`;
   }
 
   function renderHero() {
-    if (!elements.heroProductImage) return;
-    elements.heroProductImage.src = "assets/images/hero/hero-koleksi.webp";
-    elements.heroProductImage.alt = "Koleksi utama mi.do.ri";
+    const slider = elements.heroSlider;
+    const track = elements.heroSliderTrack;
+
+    if (!slider || !track) {
+      if (!elements.heroProductImage) return;
+      elements.heroProductImage.src = "assets/images/hero/hero-koleksi.webp";
+      elements.heroProductImage.alt = "Koleksi utama mi.do.ri";
+      return;
+    }
+
+    const fallback = slider.querySelector(".hero-photo-fallback");
+    let slides = [];
+    let currentIndex = 0;
+    let autoplayTimer = null;
+    let dragStartX = null;
+    let dragPointerId = null;
+
+    const stopAutoplay = () => {
+      window.clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    };
+
+    const startAutoplay = () => {
+      stopAutoplay();
+      if (slides.length <= 1 || document.hidden) return;
+      autoplayTimer = window.setInterval(() => showSlide(currentIndex + 1), 6000);
+    };
+
+    const buildDots = () => {
+      if (!elements.heroSliderDots) return;
+      elements.heroSliderDots.innerHTML = slides.map((_, index) => `
+        <button
+          class="hero-slider-dot${index === currentIndex ? " is-active" : ""}"
+          type="button"
+          data-hero-slide-index="${index}"
+          aria-label="Tampilkan foto ${index + 1}"
+          aria-current="${index === currentIndex ? "true" : "false"}"
+        ></button>
+      `).join("");
+    };
+
+    const updateControls = () => {
+      const hasMultipleSlides = slides.length > 1;
+      if (elements.heroSliderPrev) elements.heroSliderPrev.hidden = !hasMultipleSlides;
+      if (elements.heroSliderNext) elements.heroSliderNext.hidden = !hasMultipleSlides;
+      if (elements.heroSliderDots) elements.heroSliderDots.hidden = !hasMultipleSlides;
+    };
+
+    const showSlide = (index, restart = false) => {
+      if (!slides.length) return;
+
+      currentIndex = (index + slides.length) % slides.length;
+      track.style.transition = "";
+      track.style.transform = `translate3d(-${currentIndex * 100}%, 0, 0)`;
+
+      slides.forEach((slide, slideIndex) => {
+        const active = slideIndex === currentIndex;
+        slide.classList.toggle("is-active", active);
+        slide.setAttribute("aria-hidden", String(!active));
+      });
+
+      elements.heroSliderDots?.querySelectorAll(".hero-slider-dot").forEach((dot, dotIndex) => {
+        const active = dotIndex === currentIndex;
+        dot.classList.toggle("is-active", active);
+        dot.setAttribute("aria-current", String(active));
+      });
+
+      if (elements.heroSliderStatus) {
+        elements.heroSliderStatus.textContent = `Foto ${currentIndex + 1} dari ${slides.length}`;
+      }
+
+      if (restart) startAutoplay();
+    };
+
+    const refreshSlides = () => {
+      slides = [...track.querySelectorAll(".hero-slide")];
+
+      if (!slides.length) {
+        if (fallback) fallback.hidden = false;
+        if (elements.heroSliderPrev) elements.heroSliderPrev.hidden = true;
+        if (elements.heroSliderNext) elements.heroSliderNext.hidden = true;
+        if (elements.heroSliderDots) elements.heroSliderDots.hidden = true;
+        stopAutoplay();
+        return;
+      }
+
+      if (fallback) fallback.hidden = true;
+      currentIndex = Math.min(currentIndex, slides.length - 1);
+      buildDots();
+      updateControls();
+      showSlide(currentIndex);
+      startAutoplay();
+    };
+
+    track.querySelectorAll(".hero-slide img").forEach(image => {
+      image.draggable = false;
+      const slide = image.closest(".hero-slide");
+      const removeBrokenSlide = () => {
+        slide?.remove();
+        refreshSlides();
+      };
+
+      if (image.complete && image.naturalWidth === 0) {
+        removeBrokenSlide();
+      } else {
+        image.addEventListener("error", removeBrokenSlide, { once: true });
+      }
+    });
+
+    elements.heroSliderPrev?.addEventListener("click", () => showSlide(currentIndex - 1, true));
+    elements.heroSliderNext?.addEventListener("click", () => showSlide(currentIndex + 1, true));
+
+    elements.heroSliderDots?.addEventListener("click", event => {
+      const button = event.target.closest("[data-hero-slide-index]");
+      if (!button) return;
+      showSlide(Number(button.dataset.heroSlideIndex), true);
+    });
+
+    slider.addEventListener("keydown", event => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        showSlide(currentIndex - 1, true);
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        showSlide(currentIndex + 1, true);
+      }
+    });
+
+    slider.addEventListener("pointerdown", event => {
+      if (slides.length <= 1 || (event.pointerType === "mouse" && event.button !== 0)) return;
+      dragStartX = event.clientX;
+      dragPointerId = event.pointerId;
+      stopAutoplay();
+      slider.classList.add("is-dragging");
+      slider.setPointerCapture?.(event.pointerId);
+    });
+
+    slider.addEventListener("pointermove", event => {
+      if (dragStartX === null || event.pointerId !== dragPointerId) return;
+      const delta = event.clientX - dragStartX;
+      track.style.transition = "none";
+      track.style.transform = `translate3d(calc(-${currentIndex * 100}% + ${delta}px), 0, 0)`;
+    });
+
+    const finishDrag = event => {
+      if (dragStartX === null || event.pointerId !== dragPointerId) return;
+      const delta = event.clientX - dragStartX;
+      dragStartX = null;
+      dragPointerId = null;
+      slider.classList.remove("is-dragging");
+      track.style.transition = "";
+
+      if (Math.abs(delta) >= 45) {
+        showSlide(currentIndex + (delta < 0 ? 1 : -1), true);
+      } else {
+        showSlide(currentIndex, true);
+      }
+    };
+
+    slider.addEventListener("pointerup", finishDrag);
+    slider.addEventListener("pointercancel", finishDrag);
+    slider.addEventListener("mouseenter", stopAutoplay);
+    slider.addEventListener("mouseleave", startAutoplay);
+    slider.addEventListener("focusin", stopAutoplay);
+    slider.addEventListener("focusout", startAutoplay);
+    document.addEventListener("visibilitychange", () => document.hidden ? stopAutoplay() : startAutoplay());
+
+    refreshSlides();
   }
 
   function setCatalogFilter(type, value) {
