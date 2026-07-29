@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "3.0.2";
+  const APP_VERSION = "3.0.3";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
@@ -322,7 +322,7 @@
   }
 
   function stockLabel(type) {
-    return type === "out" ? "Habis" : type === "limited" ? "Stok terbatas" : "Tersedia";
+    return type === "out" ? "Habis" : type === "limited" ? "Stok menipis" : "Tersedia";
   }
 
   function productInitials(product) {
@@ -783,7 +783,8 @@ Apakah masih tersedia?`;
         <div class="product-image-wrap">
           ${imageMarkup(product, "product-image")}
           <div class="product-badges">${productBadges(product)}</div>
-          ${availability === "limited" ? `<span class="badge badge-limited badge-stock-bottom-left">Stok terbatas</span>` : ""}
+          ${availability === "limited" ? `<span class="badge badge-limited badge-stock-bottom-left">Stok menipis</span>` : ""}
+          ${product.condition === "Preloved" ? `<span class="badge badge-preloved badge-preloved-bottom-right">Preloved</span>` : ""}
           <button class="product-favorite" type="button" data-quick-add="${product.id}" aria-label="Tambah ${escapeHtml(product.name)} ke daftar pilihan">♡</button>
         </div>
         <div class="product-body">
@@ -1127,7 +1128,7 @@ Apakah masih tersedia?`;
           <h2 id="modalProductName">${escapeHtml(product.name)}</h2>
           <div class="modal-price${isPromoActive(product) ? " has-promo" : ""}" id="modalPrice">${defaultVariant ? variantPriceMarkup(product, defaultVariant) : productPriceMarkup(product)}</div>
           <div id="detailStockBadge" class="detail-stock-badge" hidden>
-            Stok terbatas
+            Stok menipis
           </div>
           <label class="variant-label" for="variantSelect">Pilih warna dan ukuran</label>
           <select class="variant-select" id="variantSelect">
@@ -1528,5 +1529,5 @@ function updateDetailStockBadge(variant) {
   const isLimited = stock > 0 && stock <= 2;
 
   badge.hidden = !isLimited;
-  badge.textContent = "Stok terbatas";
+  badge.textContent = "Stok menipis";
 }
