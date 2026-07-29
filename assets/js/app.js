@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "2.5.7";
+  const APP_VERSION = "3.0.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
@@ -795,6 +795,128 @@ Apakah masih tersedia?`;
       .sort((a, b) => Number(b.stock > 0) - Number(a.stock > 0) || (a.color || "").localeCompare(b.color || "", "id") || (a.size || "").localeCompare(b.size || "", "id"));
   }
 
+
+  function detailLines(value) {
+    if (Array.isArray(value)) {
+      return value
+        .map(item => String(item || "").trim())
+        .filter(Boolean);
+    }
+
+    return String(value || "")
+      .split(/\r?\n|[;•]+/)
+      .map(item => item.replace(/^[-✓✔*]+\s*/, "").trim())
+      .filter(Boolean);
+  }
+
+  function descriptionParagraphs(value) {
+    return detailLines(value)
+      .map(paragraph => `<p>${escapeHtml(paragraph)}</p>`)
+      .join("");
+  }
+
+  function sizeDetailsMarkup(product) {
+    const lines = detailLines(product.sizeDetails);
+
+    if (!lines.length && Array.isArray(product.sizes) && product.sizes.length) {
+      return `<div class="product-detail-value">${escapeHtml(product.sizes.join(", "))}</div>`;
+    }
+
+    return lines.map(line => {
+      const separator = line.indexOf(":");
+
+      if (separator > 0) {
+        const label = line.slice(0, separator).trim();
+        const value = line.slice(separator + 1).trim();
+        return `
+          <div class="product-size-row">
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value || "-")}</strong>
+          </div>`;
+      }
+
+      return `<div class="product-size-row product-size-row-full"><strong>${escapeHtml(line)}</strong></div>`;
+    }).join("");
+  }
+
+  function checklistMarkup(items, type) {
+    const values = detailLines(items);
+    if (!values.length) return "";
+
+    return `
+      <ul class="product-detail-list product-detail-list-${type}">
+        ${values.map(item => `
+          <li>
+            <span class="product-detail-list-icon" aria-hidden="true">✓</span>
+            <span>${escapeHtml(item)}</span>
+          </li>`).join("")}
+      </ul>`;
+  }
+
+  function renderProductDetailSections(product) {
+    const description = String(product.description || "").trim();
+    const material = String(product.material || "").trim();
+    const hasSize = detailLines(product.sizeDetails).length > 0 ||
+      (Array.isArray(product.sizes) && product.sizes.length > 0);
+    const highlights = detailLines(product.highlights);
+    const care = detailLines(product.careInstructions);
+
+    const aboutSection = description
+      ? `
+        <section class="product-detail-section product-about-section">
+          <h3>Tentang Produk</h3>
+          <div class="product-about-copy">${descriptionParagraphs(description)}</div>
+        </section>`
+      : "";
+
+    const specificationSection = material || hasSize
+      ? `
+        <section class="product-detail-section">
+          <h3>Detail Produk</h3>
+          <div class="product-detail-grid">
+            ${hasSize ? `
+              <div class="product-detail-card product-size-card">
+                <h4>Ukuran</h4>
+                <div class="product-size-list">${sizeDetailsMarkup(product)}</div>
+              </div>` : ""}
+            ${material ? `
+              <div class="product-detail-card">
+                <h4>Bahan</h4>
+                <div class="product-detail-value">${escapeHtml(material)}</div>
+              </div>` : ""}
+          </div>
+        </section>`
+      : "";
+
+    const highlightsSection = highlights.length
+      ? `
+        <section class="product-detail-section">
+          <h3>Keunggulan</h3>
+          ${checklistMarkup(highlights, "highlight")}
+        </section>`
+      : "";
+
+    const careSection = care.length
+      ? `
+        <section class="product-detail-section">
+          <h3>Perawatan</h3>
+          ${checklistMarkup(care, "care")}
+        </section>`
+      : "";
+
+    if (!aboutSection && !specificationSection && !highlightsSection && !careSection) {
+      return "";
+    }
+
+    return `
+      <div class="product-detail-content">
+        ${aboutSection}
+        ${specificationSection}
+        ${highlightsSection}
+        ${careSection}
+      </div>`;
+  }
+
   function openProduct(product, updateUrl = true) {
     if (!product) return;
     const variants = availableVariants(product);
@@ -811,8 +933,6 @@ Apakah masih tersedia?`;
           <div id="detailStockBadge" class="detail-stock-badge" hidden>
             Stok terbatas
           </div>
-          <p class="modal-description">${escapeHtml(product.description || `Koleksi ${product.category.toLowerCase()} dari ${product.brand}. Pilih varian yang diinginkan untuk menanyakan ketersediaan.`)}</p>
-
           <label class="variant-label" for="variantSelect">Pilih warna dan ukuran</label>
           <select class="variant-select" id="variantSelect">
             ${variants.map(variant => `
@@ -826,12 +946,7 @@ Apakah masih tersedia?`;
             <span id="modalStock">${defaultVariant ? `${defaultVariant.stock} produk · ${stockLabel(defaultVariant.stock <= 0 ? "out" : defaultVariant.stock <= 2 ? "limited" : "available")}` : stockLabel(availability)}</span>
           </div>
 
-          <div class="modal-specs">
-            <div><span>Kategori</span><strong>${escapeHtml(product.category)}</strong></div>
-            <div><span>Bahan</span><strong>${escapeHtml(product.material || "-")}</strong></div>
-            <div><span>Warna</span><strong>${escapeHtml(product.colors.join(", ") || "-")}</strong></div>
-            <div><span>Ukuran</span><strong>${escapeHtml(product.sizes.join(", ") || "-")}</strong></div>
-          </div>
+          ${renderProductDetailSections(product)}
 
           <div class="modal-actions">
             <button class="button button-primary" id="modalAddCartBtn" type="button" ${!defaultVariant || defaultVariant.stock <= 0 ? "disabled" : ""}>Tambah ke pilihan</button>
