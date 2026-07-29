@@ -2526,3 +2526,52 @@ body[data-page="catalog"] .catalog-header h2 {
     font-size: 12px;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v3.0.3 — Stock & preloved badges
+   ========================================================= */
+.product-card .product-image-wrap > .badge-preloved-bottom-right {
+  position: absolute !important;
+  right: 12px !important;
+  left: auto !important;
+  top: auto !important;
+  bottom: 12px !important;
+  z-index: 5;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 6px 11px !important;
+  border: 1px solid rgba(67, 35, 75, .18);
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, #9d6aa4 0%, #7d4d85 100%);
+  box-shadow: 0 5px 13px rgba(79, 43, 86, .20);
+  font-size: .68rem !important;
+  font-weight: 900;
+  line-height: 1 !important;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .product-card .product-image-wrap > .badge-stock-bottom-left,
+  .product-card .product-image-wrap > .badge-limited,
+  .product-card .product-image-wrap > .badge-preloved-bottom-right {
+    bottom: 9px !important;
+    padding: 5px 8px !important;
+    font-size: .58rem !important;
+  }
+
+  .product-card .product-image-wrap > .badge-stock-bottom-left,
+  .product-card .product-image-wrap > .badge-limited {
+    left: 9px !important;
+  }
+
+  .product-card .product-image-wrap > .badge-preloved-bottom-right {
+    right: 9px !important;
+  }
+}
