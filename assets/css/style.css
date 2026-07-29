@@ -2575,3 +2575,14 @@ body[data-page="catalog"] .catalog-header h2 {
     right: 9px !important;
   }
 }
+
+/* =========================================================
+   mi.do.ri v3.0.4 — Uniform regular badge typography
+   ========================================================= */
+.product-card .product-image-wrap > .badge-stock-bottom-left,
+.product-card .product-image-wrap > .badge-limited,
+.product-card .product-image-wrap > .badge-preloved-bottom-right {
+  font-family: "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: .02em !important;
+}
