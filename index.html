@@ -10,12 +10,12 @@
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/images/logo-midori.png">
   <title>mi.do.ri — Multibrand Muslim Fashion</title>
-  <meta name="midori-version" content="3.0.0">
+  <meta name="midori-version" content="3.0.1">
   <link rel="icon" href="assets/images/logo-midori.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=3.0.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=3.0.1">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -111,18 +111,59 @@
           </div>
 
           <div class="hero-media">
-            <div class="hero-photo-card">
+            <div
+              class="hero-photo-card hero-slider"
+              id="heroSlider"
+              role="region"
+              aria-roledescription="carousel"
+              aria-label="Koleksi utama mi.do.ri"
+              tabindex="0"
+            >
               <div class="hero-photo-fallback">
                 <img src="assets/images/logo-midori.png" alt="">
                 <span>Foto koleksi utama</span>
               </div>
-              <img
-                id="heroProductImage"
-                class="hero-product-image"
-                src="assets/images/hero/hero-koleksi.webp"
-                alt="Koleksi utama mi.do.ri"
-                onerror="this.hidden=true"
-              >
+
+              <div class="hero-slider-track" id="heroSliderTrack">
+                <div class="hero-slide is-active" aria-hidden="false">
+                  <img
+                    id="heroProductImage"
+                    class="hero-product-image"
+                    src="assets/images/hero/hero-koleksi.webp"
+                    alt="Koleksi utama mi.do.ri — foto 1"
+                    loading="eager"
+                    decoding="async"
+                  >
+                </div>
+                <div class="hero-slide" aria-hidden="true">
+                  <img
+                    class="hero-product-image"
+                    src="assets/images/hero/hero-koleksi-2.webp"
+                    alt="Koleksi utama mi.do.ri — foto 2"
+                    loading="lazy"
+                    decoding="async"
+                  >
+                </div>
+                <div class="hero-slide" aria-hidden="true">
+                  <img
+                    class="hero-product-image"
+                    src="assets/images/hero/hero-koleksi-3.webp"
+                    alt="Koleksi utama mi.do.ri — foto 3"
+                    loading="lazy"
+                    decoding="async"
+                  >
+                </div>
+              </div>
+
+              <button class="hero-slider-arrow hero-slider-prev" id="heroSliderPrev" type="button" aria-label="Foto sebelumnya">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+              </button>
+              <button class="hero-slider-arrow hero-slider-next" id="heroSliderNext" type="button" aria-label="Foto berikutnya">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+              </button>
+
+              <div class="hero-slider-dots" id="heroSliderDots" aria-label="Pilih foto"></div>
+              <p class="sr-only" id="heroSliderStatus" aria-live="polite"></p>
             </div>
           </div>
         </div>
@@ -244,6 +285,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="assets/data/catalog-data.js?v=3.0.0"></script>
-  <script src="assets/js/app.js?v=3.0.0"></script>
+  <script src="assets/js/app.js?v=3.0.1"></script>
 </body>
 </html>
