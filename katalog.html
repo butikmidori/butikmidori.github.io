@@ -10,12 +10,12 @@
   <meta property="og:type" content="website">
   <meta property="og:image" content="assets/images/logo-midori.png">
   <title>Katalog mi.do.ri — Multibrand Muslim Fashion</title>
-  <meta name="midori-version" content="3.0.1">
+  <meta name="midori-version" content="3.0.2">
   <link rel="icon" href="assets/images/logo-midori.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=3.0.1">
+  <link rel="stylesheet" href="assets/css/style.css?v=3.0.2">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -81,6 +81,23 @@
             <a role="menuitem" href="katalog.html?kelompok=bawahan#katalog">Bawahan</a>
             <a role="menuitem" href="katalog.html?kelompok=perlengkapan-ibadah#katalog">Perlengkapan Ibadah</a>
             <a role="menuitem" href="katalog.html?kelompok=aksesori-pelengkap#katalog">Aksesori &amp; Pelengkap</a>
+          </div>
+        </div>
+        <div class="nav-dropdown" id="brandNavDropdown">
+          <button
+            class="nav-dropdown-toggle"
+            id="brandNavToggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="brandNavMenu"
+          >
+            <span>Brand</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+              <path d="m5 7.5 5 5 5-5"></path>
+            </svg>
+          </button>
+          <div class="nav-dropdown-menu nav-brand-menu" id="brandNavMenu" role="menu" aria-label="Pilih brand">
+            <a role="menuitem" href="katalog.html#katalog">Semua Brand</a>
           </div>
         </div>
         <a href="#katalog" class="active" aria-current="page">Katalog</a>
@@ -232,6 +249,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="assets/data/catalog-data.js?v=3.0.0"></script>
-  <script src="assets/js/app.js?v=3.0.1"></script>
+  <script src="assets/js/app.js?v=3.0.2"></script>
 </body>
 </html>
