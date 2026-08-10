@@ -38,7 +38,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 SITE = "https://butikmidori.github.io"
-VERSION = "3.3.0"
+VERSION = "3.3.1"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -97,7 +97,7 @@ def fetch_live_catalog(root: Path) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "mi.do.ri-preview-generator/3.3.0",
+            "User-Agent": "mi.do.ri-preview-generator/3.3.1",
             "Accept": "application/json,text/javascript,*/*;q=0.8",
         },
     )
