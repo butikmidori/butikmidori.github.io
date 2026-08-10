@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "3.2.0";
+  const APP_VERSION = "3.3.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -96,8 +96,66 @@
   }
 
   const store = catalog.store;
-  const products = catalog.products.filter(product => product.status === "Aktif");
+  const products = catalog.products
+    .filter(product => product.status === "Aktif")
+    .map(normalizeProductData);
   const brands = catalog.brands || [];
+
+  function normalizeMediaValue(value) {
+    return String(value || "").trim();
+  }
+
+  function pushMediaCandidate(target, value) {
+    if (Array.isArray(value)) {
+      value.forEach(item => pushMediaCandidate(target, item));
+      return;
+    }
+
+    const normalized = normalizeMediaValue(value);
+    if (!normalized) return;
+    if (!target.includes(normalized)) target.push(normalized);
+  }
+
+  function normalizeProductData(product) {
+    const normalized = { ...product };
+    const images = [];
+
+    [
+      normalized.images,
+      normalized.image,
+      normalized.photo,
+      normalized.foto,
+      normalized.FOTO_UTAMA,
+      normalized.FOTO_2,
+      normalized.FOTO_3,
+      normalized.foto_utama,
+      normalized.foto_2,
+      normalized.foto_3,
+      normalized.fotoUtama,
+      normalized.foto2,
+      normalized.foto3,
+      normalized.image1,
+      normalized.image2,
+      normalized.image3,
+      normalized.IMAGE_1,
+      normalized.IMAGE_2,
+      normalized.IMAGE_3
+    ].forEach(value => pushMediaCandidate(images, value));
+
+    normalized.images = images;
+
+    normalized.video = normalizeMediaValue(
+      normalized.video ||
+      normalized.URL_VIDEO ||
+      normalized.url_video ||
+      normalized.urlVideo ||
+      normalized.videoUrl ||
+      normalized.VIDEO_URL ||
+      normalized.Video
+    );
+
+    return normalized;
+  }
 
   const MAIN_CATEGORY_GROUPS = [
     {
@@ -338,11 +396,141 @@
     return `placeholder-${(Number(product.brandCode || 0) % 5) + 1}`;
   }
 
+  function productImages(product) {
+    return Array.isArray(product?.images)
+      ? product.images.map(item => normalizeMediaValue(item)).filter(Boolean)
+      : [];
+  }
+
+  function firstProductImage(product) {
+    return productImages(product)[0] || "";
+  }
+
+  function productVideoUrl(product) {
+    return normalizeMediaValue(product?.video);
+  }
+
   function imageMarkup(product, className = "") {
-    const image = product.images?.find(Boolean);
+    const image = firstProductImage(product);
     const placeholder = `<div class="product-placeholder ${placeholderClass(product)} ${className}" ${image ? "hidden" : ""}><span><strong>${escapeHtml(productInitials(product))}</strong><small>${escapeHtml(product.brand)}</small></span></div>`;
     if (!image) return placeholder;
     return `<img class="${className}" src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false">${placeholder}`;
+  }
+
+  function parseYouTubeVideoId(url) {
+    if (!url) return "";
+    try {
+      const parsed = new URL(url, window.location.origin);
+      const host = parsed.hostname.replace(/^www\./, "").toLowerCase();
+      if (host === "youtu.be") {
+        return parsed.pathname.split("/").filter(Boolean)[0] || "";
+      }
+      if (host.endsWith("youtube.com")) {
+        if (parsed.searchParams.get("v")) return parsed.searchParams.get("v") || "";
+        const parts = parsed.pathname.split("/").filter(Boolean);
+        if (["embed", "shorts", "live"].includes(parts[0])) return parts[1] || "";
+      }
+    } catch (_) {
+      return "";
+    }
+    return "";
+  }
+
+  function videoMediaItem(product) {
+    const url = productVideoUrl(product);
+    if (!url) return null;
+
+    const youtubeId = parseYouTubeVideoId(url);
+    if (youtubeId) {
+      return {
+        type: "video",
+        provider: "youtube",
+        url,
+        embedUrl: `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}?rel=0&modestbranding=1`,
+        label: "Video produk"
+      };
+    }
+
+    if (/\.(mp4|webm|ogg)(?:$|[?#])/i.test(url)) {
+      return {
+        type: "video",
+        provider: "direct",
+        url,
+        embedUrl: url,
+        label: "Video produk"
+      };
+    }
+
+    return {
+      type: "video",
+      provider: "link",
+      url,
+      embedUrl: "",
+      label: "Video produk"
+    };
+  }
+
+  function productMediaItems(product) {
+    const imageItems = productImages(product).map((src, index) => ({
+      type: "image",
+      src,
+      alt: `${product.name}${index > 0 ? ` — foto ${index + 1}` : ""}`
+    }));
+    const videoItem = videoMediaItem(product);
+    return videoItem ? [...imageItems, videoItem] : imageItems;
+  }
+
+  function renderModalMainMedia(item, product) {
+    if (!item) return imageMarkup(product, "modal-main-media-image");
+
+    if (item.type === "image") {
+      const placeholder = `<div class="product-placeholder ${placeholderClass(product)} modal-main-media-image" hidden><span><strong>${escapeHtml(productInitials(product))}</strong><small>${escapeHtml(product.brand)}</small></span></div>`;
+      return `<img class="modal-main-media-image" src="${escapeHtml(item.src)}" alt="${escapeHtml(item.alt || product.name)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false">${placeholder}`;
+    }
+
+    if (item.provider === "youtube") {
+      return `
+        <div class="modal-main-media-video-wrap">
+          <iframe class="modal-main-media-embed" src="${escapeHtml(item.embedUrl)}" title="${escapeHtml(product.name)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <div class="modal-media-caption"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka video di tab baru</a></div>`;
+    }
+
+    if (item.provider === "direct") {
+      return `
+        <div class="modal-main-media-video-wrap">
+          <video class="modal-main-media-video" src="${escapeHtml(item.embedUrl)}" controls playsinline preload="metadata"></video>
+        </div>
+        <div class="modal-media-caption"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka video di tab baru</a></div>`;
+    }
+
+    return `
+      <div class="modal-media-link-fallback">
+        <div class="modal-media-link-icon" aria-hidden="true">▶</div>
+        <h3>Video produk tersedia</h3>
+        <p>Klik tombol di bawah untuk menonton video produk ini.</p>
+        <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka video</a>
+      </div>`;
+  }
+
+  function renderModalMediaThumb(item, index, product, isActive = false) {
+    if (item.type === "image") {
+      return `
+        <button type="button" class="modal-media-thumb${isActive ? " is-active" : ""}" data-media-index="${index}" aria-pressed="${isActive ? "true" : "false"}" aria-label="Lihat foto ${index + 1}">
+          <img src="${escapeHtml(item.src)}" alt="${escapeHtml(item.alt || product.name)}" loading="lazy">
+        </button>`;
+    }
+
+    return `
+      <button type="button" class="modal-media-thumb modal-media-thumb-video${isActive ? " is-active" : ""}" data-media-index="${index}" aria-pressed="${isActive ? "true" : "false"}" aria-label="Lihat video produk">
+        <span class="modal-media-thumb-video-icon" aria-hidden="true">▶</span>
+        <span class="modal-media-thumb-video-label">Video</span>
+      </button>`;
+  }
+
+  function renderModalMediaStrip(product, items) {
+    if (!items || items.length <= 1) return "";
+    return `<div class="modal-media-strip" role="tablist" aria-label="Galeri media produk">${items.map((item, index) => renderModalMediaThumb(item, index, product, index === 0)).join("")}</div>`;
   }
 
   function productUrl(product) {
@@ -1137,7 +1325,11 @@ Apakah masih tersedia?`;
 
     elements.modalContent.innerHTML = `
       <article class="modal-product">
-        <div class="modal-gallery"><div class="modal-product-badges">${productBadges(product)}</div><div class="modal-main-image">${imageMarkup(product)}</div></div>
+        <div class="modal-gallery">
+          <div class="modal-product-badges">${productBadges(product)}</div>
+          <div class="modal-main-image" id="modalMainMedia">${renderModalMainMedia(productMediaItems(product)[0], product)}</div>
+          ${renderModalMediaStrip(product, productMediaItems(product))}
+        </div>
         <div class="modal-info">
           <p class="product-brand">${escapeHtml(product.brand)}</p>
           <h2 id="modalProductName">${escapeHtml(product.name)}</h2>
@@ -1171,6 +1363,26 @@ Apakah masih tersedia?`;
     const addButton = $("#modalAddCartBtn");
     const waButton = $("#modalWhatsAppBtn");
     const selectedVariant = () => product.variants.find(v => v.sku === variantSelect.value);
+    const mediaItems = productMediaItems(product);
+    const modalMainMedia = $("#modalMainMedia");
+    const mediaThumbs = [...elements.modalContent.querySelectorAll("[data-media-index]")];
+
+    function setActiveMedia(index) {
+      const item = mediaItems[index];
+      if (!item || !modalMainMedia) return;
+      modalMainMedia.innerHTML = renderModalMainMedia(item, product);
+      mediaThumbs.forEach((thumb, thumbIndex) => {
+        const active = thumbIndex === index;
+        thumb.classList.toggle("is-active", active);
+        thumb.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    }
+
+    mediaThumbs.forEach(thumb => {
+      thumb.addEventListener("click", () => {
+        setActiveMedia(Number(thumb.dataset.mediaIndex || 0));
+      });
+    });
 
     updateDetailStockBadge(defaultVariant);
 
@@ -1253,7 +1465,7 @@ Apakah masih tersedia?`;
       productId: product.id,
       name: product.name,
       brand: product.brand,
-      image: product.images?.[0] || "",
+      image: firstProductImage(product),
       placeholder: productInitials(product),
       placeholderClass: placeholderClass(product),
       sku: variant.sku,
