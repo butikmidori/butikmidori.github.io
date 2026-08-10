@@ -1,8 +1,12 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "3.0.4";
+  const APP_VERSION = "3.1.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
+
+  const SITE_ORIGIN = "https://butikmidori.github.io";
+  const PRODUCT_PATH_PREFIX = "/produk/";
+  let modalReturnUrl = null;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
   const LIVE_CATALOG_TIMEOUT = 12000;
@@ -342,10 +346,21 @@
   }
 
   function productUrl(product) {
-    const url = new URL("katalog.html", window.location.href);
-    url.searchParams.set("produk", product.slug);
-    url.hash = "katalog";
-    return url.toString();
+    return `${SITE_ORIGIN}${PRODUCT_PATH_PREFIX}${encodeURIComponent(product.slug)}/`;
+  }
+
+  function productSharePath(product) {
+    return `${PRODUCT_PATH_PREFIX}${encodeURIComponent(product.slug)}/`;
+  }
+
+  function urlWithoutProduct(urlLike = window.location.href) {
+    const url = new URL(urlLike, window.location.origin);
+    url.searchParams.delete("produk");
+    if (url.pathname.startsWith(PRODUCT_PATH_PREFIX)) {
+      url.pathname = IS_CATALOG_PAGE ? "/katalog.html" : "/";
+      if (IS_CATALOG_PAGE) url.hash = "katalog";
+    }
+    return `${url.pathname}${url.search}${url.hash}`;
   }
 
   function whatsappProductUrl(product, variant = null) {
@@ -417,7 +432,7 @@ Apakah masih tersedia?`;
   }
 
   function catalogUrl(parameters = {}) {
-    const url = new URL("katalog.html", window.location.href);
+    const url = new URL("/katalog.html", window.location.origin);
 
     Object.entries(parameters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
@@ -1179,20 +1194,23 @@ Apakah masih tersedia?`;
     elements.modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("no-scroll");
 
-    if (updateUrl) {
-      const url = new URL(window.location.href);
-      url.searchParams.set("produk", product.slug);
-      history.replaceState({}, "", url);
+    // Keep a clean, crawlable product URL in the address bar.
+    // The matching static /produk/<slug>/ page contains the product-specific Open Graph metadata.
+    const currentUrl = new URL(window.location.href);
+    if (!currentUrl.pathname.startsWith(PRODUCT_PATH_PREFIX)) {
+      modalReturnUrl = urlWithoutProduct(currentUrl);
     }
+    history.replaceState({}, "", productSharePath(product));
   }
 
   function closeProduct() {
     elements.modal.classList.remove("open");
     elements.modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("no-scroll");
-    const url = new URL(window.location.href);
-    url.searchParams.delete("produk");
-    history.replaceState({}, "", url);
+
+    const fallbackUrl = IS_CATALOG_PAGE ? "/katalog.html#katalog" : "/";
+    history.replaceState({}, "", modalReturnUrl || fallbackUrl);
+    modalReturnUrl = null;
   }
 
   function loadCart() {
