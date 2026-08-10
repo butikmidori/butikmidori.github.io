@@ -2777,3 +2777,124 @@ body[data-page="catalog"] .catalog-header h2 {
     font-size: 18px;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v3.3.1 — Product card & sharing polish
+   ========================================================= */
+
+.product-image-open {
+  width: 100%;
+  height: 100%;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+.product-image-open:focus-visible {
+  outline: 3px solid rgba(111, 136, 55, .38);
+  outline-offset: -4px;
+}
+
+.product-image-open .product-image,
+.product-image-open .product-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+/* A cleaner, compact promo tag on product cards. */
+.product-card .badge-discount {
+  top: 16px !important;
+  left: 16px !important;
+  width: auto !important;
+  min-width: 58px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  gap: 0 !important;
+  padding: 8px 10px 7px !important;
+  border: 0 !important;
+  border-radius: 11px !important;
+  background: #e93832 !important;
+  box-shadow: 0 5px 14px rgba(117, 21, 17, .18) !important;
+  transform: none !important;
+  clip-path: none !important;
+}
+
+.product-card .badge-discount::before,
+.product-card .badge-discount::after {
+  display: none !important;
+  content: none !important;
+}
+
+.product-card .badge-discount small {
+  margin: 0 !important;
+  color: #fff !important;
+  font-size: 8px !important;
+  font-weight: 600 !important;
+  line-height: 1.1 !important;
+  letter-spacing: .10em !important;
+}
+
+.product-card .badge-discount strong,
+.product-card .badge-discount .discount-value {
+  margin: 2px 0 0 !important;
+  color: #fff !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: -.025em !important;
+}
+
+.modal-actions .button-copy-link {
+  grid-column: 1 / -1;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #d9e1d6;
+  color: var(--green-dark);
+  background: #fff;
+}
+
+.modal-actions .button-copy-link:hover {
+  border-color: #bccbb8;
+  background: #f5f8f3;
+}
+
+.modal-actions .button-copy-link.is-copied {
+  border-color: #bcdcc8;
+  color: #0b6f3c;
+  background: #edf8f1;
+}
+
+.button-copy-link svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+@media (max-width: 650px) {
+  .product-card .badge-discount {
+    top: 12px !important;
+    left: 12px !important;
+    min-width: 53px !important;
+    padding: 7px 9px 6px !important;
+    border-radius: 10px !important;
+  }
+
+  .product-card .badge-discount small {
+    font-size: 7px !important;
+  }
+
+  .product-card .badge-discount strong,
+  .product-card .badge-discount .discount-value {
+    font-size: 15px !important;
+  }
+}
