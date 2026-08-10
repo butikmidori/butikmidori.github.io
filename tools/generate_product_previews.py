@@ -38,7 +38,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 SITE = "https://butikmidori.github.io"
-VERSION = "3.2.0"
+VERSION = "3.3.0"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -97,7 +97,7 @@ def fetch_live_catalog(root: Path) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "mi.do.ri-preview-generator/3.2.0",
+            "User-Agent": "mi.do.ri-preview-generator/3.3.0",
             "Accept": "application/json,text/javascript,*/*;q=0.8",
         },
     )
@@ -130,17 +130,65 @@ def validate_catalog(data: dict[str, Any], label: str) -> None:
         raise RuntimeError(f"Data {label} tidak memiliki array products yang valid.")
 
 
+def normalize_media_value(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def push_media_candidate(target: list[str], value: Any) -> None:
+    if isinstance(value, list):
+        for item in value:
+            push_media_candidate(target, item)
+        return
+
+    normalized = normalize_media_value(value)
+    if normalized and normalized not in target:
+        target.append(normalized)
+
+
+def normalize_catalog_media(catalog: dict[str, Any]) -> None:
+    for product in catalog.get("products", []):
+        images: list[str] = []
+        for key in (
+            "images", "image", "photo", "foto",
+            "FOTO_UTAMA", "FOTO_2", "FOTO_3",
+            "foto_utama", "foto_2", "foto_3",
+            "fotoUtama", "foto2", "foto3",
+            "image1", "image2", "image3",
+            "IMAGE_1", "IMAGE_2", "IMAGE_3",
+        ):
+            push_media_candidate(images, product.get(key))
+        product["images"] = images
+
+        product["video"] = normalize_media_value(
+            product.get("video")
+            or product.get("URL_VIDEO")
+            or product.get("url_video")
+            or product.get("urlVideo")
+            or product.get("videoUrl")
+            or product.get("VIDEO_URL")
+            or product.get("Video")
+        )
+
+
 def resolve_catalog(root: Path, source: str) -> tuple[dict[str, Any], str]:
     if source == "local":
-        return load_local_catalog(root), "local"
+        catalog = load_local_catalog(root)
+        normalize_catalog_media(catalog)
+        return catalog, "local"
     if source == "live":
-        return fetch_live_catalog(root), "live"
+        catalog = fetch_live_catalog(root)
+        normalize_catalog_media(catalog)
+        return catalog, "live"
     try:
-        return fetch_live_catalog(root), "live"
+        catalog = fetch_live_catalog(root)
+        normalize_catalog_media(catalog)
+        return catalog, "live"
     except Exception as exc:
         print(f"[WARN] Data live gagal: {exc}")
         print("[INFO] Menggunakan catalog-data.js lokal.")
-        return load_local_catalog(root), "local"
+        catalog = load_local_catalog(root)
+        normalize_catalog_media(catalog)
+        return catalog, "local"
 
 
 def build_image_index(root: Path) -> dict[str, list[Path]]:
