@@ -2586,3 +2586,194 @@ body[data-page="catalog"] .catalog-header h2 {
   font-weight: 400 !important;
   letter-spacing: .02em !important;
 }
+
+
+/* =========================================================
+   mi.do.ri v3.3.0 — Product Media Gallery
+   ========================================================= */
+
+.modal-main-image {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.modal-main-media-image,
+.modal-main-media-video-wrap,
+.modal-main-media-video,
+.modal-main-media-embed,
+.modal-media-link-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.modal-main-media-image {
+  display: block;
+  object-fit: contain;
+  object-position: center top;
+}
+
+.modal-main-media-video-wrap {
+  background: #101714;
+}
+
+.modal-main-media-video,
+.modal-main-media-embed {
+  display: block;
+  border: 0;
+  background: #101714;
+}
+
+.modal-media-caption {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.modal-media-caption a {
+  color: var(--olive);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.modal-media-caption a:hover {
+  text-decoration: underline;
+}
+
+.modal-media-strip {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.modal-media-thumb {
+  flex: 0 0 72px;
+  width: 72px;
+  height: 90px;
+  padding: 0;
+  border: 1px solid #d8e0d7;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.modal-media-thumb:hover {
+  transform: translateY(-1px);
+}
+
+.modal-media-thumb.is-active {
+  border-color: var(--green-dark);
+  box-shadow: 0 0 0 3px rgba(11, 111, 60, .14);
+}
+
+.modal-media-thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.modal-media-thumb-video {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  background: linear-gradient(180deg, #1c2b20 0%, #0f1712 100%);
+  color: #fff;
+}
+
+.modal-media-thumb-video-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255,255,255,.16);
+  font-size: 16px;
+  padding-left: 2px;
+}
+
+.modal-media-thumb-video-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.modal-media-link-fallback {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 28px;
+  text-align: center;
+  background: linear-gradient(180deg, #13211a 0%, #0d1511 100%);
+  color: #fff;
+}
+
+.modal-media-link-icon {
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,.14);
+  font-size: 28px;
+  padding-left: 4px;
+}
+
+.modal-media-link-fallback h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.modal-media-link-fallback p {
+  margin: 0;
+  max-width: 320px;
+  color: rgba(255,255,255,.78);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.modal-media-link-fallback a {
+  display: inline-block;
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0d1511;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .modal-media-strip {
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 650px) {
+  .modal-media-thumb {
+    flex-basis: 64px;
+    width: 64px;
+    height: 82px;
+    border-radius: 12px;
+  }
+
+  .modal-media-thumb-video-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+
+  .modal-media-link-fallback {
+    padding: 22px 16px;
+  }
+
+  .modal-media-link-fallback h3 {
+    font-size: 18px;
+  }
+}
