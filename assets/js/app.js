@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "3.3.0";
+  const APP_VERSION = "3.3.1";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -573,6 +573,51 @@ Apakah masih tersedia?`;
     return `https://wa.me/${store.whatsapp}?text=${encodeURIComponent(message)}`;
   }
 
+  async function copyText(value) {
+    const text = String(value || "");
+    if (!text) return false;
+
+    if (navigator.clipboard?.writeText && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    textarea.style.pointerEvents = "none";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const copied = document.execCommand("copy");
+    textarea.remove();
+    return copied;
+  }
+
+  async function copyProductLink(product, button = null) {
+    try {
+      const copied = await copyText(productUrl(product));
+      if (!copied) throw new Error("Clipboard tidak tersedia");
+      showToast("Link produk berhasil disalin.");
+
+      if (button) {
+        const label = button.querySelector("span");
+        const original = label?.textContent || "Salin link produk";
+        button.classList.add("is-copied");
+        if (label) label.textContent = "Link disalin ✓";
+        clearTimeout(button._copyResetTimer);
+        button._copyResetTimer = setTimeout(() => {
+          button.classList.remove("is-copied");
+          if (label) label.textContent = original;
+        }, 1800);
+      }
+    } catch (error) {
+      console.warn("Gagal menyalin link produk:", error);
+      showToast("Link belum bisa disalin. Coba salin dari address bar.");
+    }
+  }
+
   function showToast(message) {
     elements.toast.textContent = message;
     elements.toast.classList.add("show");
@@ -967,7 +1012,7 @@ Apakah masih tersedia?`;
     const availability = productAvailability(product);
     const promo = isPromoActive(product);
     return [
-      promo ? `<span class="badge badge-discount" title="${escapeHtml(product.promoLabel || `Diskon ${promoPercent(product)}%`)}"><small>SALE</small><strong>-${promoPercent(product)}%</strong></span>` : "",
+      promo ? `<span class="badge badge-discount" title="${escapeHtml(product.promoLabel || `Diskon ${promoPercent(product)}%`)}"><small>SALE</small><strong>${promoPercent(product)}%</strong></span>` : "",
       product.isNew ? `<span class="badge">Baru</span>` : "",
       product.condition === "Preloved" ? "" : "",
       availability === "out" ? `<span class="badge badge-out">Habis</span>` : ""
@@ -984,7 +1029,9 @@ Apakah masih tersedia?`;
     return `
       <article class="product-card">
         <div class="product-image-wrap">
-          ${imageMarkup(product, "product-image")}
+          <button class="product-image-open" type="button" data-open-product="${product.id}" aria-label="Buka detail ${escapeHtml(product.name)}">
+            ${imageMarkup(product, "product-image")}
+          </button>
           <div class="product-badges">${productBadges(product)}</div>
           ${availability === "limited" ? `<span class="badge badge-limited badge-stock-bottom-left">Stok menipis</span>` : ""}
           ${product.condition === "Preloved" ? `<span class="badge badge-preloved badge-preloved-bottom-right">Preloved</span>` : ""}
@@ -1347,7 +1394,7 @@ Apakah masih tersedia?`;
 
           <div class="variant-status">
             <span>Kode: <strong id="modalSku">${escapeHtml(defaultVariant?.sku || "-")}</strong></span>
-            <span id="modalStock">${defaultVariant ? `${defaultVariant.stock} produk · ${stockLabel(defaultVariant.stock <= 0 ? "out" : defaultVariant.stock <= 2 ? "limited" : "available")}` : stockLabel(availability)}</span>
+            <span id="modalStock">${defaultVariant ? stockLabel(defaultVariant.stock <= 0 ? "out" : defaultVariant.stock <= 2 ? "limited" : "available") : stockLabel(availability)}</span>
           </div>
 
           ${renderProductDetailSections(product)}
@@ -1355,6 +1402,10 @@ Apakah masih tersedia?`;
           <div class="modal-actions">
             <button class="button button-primary" id="modalAddCartBtn" type="button" ${!defaultVariant || defaultVariant.stock <= 0 ? "disabled" : ""}>Tambah ke pilihan</button>
             <a class="button button-wa" id="modalWhatsAppBtn" href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">Tanya via WhatsApp</a>
+            <button class="button button-copy-link" id="modalCopyLinkBtn" type="button" aria-label="Salin link ${escapeHtml(product.name)}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a1 1 0 0 1 0-1.4l4.2-4.2a3 3 0 0 1 4.2 4.2l-2.1 2.1a3 3 0 0 1-4.2 0 1 1 0 0 1 1.4-1.4 1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0-1.4-1.4L12 13.4a1 1 0 0 1-1.4 0Zm2.8-2.8a1 1 0 0 1 0 1.4l-4.2 4.2A3 3 0 0 1 5 12l2.1-2.1a3 3 0 0 1 4.2 0 1 1 0 0 1-1.4 1.4 1 1 0 0 0-1.4 0l-2.1 2.1a1 1 0 0 0 1.4 1.4l4.2-4.2a1 1 0 0 1 1.4 0Z"/></svg>
+              <span>Salin link produk</span>
+            </button>
           </div>
         </div>
       </article>`;
@@ -1362,6 +1413,7 @@ Apakah masih tersedia?`;
     const variantSelect = $("#variantSelect");
     const addButton = $("#modalAddCartBtn");
     const waButton = $("#modalWhatsAppBtn");
+    const copyLinkButton = $("#modalCopyLinkBtn");
     const selectedVariant = () => product.variants.find(v => v.sku === variantSelect.value);
     const mediaItems = productMediaItems(product);
     const modalMainMedia = $("#modalMainMedia");
@@ -1392,7 +1444,7 @@ Apakah masih tersedia?`;
       if (!variant) return;
       $("#modalPrice").innerHTML = variantPriceMarkup(product, variant);
       $("#modalSku").textContent = variant.sku;
-      $("#modalStock").textContent = `${variant.stock} produk · ${stockLabel(variant.stock <= 0 ? "out" : variant.stock <= 2 ? "limited" : "available")}`;
+      $("#modalStock").textContent = stockLabel(variant.stock <= 0 ? "out" : variant.stock <= 2 ? "limited" : "available");
       addButton.disabled = variant.stock <= 0;
       waButton.href = whatsappProductUrl(product, variant);
     });
@@ -1401,6 +1453,8 @@ Apakah masih tersedia?`;
       const variant = selectedVariant();
       if (variant) addToCart(product, variant);
     });
+
+    copyLinkButton?.addEventListener("click", () => copyProductLink(product, copyLinkButton));
 
     elements.modal.classList.add("open");
     elements.modal.setAttribute("aria-hidden", "false");
