@@ -38,7 +38,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 SITE = "https://butikmidori.github.io"
-VERSION = "3.3.2"
+VERSION = "3.4.0"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -97,7 +97,7 @@ def fetch_live_catalog(root: Path) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "mi.do.ri-preview-generator/3.3.2",
+            "User-Agent": "mi.do.ri-preview-generator/3.4.0",
             "Accept": "application/json,text/javascript,*/*;q=0.8",
         },
     )
@@ -318,7 +318,7 @@ def product_page(product: dict[str, Any], image_rel: str, has_product_photo: boo
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b6f3c">
+  <meta name="theme-color" content="#0F3D34">
   <meta name="midori-version" content="{VERSION}">
   <title>{html.escape(name)} — {html.escape(brand)} | mi.do.ri</title>
   <meta name="description" content="{html.escape(desc, quote=True)}">
@@ -346,10 +346,10 @@ def product_page(product: dict[str, Any], image_rel: str, has_product_photo: boo
     window.location.replace({json.dumps(target)});
   </script>
   <style>
-    *{{box-sizing:border-box}}body{{margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f6f2;font-family:Arial,sans-serif;color:#172019}}
-    .card{{width:min(92vw,760px);background:#fff;border-radius:24px;padding:24px;box-shadow:0 18px 50px rgba(0,0,0,.08);text-align:center}}
-    .card img{{display:block;width:100%;max-height:440px;object-fit:contain;border-radius:18px;background:#eef1eb}}
-    h1{{font-size:28px;margin:20px 0 6px}}p{{margin:0 0 20px;color:#667069}}small{{display:block;margin:-10px 0 18px;color:#89908b}}a{{display:inline-block;padding:12px 20px;border-radius:999px;background:#6f8837;color:#fff;text-decoration:none}}
+    *{{box-sizing:border-box}}body{{margin:0;min-height:100vh;display:grid;place-items:center;background:#F7F6F1;font-family:Arial,sans-serif;color:#16211D}}
+    .card{{width:min(92vw,760px);background:#FFFFFF;border-radius:24px;padding:24px;box-shadow:0 18px 50px rgba(0,0,0,.08);text-align:center}}
+    .card img{{display:block;width:100%;max-height:440px;object-fit:contain;border-radius:18px;background:#E6F0E9}}
+    h1{{font-size:28px;margin:20px 0 6px}}p{{margin:0 0 20px;color:#67736D}}small{{display:block;margin:-10px 0 18px;color:#89908b}}a{{display:inline-block;padding:12px 20px;border-radius:999px;background:#0F3D34;color:#fff;text-decoration:none}}
   </style>
 </head>
 <body>
