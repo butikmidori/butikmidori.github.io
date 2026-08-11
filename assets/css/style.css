@@ -27,7 +27,7 @@ body {
   margin: 0;
   color: var(--ink);
   background: #fff;
-  font-family: "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Jost", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -1426,7 +1426,7 @@ button,
 input,
 select,
 textarea {
-  font-family: "Poppins", ui-sans-serif, system-ui, -apple-system,
+  font-family: "Jost", ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -2582,7 +2582,7 @@ body[data-page="catalog"] .catalog-header h2 {
 .product-card .product-image-wrap > .badge-stock-bottom-left,
 .product-card .product-image-wrap > .badge-limited,
 .product-card .product-image-wrap > .badge-preloved-bottom-right {
-  font-family: "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-family: "Jost", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
   font-weight: 400 !important;
   letter-spacing: .02em !important;
 }
@@ -3707,5 +3707,391 @@ body[data-page="home"] .hero-shell,
     background:
       radial-gradient(circle at 92% 8%, rgba(200,169,106,.12), transparent 28%),
       linear-gradient(180deg, #F7F6F1 0%, #FFFFFF 100%);
+  }
+}
+
+
+/* =========================================================
+   mi.do.ri v3.5.0 — Jost + Boutique Store/Footer Refinement
+   ========================================================= */
+
+/* Typography: lighter, editorial rhythm inspired by contemporary fashion retail. */
+body {
+  font-family: "Jost", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 400;
+  letter-spacing: .005em;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+.main-nav {
+  font-weight: 500;
+  letter-spacing: .018em;
+}
+
+.hero-copy h1,
+.catalog-page-intro h1,
+.section-heading h2,
+.location-copy h2,
+.modal-info h2,
+.cart-header h2 {
+  font-weight: 500 !important;
+  letter-spacing: -.035em;
+}
+
+.hero-kicker,
+.eyebrow,
+.product-brand,
+.variant-label,
+.footer-nav-group h3 {
+  font-weight: 500 !important;
+  letter-spacing: .11em;
+}
+
+.button {
+  font-weight: 500;
+  letter-spacing: .015em;
+}
+
+/* Hero supports five slots. Missing hero-koleksi-4/5 files are removed safely by app.js. */
+.hero-slider-dot {
+  min-width: 8px;
+}
+
+/* Visit Store: compact conversion card, no duplicate social links. */
+.location-section {
+  padding-top: 54px;
+  padding-bottom: 66px;
+}
+
+.location-card {
+  position: relative;
+  min-height: 310px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(260px, .65fr);
+  gap: clamp(32px, 6vw, 90px);
+  padding: clamp(38px, 5vw, 62px);
+  border: 1px solid rgba(200,169,106,.22);
+  border-radius: 28px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 5%, rgba(255,255,255,.055), transparent 28%),
+    linear-gradient(118deg, #0F3D34 0%, #103F36 52%, #134E43 100%);
+  box-shadow: 0 22px 50px rgba(15,61,52,.13);
+}
+
+.location-copy {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+}
+
+.location-copy .eyebrow {
+  color: #D8C187;
+}
+
+.location-copy h2 {
+  max-width: 620px;
+  margin-top: 13px;
+  margin-bottom: 14px;
+  color: #F7F6F1;
+  font-size: clamp(34px, 4vw, 54px);
+  line-height: 1.02;
+}
+
+.location-copy > p {
+  max-width: 590px;
+  color: #D3E1DB;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.location-actions {
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.location-actions .button-yellow {
+  color: #0F3D34;
+  border-color: #C8A96A;
+  background: #C8A96A;
+  box-shadow: 0 10px 24px rgba(4,27,22,.16);
+}
+
+.location-actions .button-yellow:hover {
+  border-color: #D6BB80;
+  background: #D6BB80;
+}
+
+.location-actions .button-outline-light {
+  color: #F7F6F1;
+  border-color: rgba(247,246,241,.34);
+  background: rgba(255,255,255,.025);
+}
+
+.location-actions .button-outline-light:hover {
+  border-color: rgba(247,246,241,.62);
+  background: rgba(255,255,255,.08);
+}
+
+.location-visual {
+  position: relative;
+  min-height: 190px;
+  align-self: stretch;
+  overflow: hidden;
+  border: 1px solid rgba(247,246,241,.10);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 70% 35%, rgba(200,169,106,.15), transparent 23%),
+    linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.012));
+}
+
+.location-visual::before {
+  content: "";
+  position: absolute;
+  inset: 20px;
+  border: 1px solid rgba(200,169,106,.16);
+  border-radius: 16px;
+}
+
+.location-visual-orbit {
+  position: absolute;
+  display: block;
+  border: 1px solid rgba(200,169,106,.28);
+  border-radius: 50%;
+}
+
+.location-visual-orbit-a {
+  width: 220px;
+  height: 220px;
+  right: -58px;
+  top: -72px;
+}
+
+.location-visual-orbit-b {
+  width: 150px;
+  height: 150px;
+  left: -52px;
+  bottom: -62px;
+  border-color: rgba(230,240,233,.16);
+}
+
+.location-visual-glow {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  left: 48%;
+  top: 47%;
+  border-radius: 50%;
+  background: #C8A96A;
+  box-shadow: 0 0 0 9px rgba(200,169,106,.08), 0 0 46px 18px rgba(200,169,106,.12);
+}
+
+/* Luxury minimal footer: brand closure + concise navigation + icon-only social. */
+.site-footer {
+  padding-top: 62px;
+  background: #0F3D34;
+}
+
+.footer-grid-luxury {
+  grid-template-columns: minmax(240px, 1.55fr) repeat(3, minmax(110px, .62fr));
+  gap: clamp(32px, 5vw, 76px);
+  align-items: start;
+}
+
+.footer-brand img {
+  width: 116px;
+  max-width: 116px;
+}
+
+.footer-brand .footer-brand-subtitle {
+  max-width: none;
+  margin: 22px 0 0;
+  color: #E6F0E9;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.footer-brand .footer-tagline {
+  max-width: none;
+  margin: 7px 0 0;
+  color: #C8A96A;
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: .06em;
+}
+
+.footer-nav-group h3 {
+  margin: 0 0 20px;
+  color: #F7F6F1;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.footer-nav-group > a {
+  display: block;
+  width: max-content;
+  margin: 10px 0;
+  color: #C7D8D1;
+  font-size: 13px;
+  font-weight: 400;
+  transition: color .18s ease, transform .18s ease;
+}
+
+.footer-nav-group > a:hover,
+.footer-nav-group > a:focus-visible {
+  color: #C8A96A;
+  transform: translateX(2px);
+}
+
+.footer-social-icons {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.footer-social-link {
+  width: 42px !important;
+  height: 42px;
+  display: grid !important;
+  place-items: center;
+  margin: 0 !important;
+  border: 1px solid rgba(230,240,233,.18);
+  border-radius: 50%;
+  color: #E6F0E9 !important;
+  background: rgba(255,255,255,.025);
+  transition: color .18s ease, border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.footer-social-link:hover,
+.footer-social-link:focus-visible {
+  color: #C8A96A !important;
+  border-color: rgba(200,169,106,.58);
+  background: rgba(200,169,106,.07);
+  transform: translateY(-2px);
+}
+
+.footer-social-link svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.footer-social-link svg .social-dot {
+  fill: currentColor;
+  stroke: none;
+}
+
+.footer-social-link:last-child svg {
+  fill: currentColor;
+  stroke: none;
+}
+
+.footer-bottom {
+  margin-top: 54px;
+  padding-top: 20px;
+  padding-bottom: 26px;
+  border-top-color: rgba(230,240,233,.11);
+  color: #8EAAA0;
+  font-size: 11px;
+}
+
+.footer-bottom a {
+  color: #C7D8D1;
+}
+
+.footer-bottom a:hover {
+  color: #C8A96A;
+}
+
+@media (max-width: 900px) {
+  .location-card {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .location-visual {
+    min-height: 150px;
+  }
+
+  .footer-grid-luxury {
+    grid-template-columns: 1.35fr repeat(3, 1fr);
+    gap: 32px;
+  }
+}
+
+@media (max-width: 700px) {
+  .location-section {
+    padding-top: 42px;
+    padding-bottom: 48px;
+  }
+
+  .location-card {
+    gap: 26px;
+    padding: 28px 24px;
+    border-radius: 22px;
+  }
+
+  .location-copy h2 {
+    font-size: 34px;
+  }
+
+  .location-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .location-actions .button {
+    width: 100%;
+  }
+
+  .location-visual {
+    min-height: 112px;
+  }
+
+  .site-footer {
+    padding-top: 48px;
+  }
+
+  .footer-grid-luxury {
+    grid-template-columns: 1fr 1fr;
+    gap: 34px 28px;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+
+  .footer-brand img {
+    width: 104px;
+  }
+
+  .footer-follow {
+    grid-column: 1 / -1;
+  }
+
+  .footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 40px;
+  }
+}
+
+@media (max-width: 430px) {
+  .footer-grid-luxury {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-nav-group h3 {
+    margin-bottom: 15px;
+  }
+
+  .footer-nav-group > a {
+    font-size: 12px;
   }
 }
