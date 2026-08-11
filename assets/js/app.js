@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "3.4.0";
+  const APP_VERSION = "3.4.2";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -250,6 +250,7 @@
     brandNavToggle: $("#brandNavToggle"),
     brandNavMenu: $("#brandNavMenu"),
     searchInput: $("#searchInput"),
+    searchJump: $(".search-jump"),
     brandFilter: $("#brandFilter"),
     categoryFilter: $("#categoryFilter"),
     segmentFilter: $("#segmentFilter"),
@@ -1671,7 +1672,44 @@ Apakah masih tersedia?`;
     }
   }
 
+  function focusCatalogSearch({ cleanUrl = false } = {}) {
+    if (!IS_CATALOG_PAGE || !elements.searchInput) return;
+
+    const searchBox = elements.searchInput.closest(".search-box");
+    searchBox?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    window.setTimeout(() => {
+      elements.searchInput.focus({ preventScroll: true });
+      const valueLength = elements.searchInput.value.length;
+      try {
+        elements.searchInput.setSelectionRange(valueLength, valueLength);
+      } catch (_) {}
+    }, 260);
+
+    if (cleanUrl) {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get("focus") === "search") {
+        url.searchParams.delete("focus");
+        history.replaceState({}, "", `${url.pathname}${url.search}${url.hash || "#katalog"}`);
+      }
+    }
+  }
+
+  function focusSearchFromUrl() {
+    if (!IS_CATALOG_PAGE) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("focus") === "search") {
+      focusCatalogSearch({ cleanUrl: true });
+    }
+  }
+
   function bindEvents() {
+    elements.searchJump?.addEventListener("click", event => {
+      if (!IS_CATALOG_PAGE) return;
+      event.preventDefault();
+      focusCatalogSearch();
+    });
+
     elements.navToggle?.addEventListener("click", () => {
       const open = elements.mainNav.classList.toggle("open");
       elements.navToggle.setAttribute("aria-expanded", String(open));
@@ -1843,6 +1881,7 @@ Apakah masih tersedia?`;
     renderCart();
     applyFilters();
     openProductFromUrl();
+    focusSearchFromUrl();
     document.documentElement.dataset.midoriApp = APP_VERSION;
   } catch (error) {
     console.error(`mi.do.ri Webstore ${APP_VERSION} gagal dimuat:`, error);
