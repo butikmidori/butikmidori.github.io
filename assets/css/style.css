@@ -2981,3 +2981,503 @@ body[data-page="catalog"] .catalog-header h2 {
     background: #fff1f0;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v3.4.0 — Emerald & Cream Luxury Theme
+   Palette:
+   Deep Emerald  #0F3D34
+   Emerald       #134E43
+   Soft Mint     #E6F0E9
+   Warm Cream    #F7F6F1
+   Muted Gold    #C8A96A
+   ========================================================= */
+
+:root {
+  --green: #134E43;
+  --green-dark: #0F3D34;
+  --green-deep: #0F3D34;
+  --green-soft: #E6F0E9;
+  --olive: #C8A96A;
+  --yellow: #C8A96A;
+  --cream: #F7F6F1;
+  --cream-deep: #EEEAE0;
+  --white: #FFFFFF;
+  --ink: #16211D;
+  --muted: #68736E;
+  --line: #DCE5DF;
+  --danger: #98463D;
+  --shadow: 0 18px 46px rgba(15, 61, 52, .10);
+  --shadow-soft: 0 8px 24px rgba(15, 61, 52, .07);
+}
+
+body {
+  color: var(--ink);
+  background: var(--cream);
+}
+
+::selection {
+  color: #fff;
+  background: var(--green-dark);
+}
+
+/* Navigation */
+.site-header {
+  border-bottom-color: rgba(15, 61, 52, .10);
+  background: rgba(247, 246, 241, .96);
+}
+
+.main-nav a {
+  color: #1B2723;
+}
+
+.main-nav a::after {
+  background: var(--olive);
+}
+
+.main-nav a:hover,
+.main-nav a:focus-visible,
+.main-nav a.active {
+  color: var(--green-dark);
+}
+
+.icon-button {
+  border-color: #D8E2DC;
+  color: var(--green-dark);
+  background: rgba(255,255,255,.80);
+}
+
+.icon-button:hover {
+  border-color: var(--olive);
+  color: var(--green-dark);
+  background: #fff;
+}
+
+.cart-count {
+  border-color: var(--cream);
+  color: var(--green-dark);
+  background: var(--olive);
+}
+
+.nav-actions .button-dark,
+.button-primary,
+.button-dark {
+  color: #fff;
+  background: var(--green-dark);
+  box-shadow: none;
+}
+
+.nav-actions .button-dark:hover,
+.button-primary:hover,
+.button-dark:hover {
+  background: var(--green);
+}
+
+.button-soft,
+.button-reset {
+  border-color: #DCE5DF;
+  color: var(--green-dark);
+  background: #fff;
+}
+
+.button-soft:hover,
+.button-reset:hover {
+  border-color: var(--olive);
+  background: #FBFAF6;
+}
+
+.button-yellow {
+  color: var(--green-dark);
+  background: var(--olive);
+}
+
+/* Hero */
+.hero-shell {
+  border-color: #E7E1D5;
+  background: linear-gradient(105deg, #FBF9F3 0%, #F7F6F1 55%, #E6F0E9 100%);
+  box-shadow: 0 14px 38px rgba(15,61,52,.07);
+}
+
+.hero-kicker {
+  color: var(--green);
+}
+
+.hero-kicker i {
+  background: var(--olive);
+  box-shadow: 0 0 0 4px rgba(200,169,106,.16);
+}
+
+.hero-photo-card,
+.hero-photo-fallback {
+  background-color: var(--green-soft);
+}
+
+.hero-photo-fallback {
+  color: var(--green-dark);
+  background: radial-gradient(circle at 56% 40%, #FFFFFF 0%, #F7F6F1 53%, #E6F0E9 100%);
+}
+
+/* Supporting cards and sections */
+.service-grid,
+.product-card,
+.brand-chip,
+.search-box,
+.sort-box select,
+.filter-field select,
+.variant-select,
+.modal-dialog,
+.cart-panel {
+  background-color: #FFFFFF;
+}
+
+.service-grid {
+  border-color: var(--line);
+  box-shadow: 0 7px 22px rgba(15,61,52,.045);
+}
+
+.service-icon {
+  color: var(--green-dark);
+  background: var(--green-soft);
+}
+
+.category-image {
+  border-color: #DFE7E1;
+  background: var(--green-soft);
+}
+
+.category-card:hover .category-image {
+  box-shadow: 0 12px 28px rgba(15,61,52,.11);
+}
+
+.featured-section,
+.brand-section,
+.preloved-section,
+.catalog-section {
+  background: var(--cream);
+}
+
+.product-card {
+  border-color: #DDE5DF;
+}
+
+.product-card:hover {
+  border-color: #C8D6CE;
+  box-shadow: 0 14px 32px rgba(15,61,52,.10);
+}
+
+.product-image-wrap {
+  background: var(--green-soft);
+}
+
+.product-placeholder {
+  background: linear-gradient(145deg, #F7F6F1 0%, #E6F0E9 100%);
+}
+
+.product-placeholder strong,
+.product-placeholder small {
+  color: var(--green-dark);
+}
+
+.product-brand,
+.eyebrow {
+  color: var(--green);
+}
+
+.section-heading h2,
+.catalog-header h2,
+.product-title {
+  color: var(--ink);
+}
+
+.product-price,
+.product-price .current-price,
+.cart-item-price,
+.cart-summary strong {
+  color: var(--green-dark);
+}
+
+.product-rating {
+  color: #B9944C;
+}
+
+.quick-wa {
+  color: #064525;
+  background: #DCF4E5;
+}
+
+/* Gold is jewelry-like accent only */
+.text-link:hover,
+.brand-chip:hover,
+.modal-media-caption a {
+  color: #9A7B3E;
+}
+
+.brand-chip span {
+  color: var(--green-dark);
+  background: var(--green-soft);
+}
+
+.brand-chip:hover {
+  border-color: var(--olive);
+}
+
+.catalog-count-card {
+  color: #fff;
+  background: var(--green-dark);
+}
+
+.catalog-count-card strong {
+  color: #E0C58D;
+}
+
+.catalog-toolbar {
+  border-color: var(--line);
+  background: #F1F5F1;
+}
+
+.search-box:focus-within,
+.sort-box select:focus,
+.filter-field select:focus,
+.variant-select:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(19,78,67,.10);
+}
+
+.filters-panel {
+  border-color: #DCE5DF;
+  background: #EFF4F0;
+}
+
+.empty-state {
+  border-color: #C9D7CF;
+  background: #FBFAF6;
+}
+
+.empty-icon {
+  color: var(--olive);
+}
+
+/* Promo banner wrapper — keeps uploaded campaign artwork as the focus */
+.promo-banner {
+  background: linear-gradient(100deg, #F7F6F1 0%, #F8F5ED 56%, #E6F0E9 100%);
+}
+
+.responsive-promo-banner {
+  box-shadow: 0 13px 34px rgba(15,61,52,.09);
+}
+
+.responsive-promo-banner:focus-visible,
+.product-image-open:focus-visible {
+  outline-color: rgba(200,169,106,.58);
+}
+
+/* Store/location */
+.location-card {
+  color: #fff;
+  background: linear-gradient(120deg, #0F3D34 0%, #134E43 100%);
+  box-shadow: 0 18px 46px rgba(15,61,52,.16);
+}
+
+.location-copy p {
+  color: #DCE9E4;
+}
+
+.social-card {
+  border-color: rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+}
+
+/* Product detail modal */
+.modal-backdrop,
+.cart-backdrop {
+  background: rgba(10, 35, 30, .74);
+}
+
+.modal-dialog {
+  box-shadow: 0 34px 90px rgba(9,39,33,.24);
+}
+
+.modal-gallery {
+  background: #EDF3EF;
+}
+
+.modal-main-image {
+  background: #E6F0E9;
+}
+
+.modal-close,
+.cart-close {
+  color: var(--green-dark);
+  background: #F1F4F1;
+}
+
+.modal-price,
+.modal-price .current-price {
+  color: var(--green-dark);
+}
+
+.variant-status {
+  background: #F1F5F2;
+}
+
+.variant-status strong {
+  color: var(--green);
+}
+
+.product-detail-content,
+.product-detail-section {
+  border-color: var(--line);
+}
+
+.product-detail-card {
+  border-color: #DCE5DF;
+  background: #F7F9F6;
+}
+
+.product-detail-card h4 {
+  color: var(--green);
+}
+
+.product-detail-list-icon {
+  color: var(--green-dark);
+  background: var(--green-soft);
+}
+
+.modal-media-thumb {
+  border-color: #D5E0D9;
+  background: #fff;
+}
+
+.modal-media-thumb.is-active {
+  border-color: var(--olive);
+  box-shadow: 0 0 0 3px rgba(200,169,106,.18);
+}
+
+.modal-media-thumb-video,
+.modal-media-link-fallback {
+  background: linear-gradient(180deg, #134E43 0%, #0F3D34 100%);
+}
+
+.modal-actions .button-copy-link {
+  border-color: #D7E1DB;
+  color: var(--green-dark);
+  background: #FFFFFF;
+}
+
+.modal-actions .button-copy-link:hover {
+  border-color: var(--olive);
+  background: #FBF9F3;
+}
+
+.modal-actions .button-copy-link.is-copied {
+  border-color: #B9D1C5;
+  color: var(--green-dark);
+  background: var(--green-soft);
+}
+
+/* Cart */
+.cart-thumb,
+.cart-footer {
+  background: #F1F5F2;
+}
+
+.remove-cart-item {
+  color: #98463D;
+  background: #F9ECEA;
+}
+
+/* Footer becomes the strongest brand anchor */
+.site-footer {
+  color: #D6E3DE;
+  background: var(--green-dark);
+  border-top-color: rgba(200,169,106,.34);
+}
+
+.site-footer h3 {
+  color: #FFFFFF;
+}
+
+.footer-brand p,
+.site-footer div > p,
+.site-footer a {
+  color: #BFD1CA;
+}
+
+.site-footer a:hover {
+  color: #E0C58D;
+}
+
+.footer-bottom {
+  border-top-color: rgba(255,255,255,.11);
+  color: #91AEA4;
+}
+
+/* SALE stays distinct, but more refined than bright red */
+.main-nav .nav-sale-link {
+  color: #98463D;
+}
+
+.main-nav .nav-sale-link::after {
+  background: #98463D;
+}
+
+.main-nav .nav-sale-link:hover,
+.main-nav .nav-sale-link:focus-visible,
+.main-nav .nav-sale-link.active {
+  color: #7F392F;
+}
+
+.sale-filter-chip {
+  border-color: #E4C9C4;
+  color: #874039;
+  background: #FBF3F1;
+}
+
+.sale-filter-chip button {
+  color: #874039;
+  background: #F3E1DE;
+}
+
+.sale-filter-chip button:hover,
+.sale-filter-chip button:focus-visible {
+  background: #EBCFCA;
+}
+
+.product-card .badge-discount {
+  background: #98463D !important;
+  box-shadow: 0 5px 14px rgba(93, 37, 31, .18) !important;
+}
+
+/* Stock and preloved badges harmonized with luxury palette */
+.product-card .product-image-wrap > .badge-stock-bottom-left,
+.product-card .product-image-wrap > .badge-limited {
+  border-color: rgba(151,115,44,.18) !important;
+  color: #69501E !important;
+  background: #F1DCA8 !important;
+  box-shadow: 0 5px 13px rgba(118,89,34,.12) !important;
+}
+
+.product-card .product-image-wrap > .badge-preloved-bottom-right {
+  border-color: rgba(15,61,52,.16) !important;
+  color: #FFFFFF !important;
+  background: linear-gradient(135deg, #134E43 0%, #0F3D34 100%) !important;
+  box-shadow: 0 5px 13px rgba(15,61,52,.18) !important;
+}
+
+/* Small-screen nav retains luxury contrast */
+@media (max-width: 900px) {
+  .main-nav {
+    border-color: #DCE5DF;
+    background: #FBFAF6;
+  }
+
+  .main-nav a:hover {
+    background: #EEF3EF;
+  }
+
+  .main-nav .nav-sale-link:hover,
+  .main-nav .nav-sale-link:focus-visible,
+  .main-nav .nav-sale-link.active {
+    background: #FBF0ED;
+  }
+}
