@@ -3481,3 +3481,231 @@ body {
     background: #FBF0ED;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v3.4.1 — Modal badge, search & header polish
+   ========================================================= */
+
+/* Header is intentionally lighter: Search + Cart only. */
+.nav-actions {
+  gap: 10px;
+}
+
+/* Search icon gets a visible interactive state. */
+.search-jump {
+  cursor: pointer;
+}
+
+.search-jump:focus-visible {
+  border-color: var(--olive);
+  outline: 3px solid rgba(200,169,106,.22);
+  outline-offset: 2px;
+}
+
+/* Product-detail SALE badge: compact burgundy/cream treatment. */
+.modal-product-badges .badge-discount {
+  width: auto !important;
+  height: auto !important;
+  min-width: 64px !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  padding: 8px 12px 9px !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  border-radius: 12px !important;
+  color: #FFF9F3 !important;
+  background: #98463D !important;
+  box-shadow: 0 7px 18px rgba(93,37,31,.16) !important;
+  transform: none !important;
+}
+
+.modal-product-badges .badge-discount::before,
+.modal-product-badges .badge-discount::after {
+  display: none !important;
+  content: none !important;
+}
+
+.modal-product-badges .badge-discount small {
+  color: #F7EBDD !important;
+  font-size: 8px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: .13em !important;
+}
+
+.modal-product-badges .badge-discount strong,
+.modal-product-badges .badge-discount .discount-value {
+  color: #FFFFFF !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  line-height: 1.05 !important;
+  letter-spacing: .01em !important;
+}
+
+/* Product-detail low-stock badge follows the Emerald & Cream palette. */
+.modal-info .detail-stock-badge,
+.detail-stock-badge {
+  width: max-content !important;
+  margin-top: 10px !important;
+  padding: 7px 12px !important;
+  border: 1px solid rgba(200,169,106,.52) !important;
+  border-radius: 999px !important;
+  color: #5E491D !important;
+  background: #F3E6C3 !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  letter-spacing: .055em !important;
+  text-transform: uppercase !important;
+}
+
+@media (max-width: 650px) {
+  .modal-product-badges .badge-discount {
+    min-width: 58px !important;
+    padding: 7px 10px 8px !important;
+    border-radius: 11px !important;
+  }
+
+  .modal-product-badges .badge-discount strong,
+  .modal-product-badges .badge-discount .discount-value {
+    font-size: 14px !important;
+  }
+
+  .modal-info .detail-stock-badge,
+  .detail-stock-badge {
+    padding: 6px 10px !important;
+    font-size: 9px !important;
+  }
+}
+\n\n/* =========================================================
+   mi.do.ri v3.4.2 — Emerald Hero Refinement
+   Campaign hero: Deep Emerald + Cream typography + restrained Gold.
+   Catalog intro stays light for browsing clarity.
+   ========================================================= */
+
+/* Home campaign hero */
+body[data-page="home"] .hero-shell,
+.hero-section .hero-shell {
+  border-color: rgba(200,169,106,.34);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255,255,255,.055), transparent 28%),
+    radial-gradient(circle at 82% 84%, rgba(200,169,106,.10), transparent 32%),
+    linear-gradient(118deg, #0F3D34 0%, #103F36 48%, #134E43 100%);
+  box-shadow: 0 18px 44px rgba(15,61,52,.16);
+}
+
+.hero-section .hero-copy h1 {
+  color: #F7F6F1;
+}
+
+.hero-section .hero-copy > p {
+  color: #D7E5DF;
+}
+
+.hero-section .hero-kicker {
+  color: #DCC58F;
+}
+
+.hero-section .hero-kicker i {
+  background: #C8A96A;
+  box-shadow: 0 0 0 4px rgba(200,169,106,.16);
+}
+
+/* Keep the photography framed as the bright premium focal point. */
+.hero-section .hero-photo-card {
+  border-color: rgba(247,246,241,.34);
+  background: #E6F0E9;
+  box-shadow: 0 22px 46px rgba(3,25,20,.24);
+}
+
+.hero-section .hero-photo-fallback {
+  color: #0F3D34;
+  background: radial-gradient(circle at 56% 40%, #FFFFFF 0%, #F7F6F1 54%, #E6F0E9 100%);
+}
+
+.hero-section .hero-slider-prev,
+.hero-section .hero-slider-next {
+  border-color: rgba(247,246,241,.35);
+  color: #F7F6F1;
+  background: rgba(15,61,52,.70);
+  backdrop-filter: blur(8px);
+}
+
+.hero-section .hero-slider-prev:hover,
+.hero-section .hero-slider-next:hover {
+  color: #0F3D34;
+  background: #F7F6F1;
+}
+
+.hero-section .hero-slider-dot {
+  background: rgba(247,246,241,.40);
+}
+
+.hero-section .hero-slider-dot.is-active {
+  background: #C8A96A;
+}
+
+/* Catalog remains light and task-oriented. */
+.catalog-page-intro {
+  border-bottom-color: #DCE5DF;
+  background:
+    radial-gradient(circle at 88% 6%, rgba(200,169,106,.13), transparent 28%),
+    radial-gradient(circle at 70% 108%, rgba(230,240,233,.82), transparent 34%),
+    linear-gradient(180deg, #F7F6F1 0%, #FBFAF6 72%, #FFFFFF 100%);
+}
+
+.catalog-page-intro .eyebrow {
+  color: #0F3D34;
+}
+
+.catalog-page-intro h1 {
+  color: #12231E;
+}
+
+.catalog-page-intro p,
+.catalog-page-intro .breadcrumb {
+  color: #65736D;
+}
+
+.catalog-page-intro .breadcrumb a {
+  color: #0F3D34;
+}
+
+.catalog-page-intro .button-soft {
+  border-color: #D7E1DB;
+  color: #0F3D34;
+  background: rgba(255,255,255,.78);
+}
+
+.catalog-page-intro .button-soft:hover {
+  border-color: #C8A96A;
+  background: #FFFFFF;
+}
+
+@media (max-width: 900px) {
+  .hero-section .hero-copy {
+    background: transparent;
+  }
+}
+
+@media (max-width: 650px) {
+  .hero-section .hero-shell {
+    border-color: rgba(200,169,106,.30);
+  }
+
+  .hero-section .hero-copy > p {
+    color: #C9DAD3;
+  }
+
+  .catalog-page-intro {
+    background:
+      radial-gradient(circle at 92% 8%, rgba(200,169,106,.12), transparent 28%),
+      linear-gradient(180deg, #F7F6F1 0%, #FFFFFF 100%);
+  }
+}
