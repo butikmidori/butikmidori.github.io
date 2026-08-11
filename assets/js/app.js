@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "3.5.0";
+  const APP_VERSION = "3.6.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -1348,6 +1348,18 @@ Apakah masih tersedia?`;
       </ul>`;
   }
 
+  function productDetailSectionMarkup(title, content, extraClass = "") {
+    if (!content) return "";
+    return `
+      <section class="product-detail-section product-detail-accordion ${extraClass}" data-detail-accordion>
+        <button class="product-detail-toggle" type="button" aria-expanded="true">
+          <span>${escapeHtml(title)}</span>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"></path></svg>
+        </button>
+        <div class="product-detail-panel">${content}</div>
+      </section>`;
+  }
+
   function renderProductDetailSections(product) {
     const description = String(product.description || "").trim();
     const material = String(product.material || "").trim();
@@ -1357,46 +1369,38 @@ Apakah masih tersedia?`;
     const care = detailLines(product.careInstructions);
 
     const aboutSection = description
-      ? `
-        <section class="product-detail-section product-about-section">
-          <h3>Tentang Produk</h3>
-          <div class="product-about-copy">${descriptionParagraphs(description)}</div>
-        </section>`
+      ? productDetailSectionMarkup(
+          "Tentang Produk",
+          `<div class="product-about-copy">${descriptionParagraphs(description)}</div>`,
+          "product-about-section"
+        )
       : "";
 
-    const specificationSection = material || hasSize
-      ? `
-        <section class="product-detail-section">
-          <h3>Detail Produk</h3>
-          <div class="product-detail-grid">
-            ${hasSize ? `
-              <div class="product-detail-card product-size-card">
-                <h4>Ukuran</h4>
-                <div class="product-size-list">${sizeDetailsMarkup(product)}</div>
-              </div>` : ""}
-            ${material ? `
-              <div class="product-detail-card">
-                <h4>Bahan</h4>
-                <div class="product-detail-value">${escapeHtml(material)}</div>
-              </div>` : ""}
-          </div>
-        </section>`
+    const specificationContent = material || hasSize
+      ? `<div class="product-detail-grid">
+          ${material ? `
+            <div class="product-detail-card product-material-card">
+              <h4>Bahan</h4>
+              <div class="product-detail-value">${escapeHtml(material)}</div>
+            </div>` : ""}
+          ${hasSize ? `
+            <div class="product-detail-card product-size-card">
+              <h4>Ukuran</h4>
+              <div class="product-size-list">${sizeDetailsMarkup(product)}</div>
+            </div>` : ""}
+        </div>`
+      : "";
+
+    const specificationSection = specificationContent
+      ? productDetailSectionMarkup("Ukuran & Bahan", specificationContent, "product-specification-section")
       : "";
 
     const highlightsSection = highlights.length
-      ? `
-        <section class="product-detail-section">
-          <h3>Keunggulan</h3>
-          ${checklistMarkup(highlights, "highlight")}
-        </section>`
+      ? productDetailSectionMarkup("Keunggulan", checklistMarkup(highlights, "highlight"), "product-highlights-section")
       : "";
 
     const careSection = care.length
-      ? `
-        <section class="product-detail-section">
-          <h3>Perawatan</h3>
-          ${checklistMarkup(care, "care")}
-        </section>`
+      ? productDetailSectionMarkup("Perawatan", checklistMarkup(care, "care"), "product-care-section")
       : "";
 
     if (!aboutSection && !specificationSection && !highlightsSection && !careSection) {
@@ -1417,17 +1421,26 @@ Apakah masih tersedia?`;
     const variants = availableVariants(product);
     const defaultVariant = variants.find(v => v.stock > 0) || variants[0];
     const availability = productAvailability(product);
+    const mediaItemsForProduct = productMediaItems(product);
 
     elements.modalContent.innerHTML = `
       <article class="modal-product">
         <div class="modal-gallery">
           <div class="modal-product-badges">${productBadges(product)}</div>
-          <div class="modal-main-image" id="modalMainMedia">${renderModalMainMedia(productMediaItems(product)[0], product)}</div>
-          ${renderModalMediaStrip(product, productMediaItems(product))}
+          <div class="modal-main-image" id="modalMainMedia">${renderModalMainMedia(mediaItemsForProduct[0], product)}</div>
+          ${renderModalMediaStrip(product, mediaItemsForProduct)}
         </div>
         <div class="modal-info">
-          <p class="product-brand">${escapeHtml(product.brand)}</p>
-          <h2 id="modalProductName">${escapeHtml(product.name)}</h2>
+          <div class="modal-heading-row">
+            <div class="modal-heading-copy">
+              <p class="product-brand">${escapeHtml(product.brand)}</p>
+              <h2 id="modalProductName">${escapeHtml(product.name)}</h2>
+            </div>
+            <button class="modal-share-button" id="modalShareButton" type="button" aria-label="Salin link ${escapeHtml(product.name)}" title="Salin link produk">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a3 3 0 1 0-2.83-4A3 3 0 0 0 15 5c0 .2.02.4.06.58L8.91 9.1A3 3 0 1 0 9 14.83l6.08 3.47A3 3 0 1 0 16 16.55l-6.07-3.47a3.06 3.06 0 0 0 0-2.15l6.11-3.5c.53.36 1.17.57 1.86.57Z"></path></svg>
+              <span class="sr-only">Salin link produk</span>
+            </button>
+          </div>
           <div class="modal-price${isPromoActive(product) ? " has-promo" : ""}" id="modalPrice">${defaultVariant ? variantPriceMarkup(product, defaultVariant) : productPriceMarkup(product)}</div>
           <div id="detailStockBadge" class="detail-stock-badge" hidden>
             Stok menipis
@@ -1441,31 +1454,55 @@ Apakah masih tersedia?`;
           </select>
 
           <div class="variant-status">
-            <span>Kode: <strong id="modalSku">${escapeHtml(defaultVariant?.sku || "-")}</strong></span>
+            <span class="variant-sku-label">Kode <strong id="modalSku">${escapeHtml(defaultVariant?.sku || "-")}</strong></span>
             <span id="modalStock">${defaultVariant ? stockLabel(defaultVariant.stock <= 0 ? "out" : defaultVariant.stock <= 2 ? "limited" : "available") : stockLabel(availability)}</span>
+          </div>
+
+          <div class="modal-mobile-cta" aria-label="Aksi produk">
+            <button class="button button-primary" type="button" data-modal-add-cart ${!defaultVariant || defaultVariant.stock <= 0 ? "disabled" : ""}>Tambah ke pilihan</button>
+            <a class="button button-wa" data-modal-whatsapp href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">WhatsApp</a>
           </div>
 
           ${renderProductDetailSections(product)}
 
-          <div class="modal-actions">
-            <button class="button button-primary" id="modalAddCartBtn" type="button" ${!defaultVariant || defaultVariant.stock <= 0 ? "disabled" : ""}>Tambah ke pilihan</button>
-            <a class="button button-wa" id="modalWhatsAppBtn" href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">Tanya via WhatsApp</a>
-            <button class="button button-copy-link" id="modalCopyLinkBtn" type="button" aria-label="Salin link ${escapeHtml(product.name)}">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a1 1 0 0 1 0-1.4l4.2-4.2a3 3 0 0 1 4.2 4.2l-2.1 2.1a3 3 0 0 1-4.2 0 1 1 0 0 1 1.4-1.4 1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0-1.4-1.4L12 13.4a1 1 0 0 1-1.4 0Zm2.8-2.8a1 1 0 0 1 0 1.4l-4.2 4.2A3 3 0 0 1 5 12l2.1-2.1a3 3 0 0 1 4.2 0 1 1 0 0 1-1.4 1.4 1 1 0 0 0-1.4 0l-2.1 2.1a1 1 0 0 0 1.4 1.4l4.2-4.2a1 1 0 0 1 1.4 0Z"/></svg>
-              <span>Salin link produk</span>
-            </button>
+          <div class="modal-actions modal-actions-desktop">
+            <button class="button button-primary" type="button" data-modal-add-cart ${!defaultVariant || defaultVariant.stock <= 0 ? "disabled" : ""}>Tambah ke pilihan</button>
+            <a class="button button-wa" data-modal-whatsapp href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">Tanya via WhatsApp</a>
           </div>
         </div>
       </article>`;
 
     const variantSelect = $("#variantSelect");
-    const addButton = $("#modalAddCartBtn");
-    const waButton = $("#modalWhatsAppBtn");
-    const copyLinkButton = $("#modalCopyLinkBtn");
-    const selectedVariant = () => product.variants.find(v => v.sku === variantSelect.value);
-    const mediaItems = productMediaItems(product);
+    const addButtons = [...elements.modalContent.querySelectorAll("[data-modal-add-cart]")];
+    const waButtons = [...elements.modalContent.querySelectorAll("[data-modal-whatsapp]")];
+    const shareButton = $("#modalShareButton");
+    const selectedVariant = () => product.variants.find(v => v.sku === variantSelect?.value);
+    const mediaItems = mediaItemsForProduct;
     const modalMainMedia = $("#modalMainMedia");
     const mediaThumbs = [...elements.modalContent.querySelectorAll("[data-media-index]")];
+    const detailAccordions = [...elements.modalContent.querySelectorAll("[data-detail-accordion]")];
+
+    function setActionState(variant) {
+      addButtons.forEach(button => { button.disabled = !variant || variant.stock <= 0; });
+      waButtons.forEach(link => { link.href = whatsappProductUrl(product, variant); });
+    }
+
+    function configureDetailAccordions() {
+      const compact = window.matchMedia("(max-width: 700px)").matches;
+      detailAccordions.forEach(section => {
+        const button = section.querySelector(".product-detail-toggle");
+        if (!button) return;
+        const expanded = !compact;
+        section.classList.toggle("is-open", expanded);
+        button.setAttribute("aria-expanded", expanded ? "true" : "false");
+        button.addEventListener("click", () => {
+          if (!window.matchMedia("(max-width: 700px)").matches) return;
+          const next = !section.classList.contains("is-open");
+          section.classList.toggle("is-open", next);
+          button.setAttribute("aria-expanded", next ? "true" : "false");
+        });
+      });
+    }
 
     function setActiveMedia(index) {
       const item = mediaItems[index];
@@ -1484,7 +1521,9 @@ Apakah masih tersedia?`;
       });
     });
 
+    configureDetailAccordions();
     updateDetailStockBadge(defaultVariant);
+    setActionState(defaultVariant);
 
     variantSelect?.addEventListener("change", () => {
       const variant = selectedVariant();
@@ -1493,16 +1532,17 @@ Apakah masih tersedia?`;
       $("#modalPrice").innerHTML = variantPriceMarkup(product, variant);
       $("#modalSku").textContent = variant.sku;
       $("#modalStock").textContent = stockLabel(variant.stock <= 0 ? "out" : variant.stock <= 2 ? "limited" : "available");
-      addButton.disabled = variant.stock <= 0;
-      waButton.href = whatsappProductUrl(product, variant);
+      setActionState(variant);
     });
 
-    addButton?.addEventListener("click", () => {
-      const variant = selectedVariant();
-      if (variant) addToCart(product, variant);
+    addButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const variant = selectedVariant();
+        if (variant) addToCart(product, variant);
+      });
     });
 
-    copyLinkButton?.addEventListener("click", () => copyProductLink(product, copyLinkButton));
+    shareButton?.addEventListener("click", () => copyProductLink(product, shareButton));
 
     elements.modal.classList.add("open");
     elements.modal.setAttribute("aria-hidden", "false");
