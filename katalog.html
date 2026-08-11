@@ -22,12 +22,12 @@
   <meta name="twitter:image" content="https://butikmidori.github.io/assets/images/share/midori-default.jpg">
   <link rel="canonical" href="https://butikmidori.github.io/katalog.html">
   <title>mi.do.ri — Multibrand Muslim Fashion</title>
-  <meta name="midori-version" content="3.3.1">
+  <meta name="midori-version" content="3.3.2">
   <link rel="icon" href="assets/images/logo-midori.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=3.3.1">
+  <link rel="stylesheet" href="assets/css/style.css?v=3.3.2">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -112,7 +112,8 @@
             <a role="menuitem" href="katalog.html#katalog">Semua Brand</a>
           </div>
         </div>
-        <a href="#katalog" class="active" aria-current="page">Katalog</a>
+        <a class="nav-sale-link" id="saleNavLink" href="katalog.html?sale=1#katalog">SALE</a>
+        <a href="katalog.html#katalog" class="active" id="catalogNavLink" aria-current="page">Katalog</a>
         <a href="#lokasi">Lokasi</a>
       </nav>
 
@@ -149,9 +150,9 @@
       <div class="container">
         <div class="catalog-header">
           <div>
-            <span class="eyebrow">Full catalog</span>
-            <h2>Seluruh koleksi mi.do.ri</h2>
-            <p>Cari berdasarkan nama produk, brand, kategori, warna, atau kode barang.</p>
+            <span class="eyebrow" id="catalogEyebrow">Full catalog</span>
+            <h2 id="catalogTitle">Seluruh koleksi mi.do.ri</h2>
+            <p id="catalogDescription">Cari berdasarkan nama produk, brand, kategori, warna, atau kode barang.</p>
           </div>
         </div>
 
@@ -179,6 +180,11 @@
           <div class="filter-field"><label for="conditionFilter">Kondisi</label><select id="conditionFilter"><option value="">Semua kondisi</option><option value="Baru">Baru</option><option value="Preloved">Preloved</option></select></div>
           <div class="filter-field"><label for="availabilityFilter">Ketersediaan</label><select id="availabilityFilter"><option value="">Semua stok</option><option value="available">Tersedia</option><option value="limited">Stok menipis</option><option value="out">Habis</option></select></div>
           <button class="button button-reset" id="resetFiltersBtn" type="button">Reset filter</button>
+        </div>
+
+        <div class="sale-filter-chip" id="saleFilterChip" hidden>
+          <span><strong>SALE</strong> Promo aktif</span>
+          <button type="button" id="clearSaleFilter" aria-label="Hapus filter SALE">×</button>
         </div>
 
         <div class="catalog-meta">
@@ -260,7 +266,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="assets/data/catalog-data.js?v=3.3.1"></script>
-  <script src="assets/js/app.js?v=3.3.1"></script>
+  <script src="assets/data/catalog-data.js?v=3.3.2"></script>
+  <script src="assets/js/app.js?v=3.3.2"></script>
 </body>
 </html>
