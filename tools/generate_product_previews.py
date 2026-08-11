@@ -38,7 +38,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 SITE = "https://butikmidori.github.io"
-VERSION = "3.5.0"
+VERSION = "3.6.0"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -97,7 +97,7 @@ def fetch_live_catalog(root: Path) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "mi.do.ri-preview-generator/3.5.0",
+            "User-Agent": "mi.do.ri-preview-generator/3.6.0",
             "Accept": "application/json,text/javascript,*/*;q=0.8",
         },
     )
@@ -232,29 +232,49 @@ def write_fallback_catalog(root: Path, catalog: dict[str, Any]) -> None:
 
 
 def make_default_card(root: Path, share_dir: Path) -> None:
-    logo_path = root / "assets/images/logo-midori.png"
+    logo_path = root / "assets/images/brand/logo-midori-primary.png"
     if not logo_path.exists():
-        raise RuntimeError("assets/images/logo-midori.png tidak ditemukan.")
-    logo = Image.open(logo_path).convert("RGB")
-    canvas = Image.new("RGB", (1200, 630), (247, 248, 244))
+        raise RuntimeError("assets/images/brand/logo-midori-primary.png tidak ditemukan.")
+    logo = Image.open(logo_path).convert("RGBA")
+    canvas = Image.new("RGB", (1200, 630), (247, 246, 241))
     fitted = ImageOps.contain(logo, (760, 470), Image.Resampling.LANCZOS)
     x = (1200 - fitted.width) // 2
     y = (630 - fitted.height) // 2
-    canvas.paste(fitted, (x, y))
+    canvas.paste(fitted.convert("RGB"), (x, y), fitted.getchannel("A"))
     canvas.save(share_dir / "midori-default.jpg", "JPEG", quality=90, optimize=True, progressive=True)
 
 
 def make_product_card(src: Path, dest: Path) -> None:
+    """Create a social-safe 1200x630 card with the full portrait product image.
+
+    The product photo is never blurred into the side areas. It is preserved in a
+    centered 4:5 portrait stage over the Emerald & Cream luxury palette.
+    """
     img = Image.open(src).convert("RGB")
-    bg = ImageOps.fit(img, (1200, 630), method=Image.Resampling.LANCZOS, centering=(0.5, 0.45))
-    bg = bg.filter(ImageFilter.GaussianBlur(28))
-    overlay = Image.new("RGB", bg.size, (245, 245, 245))
-    bg = Image.blend(bg, overlay, 0.16)
-    fg = ImageOps.contain(img, (560, 630), method=Image.Resampling.LANCZOS)
-    x = (1200 - fg.width) // 2
-    y = (630 - fg.height) // 2
-    bg.paste(fg, (x, y))
-    bg.save(dest, "JPEG", quality=88, optimize=True, progressive=True)
+    canvas = Image.new("RGB", (1200, 630), (247, 246, 241))
+
+    # Subtle editorial side panels; intentionally flat/clean (no photo blur).
+    left_panel = Image.new("RGB", (348, 630), (230, 240, 233))
+    right_panel = Image.new("RGB", (348, 630), (247, 246, 241))
+    canvas.paste(left_panel, (0, 0))
+    canvas.paste(right_panel, (852, 0))
+
+    # Gold hairlines give the card a restrained boutique finish.
+    gold = (200, 169, 106)
+    for x in (347, 852):
+        for y in range(630):
+            canvas.putpixel((x, y), gold)
+
+    # 4:5 stage (504 x 630). Contain preserves the complete original image.
+    stage_size = (504, 630)
+    stage = Image.new("RGB", stage_size, (247, 246, 241))
+    fitted = ImageOps.contain(img, stage_size, method=Image.Resampling.LANCZOS)
+    sx = (stage_size[0] - fitted.width) // 2
+    sy = (stage_size[1] - fitted.height) // 2
+    stage.paste(fitted, (sx, sy))
+    canvas.paste(stage, (348, 0))
+
+    canvas.save(dest, "JPEG", quality=90, optimize=True, progressive=True)
 
 
 def local_image_for_product(root: Path, product: dict[str, Any]) -> Path | None:
@@ -339,7 +359,7 @@ def product_page(product: dict[str, Any], image_rel: str, has_product_photo: boo
   <meta name="twitter:description" content="{html.escape(desc, quote=True)}">
   <meta name="twitter:image" content="{image_url}">
   <link rel="canonical" href="{share_url}">
-  <link rel="icon" href="/assets/images/logo-midori.png">
+  <link rel="icon" href="/assets/images/brand/logo-midori-primary.png">
   <script>
     // Halaman ini menyediakan metadata Open Graph untuk crawler sosial.
     // Pengunjung manusia diteruskan ke modal produk di katalog.
