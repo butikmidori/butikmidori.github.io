@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "3.3.1";
+  const APP_VERSION = "3.3.2";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -229,6 +229,7 @@
     segment: "",
     condition: "",
     availability: "",
+    sale: false,
     sort: "recommended",
     page: 1,
     perPage: 25,
@@ -254,6 +255,13 @@
     segmentFilter: $("#segmentFilter"),
     conditionFilter: $("#conditionFilter"),
     availabilityFilter: $("#availabilityFilter"),
+    saleFilterChip: $("#saleFilterChip"),
+    clearSaleFilter: $("#clearSaleFilter"),
+    saleNavLink: $("#saleNavLink"),
+    catalogNavLink: $("#catalogNavLink"),
+    catalogEyebrow: $("#catalogEyebrow"),
+    catalogTitle: $("#catalogTitle"),
+    catalogDescription: $("#catalogDescription"),
     sortSelect: $("#sortSelect"),
     filtersPanel: $("#filtersPanel"),
     resetFiltersBtn: $("#resetFiltersBtn"),
@@ -691,6 +699,7 @@ Apakah masih tersedia?`;
     state.condition = params.get("kondisi") || "";
     state.segment = params.get("segmen") || "";
     state.availability = params.get("stok") || "";
+    state.sale = params.get("sale") === "1";
     state.sort = params.get("urut") || "recommended";
 
     if (elements.searchInput) elements.searchInput.value = state.query;
@@ -700,6 +709,40 @@ Apakah masih tersedia?`;
     if (elements.segmentFilter) elements.segmentFilter.value = state.segment;
     if (elements.availabilityFilter) elements.availabilityFilter.value = state.availability;
     if (elements.sortSelect) elements.sortSelect.value = state.sort;
+    updateSaleView();
+  }
+
+  function updateSaleView() {
+    if (!IS_CATALOG_PAGE) return;
+
+    if (elements.saleFilterChip) {
+      elements.saleFilterChip.hidden = !state.sale;
+    }
+
+    if (elements.saleNavLink && elements.catalogNavLink) {
+      elements.saleNavLink.classList.toggle("active", state.sale);
+      elements.catalogNavLink.classList.toggle("active", !state.sale);
+
+      if (state.sale) {
+        elements.saleNavLink.setAttribute("aria-current", "page");
+        elements.catalogNavLink.removeAttribute("aria-current");
+      } else {
+        elements.catalogNavLink.setAttribute("aria-current", "page");
+        elements.saleNavLink.removeAttribute("aria-current");
+      }
+    }
+
+    if (elements.catalogEyebrow) {
+      elements.catalogEyebrow.textContent = state.sale ? "SALE" : "Full catalog";
+    }
+    if (elements.catalogTitle) {
+      elements.catalogTitle.textContent = state.sale ? "Produk SALE mi.do.ri" : "Seluruh koleksi mi.do.ri";
+    }
+    if (elements.catalogDescription) {
+      elements.catalogDescription.textContent = state.sale
+        ? "Menampilkan produk dengan promo yang sedang aktif. Kamu tetap bisa menyaring berdasarkan brand, kategori, segmen, dan stok."
+        : "Cari berdasarkan nama produk, brand, kategori, warna, atau kode barang.";
+    }
   }
 
   function syncCatalogUrl() {
@@ -710,7 +753,7 @@ Apakah masih tersedia?`;
 
     [
       "q", "brand", "kategori", "kelompok", "kondisi",
-      "ukuran", "segmen", "stok", "urut"
+      "ukuran", "segmen", "stok", "sale", "urut"
     ].forEach(key => url.searchParams.delete(key));
 
     if (state.query) url.searchParams.set("q", state.query);
@@ -720,6 +763,7 @@ Apakah masih tersedia?`;
     if (state.condition) url.searchParams.set("kondisi", state.condition);
     if (state.segment) url.searchParams.set("segmen", state.segment);
     if (state.availability) url.searchParams.set("stok", state.availability);
+    if (state.sale) url.searchParams.set("sale", "1");
     if (state.sort && state.sort !== "recommended") {
       url.searchParams.set("urut", state.sort);
     }
@@ -1156,6 +1200,7 @@ Apakah masih tersedia?`;
       if (state.segment && product.segment !== state.segment) return false;
       if (state.condition && product.condition !== state.condition) return false;
       if (state.availability && productAvailability(product) !== state.availability) return false;
+      if (state.sale && !isPromoActive(product)) return false;
       return true;
     });
 
@@ -1179,6 +1224,7 @@ Apakah masih tersedia?`;
     const totalPages = Math.max(1, Math.ceil(filtered.length / state.perPage));
     state.page = Math.min(state.page, totalPages);
     updateActiveFilterCount();
+    updateSaleView();
     renderProducts();
     renderPagination();
     syncCatalogUrl();
@@ -1191,7 +1237,8 @@ Apakah masih tersedia?`;
       state.mainCategory,
       state.segment,
       state.condition,
-      state.availability
+      state.availability,
+      state.sale
     ].filter(Boolean).length;
     if (!elements.activeFilterCount) return;
     elements.activeFilterCount.textContent = count;
@@ -1594,7 +1641,7 @@ Apakah masih tersedia?`;
   function resetFilters() {
     Object.assign(state, {
       query: "", brand: "", category: "", mainCategory: "",
-      segment: "", condition: "", availability: "",
+      segment: "", condition: "", availability: "", sale: false,
       sort: "recommended", page: 1
     });
 
@@ -1694,6 +1741,11 @@ Apakah masih tersedia?`;
 
     elements.resetFiltersBtn?.addEventListener("click", resetFilters);
     elements.emptyResetBtn?.addEventListener("click", resetFilters);
+    elements.clearSaleFilter?.addEventListener("click", () => {
+      state.sale = false;
+      state.page = 1;
+      applyFilters();
+    });
 
     document.addEventListener("click", event => {
       if (
