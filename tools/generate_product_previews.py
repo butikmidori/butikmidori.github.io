@@ -38,7 +38,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 SITE = "https://butikmidori.github.io"
-VERSION = "3.6.0"
+VERSION = "3.6.1"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -97,7 +97,7 @@ def fetch_live_catalog(root: Path) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "mi.do.ri-preview-generator/3.6.0",
+            "User-Agent": "mi.do.ri-preview-generator/3.6.1",
             "Accept": "application/json,text/javascript,*/*;q=0.8",
         },
     )
@@ -359,7 +359,8 @@ def product_page(product: dict[str, Any], image_rel: str, has_product_photo: boo
   <meta name="twitter:description" content="{html.escape(desc, quote=True)}">
   <meta name="twitter:image" content="{image_url}">
   <link rel="canonical" href="{share_url}">
-  <link rel="icon" href="/assets/images/brand/logo-midori-primary.png">
+  <link rel="icon" type="image/png" href="/assets/images/brand/favicon-midori.png">
+  <link rel="apple-touch-icon" href="/assets/images/brand/favicon-midori.png">
   <script>
     // Halaman ini menyediakan metadata Open Graph untuk crawler sosial.
     // Pengunjung manusia diteruskan ke modal produk di katalog.
