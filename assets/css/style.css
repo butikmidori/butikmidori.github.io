@@ -4095,3 +4095,319 @@ button, input, select, textarea {
     font-size: 12px;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v3.6.0 — Luxury Product Experience Refinement
+   Typography readability · Product detail mobile UX · Dual logo
+   ========================================================= */
+
+/* Readability floor: informative UI text should not feel miniature in Jost. */
+.product-card .product-brand {
+  font-size: 12px !important;
+  line-height: 1.35;
+}
+.product-card .product-title {
+  font-size: 16px !important;
+  line-height: 1.4;
+  font-weight: 500 !important;
+}
+.product-card .product-rating,
+.product-card .product-rating span,
+.product-card .product-card-info {
+  font-size: 12px !important;
+  line-height: 1.45;
+}
+.product-card .product-actions .button {
+  font-size: 12px !important;
+}
+.filter-field label,
+.catalog-count-card span,
+.variant-label,
+.eyebrow,
+.hero-kicker {
+  font-size: 12px !important;
+}
+.filter-field select,
+.sort-box select,
+.variant-select,
+.search-box input {
+  font-size: 13px !important;
+}
+.category-card h3,
+.brand-chip,
+.service-item strong,
+.service-item span {
+  font-size: 12px;
+}
+.footer-nav-group h3 {
+  font-size: 12px !important;
+}
+.footer-nav-group > a,
+.footer-brand .footer-brand-subtitle {
+  font-size: 13px !important;
+}
+.footer-bottom {
+  font-size: 12px !important;
+}
+
+/* Separate dark-background brand source gets a subtle light halo without altering artwork. */
+.footer-brand img {
+  filter: drop-shadow(0 0 1px rgba(247,246,241,.78)) drop-shadow(0 5px 16px rgba(0,0,0,.10));
+}
+
+/* Product detail heading + compact share action. */
+.modal-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+.modal-heading-copy {
+  min-width: 0;
+}
+.modal-heading-copy .product-brand {
+  margin-bottom: 7px;
+  font-size: 12px !important;
+}
+.modal-heading-row h2 {
+  margin-top: 0;
+}
+.modal-share-button {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  margin-top: 2px;
+  border: 1px solid #D7E1DB;
+  border-radius: 50%;
+  color: #0F3D34;
+  background: #F7F6F1;
+  cursor: pointer;
+  transition: border-color .18s ease, color .18s ease, background .18s ease, transform .18s ease;
+}
+.modal-share-button svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+.modal-share-button:hover,
+.modal-share-button:focus-visible {
+  color: #8A713B;
+  border-color: #C8A96A;
+  background: #FFFDF7;
+  transform: translateY(-1px);
+}
+.modal-share-button.is-copied {
+  color: #F7F6F1;
+  border-color: #0F3D34;
+  background: #0F3D34;
+}
+
+/* Price hierarchy: promo is primary, savings note stays jewelry-like/subtle. */
+.modal-info .saving-note {
+  padding: 4px 9px;
+  color: #75642E;
+  border: 1px solid rgba(200,169,106,.20);
+  background: rgba(200,169,106,.12);
+  font-size: 11px !important;
+  font-weight: 400 !important;
+}
+
+/* SKU/status should read as metadata, not another dominant card. */
+.modal-info .variant-status {
+  min-height: 48px;
+  align-items: center;
+  margin-top: 10px;
+  padding: 11px 14px;
+  border: 1px solid #E1E8E3;
+  background: #F7F9F6;
+  font-size: 12px;
+}
+.modal-info .variant-sku-label {
+  color: #718079;
+}
+.modal-info .variant-sku-label strong {
+  margin-left: 5px;
+  color: #0F3D34;
+  font-weight: 500 !important;
+}
+
+/* Desktop: detail sections remain visually open, with editorial section headers. */
+.product-detail-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+  cursor: default;
+  pointer-events: none;
+}
+.product-detail-toggle > span {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.product-detail-toggle svg {
+  display: none;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+.product-detail-panel {
+  display: block;
+  margin-top: 15px;
+}
+.product-detail-section h3 {
+  display: none;
+}
+.product-material-card {
+  order: 2;
+}
+.product-size-card {
+  order: 1;
+}
+
+/* Desktop CTA stays at the end; the sticky mobile clone is hidden. */
+.modal-mobile-cta {
+  display: none;
+}
+.modal-actions-desktop {
+  display: grid;
+}
+
+@media (max-width: 700px) {
+  /* Cards remain readable without crowding narrow product grids. */
+  .product-card .product-brand {
+    font-size: 11px !important;
+  }
+  .product-card .product-title {
+    font-size: 14px !important;
+    min-height: 40px;
+  }
+  .product-card .product-rating,
+  .product-card .product-rating span,
+  .product-card .product-card-info,
+  .product-card .product-actions .button {
+    font-size: 12px !important;
+  }
+  .filter-field label,
+  .variant-label,
+  .eyebrow,
+  .hero-kicker {
+    font-size: 11px !important;
+  }
+
+  /* Compact luxury product detail: accordion + persistent conversion actions. */
+  .modal-info {
+    padding-bottom: 92px !important;
+  }
+  .modal-heading-row {
+    gap: 12px;
+  }
+  .modal-share-button {
+    width: 40px;
+    height: 40px;
+  }
+  .modal-info .variant-status {
+    font-size: 12px;
+  }
+  .product-detail-content {
+    margin-top: 18px;
+  }
+  .product-detail-section {
+    padding: 0;
+    border-bottom: 1px solid #DFE7E2;
+  }
+  .product-detail-toggle {
+    min-height: 54px;
+    padding: 15px 0;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  .product-detail-toggle > span {
+    font-size: 14px;
+  }
+  .product-detail-toggle svg {
+    display: block;
+    transition: transform .2s ease;
+  }
+  .product-detail-section.is-open .product-detail-toggle svg {
+    transform: rotate(180deg);
+  }
+  .product-detail-panel {
+    display: none;
+    margin: 0;
+    padding: 0 0 18px;
+  }
+  .product-detail-section.is-open .product-detail-panel {
+    display: block;
+  }
+  .product-detail-grid,
+  .product-detail-list {
+    grid-template-columns: 1fr !important;
+  }
+  .product-material-card {
+    order: 1;
+  }
+  .product-size-card {
+    order: 2;
+  }
+  .product-detail-card {
+    padding: 14px;
+  }
+  .product-detail-card h4 {
+    font-size: 11px;
+  }
+  .product-detail-value,
+  .product-size-row > span,
+  .product-size-row > strong,
+  .product-detail-list li,
+  .product-about-copy {
+    font-size: 12px !important;
+  }
+
+  /* Mobile sticky CTA sits before long details and stays visible while reading. */
+  .modal-actions-desktop {
+    display: none !important;
+  }
+  .modal-mobile-cta {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    z-index: 322;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 12px max(10px, env(safe-area-inset-bottom));
+    border: 1px solid rgba(15,61,52,.10);
+    border-radius: 0 0 16px 16px;
+    background: rgba(247,246,241,.97);
+    box-shadow: 0 -10px 28px rgba(15,61,52,.10);
+    backdrop-filter: blur(12px);
+  }
+  .modal-mobile-cta .button {
+    min-height: 46px;
+    padding-inline: 10px;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .footer-nav-group h3 {
+    font-size: 12px !important;
+  }
+  .footer-nav-group > a {
+    font-size: 13px !important;
+  }
+}
