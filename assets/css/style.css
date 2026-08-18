@@ -5392,3 +5392,102 @@ body[data-page="home"] .location-section {
     min-height: 160px;
   }
 }
+
+
+/* =========================================================
+   mi.do.ri v4.0.1 — Homepage stability & contrast hotfix
+   Fixes hero chip clipping, hover-dependent CTA visibility,
+   and Second Chapter price contrast.
+   ========================================================= */
+
+/* Keep the hero editorial CTA safely inside the image frame. */
+body[data-page="home"] .hero-shop-chip {
+  right: 28px;
+  bottom: 82px;
+  max-width: calc(100% - 56px);
+  white-space: nowrap;
+}
+
+/* Product cards must not change layout or hide the CTA when the cursor leaves. */
+body[data-page="home"] .product-card-home .product-actions {
+  min-height: 41px;
+  margin-top: 15px;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+body[data-page="home"] .product-card-home .product-actions .button {
+  min-height: 41px;
+  color: #F7F6F1;
+  border-color: #0F3D34;
+  background: #0F3D34;
+  transform: none !important;
+}
+
+body[data-page="home"] .product-card-home .product-actions .button:hover,
+body[data-page="home"] .product-card-home .product-actions .button:focus-visible {
+  color: #F7F6F1;
+  border-color: #134E43;
+  background: #134E43;
+  transform: none !important;
+}
+
+/* FOTO_2 crossfade is intentional only while hovering the image itself,
+   not when the pointer moves over the title, price or CTA. */
+body[data-page="home"] .product-card-home .product-image-secondary {
+  opacity: 0 !important;
+  transform: scale(1.01) !important;
+}
+
+body[data-page="home"] .product-card-home .product-image-wrap:hover .product-image-secondary {
+  opacity: 1 !important;
+  transform: scale(1.035) !important;
+}
+
+/* Second Chapter lives on Deep Emerald: all price states need explicit
+   high-contrast colors rather than inheriting the catalogue palette. */
+.second-chapter-section .product-card-home .product-price,
+.second-chapter-section .product-card-home .product-price .current-price {
+  color: #F7F6F1 !important;
+}
+
+.second-chapter-section .product-card-home .product-price .original-price {
+  color: #A8BCB3 !important;
+}
+
+.second-chapter-section .product-card-home .product-price .discounted-price,
+.second-chapter-section .product-card-home .product-price.has-promo .discounted-price {
+  color: #E2C778 !important;
+}
+
+/* CTA on the dark Second Chapter section stays visible at rest. */
+.second-chapter-section .product-card-home .product-actions .button {
+  color: #0F3D34 !important;
+  border-color: #F7F6F1 !important;
+  background: #F7F6F1 !important;
+}
+
+.second-chapter-section .product-card-home .product-actions .button:hover,
+.second-chapter-section .product-card-home .product-actions .button:focus-visible {
+  color: #0F3D34 !important;
+  border-color: #E6F0E9 !important;
+  background: #E6F0E9 !important;
+}
+
+@media (max-width: 700px) {
+  body[data-page="home"] .hero-shop-chip {
+    right: 14px;
+    bottom: 70px;
+    max-width: calc(100% - 28px);
+  }
+
+  body[data-page="home"] .product-card-home .product-actions {
+    min-height: 43px;
+    margin-top: 16px;
+  }
+
+  body[data-page="home"] .product-card-home .product-actions .button {
+    min-height: 43px;
+    font-size: 12px !important;
+  }
+}
