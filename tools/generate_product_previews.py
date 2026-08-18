@@ -38,7 +38,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 SITE = "https://butikmidori.github.io"
-VERSION = "4.7.1"
+VERSION = "4.8.0"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -97,7 +97,7 @@ def fetch_live_catalog(root: Path) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "mi.do.ri-preview-generator/4.7.1",
+            "User-Agent": "mi.do.ri-preview-generator/4.8.0",
             "Accept": "application/json,text/javascript,*/*;q=0.8",
         },
     )
@@ -329,7 +329,7 @@ def product_page(product: dict[str, Any], image_rel: str, has_product_photo: boo
     share_url = f"{SITE}/produk/{urllib.parse.quote(slug)}/"
     image_url = f"{SITE}/{image_rel}"
     alt = f"{name} — {brand}" if has_product_photo else "mi.do.ri — Fashion Muslim Multibrand"
-    desc = f"Lihat {name} dari {brand} di mi.do.ri, butik fashion muslim multibrand. Konfirmasi stok melalui WhatsApp."
+    desc = f"Cek detail dan ketersediaan {name} dari {brand} di mi.do.ri."
     target = f"/katalog.html?produk={urllib.parse.quote(slug)}#katalog"
     product_id = str(product.get("id") or "").strip()
 
