@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.0.1";
+  const APP_VERSION = "4.1.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -230,9 +230,10 @@
     condition: "",
     availability: "",
     sale: false,
+    newOnly: false,
     sort: "recommended",
     page: 1,
-    perPage: 25,
+    perPage: 24,
     filtered: [],
     cart: loadCart()
   };
@@ -258,6 +259,18 @@
     availabilityFilter: $("#availabilityFilter"),
     saleFilterChip: $("#saleFilterChip"),
     clearSaleFilter: $("#clearSaleFilter"),
+    activeFilterCount: $("#activeFilterCount"),
+    activeFilterChips: $("#activeFilterChips"),
+    filterToggleBtn: $("#filterToggleBtn"),
+    filterCloseBtn: $("#filterCloseBtn"),
+    filterDrawer: $("#filterDrawer"),
+    filterShowResultsBtn: $("#filterShowResultsBtn"),
+    filterResultCount: $("#filterResultCount"),
+    searchSuggestions: $("#searchSuggestions"),
+    loadMoreBtn: $("#loadMoreBtn"),
+    catalogProgress: $("#catalogProgress"),
+    catalogIntroProducts: $("#catalogIntroProducts"),
+    catalogIntroBrands: $("#catalogIntroBrands"),
     saleNavLink: $("#saleNavLink"),
     catalogNavLink: $("#catalogNavLink"),
     catalogEyebrow: $("#catalogEyebrow"),
@@ -665,6 +678,9 @@ Apakah masih tersedia?`;
 
     fillSelect(elements.brandFilter, activeBrands);
     fillSelect(elements.categoryFilter, categories);
+
+    const newQuickFilter = document.querySelector('[data-quick-filter="new"]');
+    if (newQuickFilter) newQuickFilter.hidden = !products.some(product => product.isNew === true);
   }
 
   function renderBrandNavigation() {
@@ -716,6 +732,7 @@ Apakah masih tersedia?`;
     state.segment = params.get("segmen") || "";
     state.availability = params.get("stok") || "";
     state.sale = params.get("sale") === "1";
+    state.newOnly = params.get("baru") === "1";
     state.sort = params.get("urut") || "recommended";
 
     if (elements.searchInput) elements.searchInput.value = state.query;
@@ -725,15 +742,11 @@ Apakah masih tersedia?`;
     if (elements.segmentFilter) elements.segmentFilter.value = state.segment;
     if (elements.availabilityFilter) elements.availabilityFilter.value = state.availability;
     if (elements.sortSelect) elements.sortSelect.value = state.sort;
-    updateSaleView();
+    updateCatalogContext();
   }
 
-  function updateSaleView() {
+  function updateCatalogContext() {
     if (!IS_CATALOG_PAGE) return;
-
-    if (elements.saleFilterChip) {
-      elements.saleFilterChip.hidden = !state.sale;
-    }
 
     if (elements.saleNavLink && elements.catalogNavLink) {
       elements.saleNavLink.classList.toggle("active", state.sale);
@@ -748,17 +761,59 @@ Apakah masih tersedia?`;
       }
     }
 
-    if (elements.catalogEyebrow) {
-      elements.catalogEyebrow.textContent = state.sale ? "SALE" : "Full catalog";
+    const mainGroup = state.mainCategory ? getMainCategoryGroup(state.mainCategory) : null;
+    let eyebrow = "Full catalog";
+    let title = "Seluruh koleksi mi.do.ri";
+    let description = "Semua pieces aktif dari label pilihan mi.do.ri.";
+
+    if (state.query) {
+      eyebrow = "Search results";
+      title = `Hasil untuk “${state.query}”`;
+      description = `${state.filtered.length.toLocaleString("id-ID")} pieces yang paling dekat dengan pencarianmu.`;
+    } else if (state.brand) {
+      eyebrow = "Brand edit";
+      title = state.brand;
+      description = `${state.filtered.length.toLocaleString("id-ID")} pieces dari ${state.brand} tersedia di mi.do.ri.`;
+    } else if (state.condition === "Preloved") {
+      eyebrow = "Second Chapter";
+      title = "Preloved pieces, next story.";
+      description = `${state.filtered.length.toLocaleString("id-ID")} preloved pieces siap menemukan wardrobe berikutnya.`;
+    } else if (state.sale) {
+      eyebrow = "Current offer";
+      title = "The SALE Edit";
+      description = `${state.filtered.length.toLocaleString("id-ID")} pieces dengan promo yang sedang aktif.`;
+    } else if (state.newOnly) {
+      eyebrow = "Just in";
+      title = "New Arrivals";
+      description = `${state.filtered.length.toLocaleString("id-ID")} fresh pieces yang baru masuk ke mi.do.ri.`;
+    } else if (mainGroup) {
+      eyebrow = "Category edit";
+      title = `The ${mainGroup.label} Edit`;
+      description = `${state.filtered.length.toLocaleString("id-ID")} pieces dalam pilihan ${mainGroup.label}.`;
+    } else if (state.category) {
+      eyebrow = "Category edit";
+      title = `The ${state.category} Edit`;
+      description = `${state.filtered.length.toLocaleString("id-ID")} pieces dalam kategori ${state.category}.`;
+    } else if (state.segment) {
+      eyebrow = "For you";
+      title = state.segment === "Anak" ? "The Little Edit" : "The Adult Edit";
+      description = `${state.filtered.length.toLocaleString("id-ID")} pieces untuk segmen ${state.segment.toLowerCase()}.`;
     }
-    if (elements.catalogTitle) {
-      elements.catalogTitle.textContent = state.sale ? "Produk SALE mi.do.ri" : "Seluruh koleksi mi.do.ri";
-    }
-    if (elements.catalogDescription) {
-      elements.catalogDescription.textContent = state.sale
-        ? "Menampilkan produk dengan promo yang sedang aktif. Kamu tetap bisa menyaring berdasarkan brand, kategori, segmen, dan stok."
-        : "Cari berdasarkan nama produk, brand, kategori, warna, atau kode barang.";
-    }
+
+    if (elements.catalogEyebrow) elements.catalogEyebrow.textContent = eyebrow;
+    if (elements.catalogTitle) elements.catalogTitle.textContent = title;
+    if (elements.catalogDescription) elements.catalogDescription.textContent = description;
+
+    document.querySelectorAll("[data-quick-filter]").forEach(button => {
+      const type = button.dataset.quickFilter;
+      const active =
+        (type === "new" && state.newOnly) ||
+        (type === "sale" && state.sale) ||
+        (type === "preloved" && state.condition === "Preloved") ||
+        (type === "available" && state.availability === "available");
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
   }
 
   function syncCatalogUrl() {
@@ -769,7 +824,7 @@ Apakah masih tersedia?`;
 
     [
       "q", "brand", "kategori", "kelompok", "kondisi",
-      "ukuran", "segmen", "stok", "sale", "urut"
+      "ukuran", "segmen", "stok", "sale", "baru", "urut"
     ].forEach(key => url.searchParams.delete(key));
 
     if (state.query) url.searchParams.set("q", state.query);
@@ -780,6 +835,7 @@ Apakah masih tersedia?`;
     if (state.segment) url.searchParams.set("segmen", state.segment);
     if (state.availability) url.searchParams.set("stok", state.availability);
     if (state.sale) url.searchParams.set("sale", "1");
+    if (state.newOnly) url.searchParams.set("baru", "1");
     if (state.sort && state.sort !== "recommended") {
       url.searchParams.set("urut", state.sort);
     }
@@ -794,7 +850,9 @@ Apakah masih tersedia?`;
       statProducts: catalog.summary.products.toLocaleString("id-ID"),
       statBrands: catalog.summary.brands.toLocaleString("id-ID"),
       statProductsHero: catalog.summary.products.toLocaleString("id-ID"),
-      statBrandsHero: catalog.summary.brands.toLocaleString("id-ID")
+      statBrandsHero: catalog.summary.brands.toLocaleString("id-ID"),
+      catalogIntroProducts: catalog.summary.products.toLocaleString("id-ID"),
+      catalogIntroBrands: catalog.summary.brands.toLocaleString("id-ID")
     };
     Object.entries(values).forEach(([id, value]) => {
       const node = document.getElementById(id);
@@ -1111,6 +1169,7 @@ Apakah masih tersedia?`;
   function renderProductCard(product, options = {}) {
     const availability = productAvailability(product);
     const isHomeCard = options.home === true;
+    const isCatalogCard = IS_CATALOG_PAGE && !isHomeCard;
     const images = productImages(product);
     const secondImage = images[1] || "";
     const info = [
@@ -1119,7 +1178,7 @@ Apakah masih tersedia?`;
     ].filter(Boolean).join(" · ");
 
     return `
-      <article class="product-card${isHomeCard ? " product-card-home" : ""}">
+      <article class="product-card${isHomeCard ? " product-card-home" : ""}${isCatalogCard ? " product-card-catalog" : ""}"${isCatalogCard ? ` data-open-product="${product.id}" role="link" tabindex="0" aria-label="Buka detail ${escapeHtml(product.name)}"` : ""}>
         <div class="product-image-wrap">
           <button class="product-image-open" type="button" data-open-product="${product.id}" aria-label="Buka detail ${escapeHtml(product.name)}">
             <span class="product-image-stack">
@@ -1135,15 +1194,16 @@ Apakah masih tersedia?`;
         <div class="product-body">
           <p class="product-brand">${escapeHtml(product.brand)}</p>
           <h3 class="product-title">${escapeHtml(product.name)}</h3>
-          <div class="product-rating">● <span>${stockLabel(availability)}</span></div>
+          ${isCatalogCard ? "" : `<div class="product-rating">● <span>${stockLabel(availability)}</span></div>`}
           <div class="product-price${isPromoActive(product) ? " has-promo" : ""}">${productPriceMarkup(product, true)}</div>
           <p class="product-card-info" title="${escapeHtml(info)}">${escapeHtml(info)}</p>
+          ${isCatalogCard ? `<span class="catalog-card-affordance" aria-hidden="true">View piece ↗</span>` : `
           <div class="product-actions">
             <button class="button button-primary" type="button" data-open-product="${product.id}">${isHomeCard ? "Lihat detail" : "Pilih produk"}</button>
             ${isHomeCard ? "" : `<a class="quick-wa" href="${whatsappProductUrl(product)}" target="_blank" rel="noopener" aria-label="Tanya ${escapeHtml(product.name)} via WhatsApp">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L0 24l6.5-1.7a11.8 11.8 0 0 0 5.6 1.4h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.1-1.2-6-3.5-8.4Z"></path></svg>
             </a>`}
-          </div>
+          </div>`}
         </div>
       </article>`;
   }
@@ -1449,14 +1509,12 @@ Apakah masih tersedia?`;
       if (!matchesSearch(product, query)) return false;
       if (state.brand && product.brand !== state.brand) return false;
       if (state.category && product.category !== state.category) return false;
-      if (
-        state.mainCategory &&
-        !productMatchesMainCategory(product, state.mainCategory)
-      ) return false;
+      if (state.mainCategory && !productMatchesMainCategory(product, state.mainCategory)) return false;
       if (state.segment && product.segment !== state.segment) return false;
       if (state.condition && product.condition !== state.condition) return false;
       if (state.availability && productAvailability(product) !== state.availability) return false;
       if (state.sale && !isPromoActive(product)) return false;
+      if (state.newOnly && !product.isNew) return false;
       return true;
     });
 
@@ -1477,12 +1535,14 @@ Apakah masih tersedia?`;
     });
 
     state.filtered = filtered;
-    const totalPages = Math.max(1, Math.ceil(filtered.length / state.perPage));
-    state.page = Math.min(state.page, totalPages);
+    const maxBatch = Math.max(1, Math.ceil(filtered.length / state.perPage));
+    state.page = Math.min(state.page, maxBatch);
     updateActiveFilterCount();
-    updateSaleView();
+    renderActiveFilterChips();
+    updateCatalogContext();
     renderProducts();
     renderPagination();
+    if (elements.filterResultCount) elements.filterResultCount.textContent = filtered.length.toLocaleString("id-ID");
     syncCatalogUrl();
   }
 
@@ -1494,45 +1554,146 @@ Apakah masih tersedia?`;
       state.segment,
       state.condition,
       state.availability,
-      state.sale
+      state.sale,
+      state.newOnly
     ].filter(Boolean).length;
     if (!elements.activeFilterCount) return;
     elements.activeFilterCount.textContent = count;
     elements.activeFilterCount.classList.toggle("visible", count > 0);
   }
 
+  function renderActiveFilterChips() {
+    if (!elements.activeFilterChips) return;
+    const chips = [];
+    if (state.query) chips.push(["query", `Search: ${state.query}`]);
+    if (state.brand) chips.push(["brand", state.brand]);
+    if (state.mainCategory) chips.push(["mainCategory", getMainCategoryGroup(state.mainCategory)?.label || state.mainCategory]);
+    if (state.category) chips.push(["category", state.category]);
+    if (state.segment) chips.push(["segment", state.segment]);
+    if (state.condition) chips.push(["condition", state.condition === "Preloved" ? "Preloved" : state.condition]);
+    if (state.availability) chips.push(["availability", stockLabel(state.availability)]);
+    if (state.sale) chips.push(["sale", "SALE"]);
+    if (state.newOnly) chips.push(["newOnly", "New"]);
+
+    elements.activeFilterChips.innerHTML = chips.map(([key, label]) => `
+      <button type="button" class="active-filter-chip" data-clear-filter="${key}">
+        <span>${escapeHtml(label)}</span><i aria-hidden="true">×</i>
+      </button>`).join("");
+    elements.activeFilterChips.classList.toggle("has-filters", chips.length > 0);
+  }
+
   function renderProducts() {
     if (!elements.productGrid || !elements.resultCount || !elements.emptyState) return;
     elements.resultCount.textContent = state.filtered.length.toLocaleString("id-ID");
-    const start = (state.page - 1) * state.perPage;
-    const pageItems = state.filtered.slice(start, start + state.perPage);
+    const visibleCount = Math.min(state.filtered.length, state.page * state.perPage);
+    const pageItems = state.filtered.slice(0, visibleCount);
     elements.productGrid.classList.toggle("hidden", !pageItems.length);
     elements.emptyState.classList.toggle("hidden", Boolean(pageItems.length));
-    elements.productGrid.innerHTML = pageItems.map(renderProductCard).join("");
+    elements.productGrid.innerHTML = pageItems.map(product => renderProductCard(product)).join("");
   }
 
   function renderPagination() {
-    if (!elements.paginationWrap || !elements.pageNumbers || !elements.prevPageBtn || !elements.nextPageBtn) return;
-    const totalPages = Math.ceil(state.filtered.length / state.perPage);
-    elements.paginationWrap.classList.toggle("hidden", totalPages <= 1);
-    if (totalPages <= 1) return;
-    elements.prevPageBtn.disabled = state.page === 1;
-    elements.nextPageBtn.disabled = state.page === totalPages;
-    const visiblePages = [];
-    const start = Math.max(1, state.page - 2);
-    const end = Math.min(totalPages, state.page + 2);
-    for (let page = start; page <= end; page++) visiblePages.push(page);
-    elements.pageNumbers.innerHTML = visiblePages.map(page => `
-      <button class="page-number ${page === state.page ? "active" : ""}" type="button" data-page="${page}" aria-label="Halaman ${page}">${page}</button>
-    `).join("");
+    if (!elements.paginationWrap) return;
+    const shown = Math.min(state.filtered.length, state.page * state.perPage);
+    const total = state.filtered.length;
+    if (elements.catalogProgress) {
+      elements.catalogProgress.textContent = `Menampilkan ${shown.toLocaleString("id-ID")} dari ${total.toLocaleString("id-ID")} pieces`;
+    }
+    if (elements.loadMoreBtn) {
+      const hasMore = shown < total;
+      elements.loadMoreBtn.hidden = !hasMore;
+      elements.loadMoreBtn.disabled = !hasMore;
+    }
+    elements.paginationWrap.classList.toggle("hidden", total === 0);
   }
 
-  function setPage(page) {
-    const totalPages = Math.max(1, Math.ceil(state.filtered.length / state.perPage));
-    state.page = Math.min(Math.max(1, page), totalPages);
+  function loadMoreProducts() {
+    if (state.page * state.perPage >= state.filtered.length) return;
+    state.page += 1;
     renderProducts();
     renderPagination();
-    $("#katalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function openFilters() {
+    if (!elements.filterDrawer) return;
+    elements.filterDrawer.classList.add("open");
+    elements.filterDrawer.setAttribute("aria-hidden", "false");
+    elements.filterToggleBtn?.setAttribute("aria-expanded", "true");
+    document.body.classList.add("no-scroll");
+  }
+
+  function closeFilters() {
+    if (!elements.filterDrawer) return;
+    elements.filterDrawer.classList.remove("open");
+    elements.filterDrawer.setAttribute("aria-hidden", "true");
+    elements.filterToggleBtn?.setAttribute("aria-expanded", "false");
+    if (!elements.modal?.classList.contains("open") && !elements.cartDrawer?.classList.contains("open")) {
+      document.body.classList.remove("no-scroll");
+    }
+  }
+
+  function toggleQuickFilter(type) {
+    if (type === "new") state.newOnly = !state.newOnly;
+    if (type === "sale") state.sale = !state.sale;
+    if (type === "preloved") state.condition = state.condition === "Preloved" ? "" : "Preloved";
+    if (type === "available") state.availability = state.availability === "available" ? "" : "available";
+
+    if (elements.conditionFilter) elements.conditionFilter.value = state.condition;
+    if (elements.availabilityFilter) elements.availabilityFilter.value = state.availability;
+    state.page = 1;
+    applyFilters();
+  }
+
+  function clearFilterKey(key) {
+    const resetMap = {
+      query: () => { state.query = ""; if (elements.searchInput) elements.searchInput.value = ""; },
+      brand: () => { state.brand = ""; if (elements.brandFilter) elements.brandFilter.value = ""; },
+      mainCategory: () => { state.mainCategory = ""; },
+      category: () => { state.category = ""; if (elements.categoryFilter) elements.categoryFilter.value = ""; },
+      segment: () => { state.segment = ""; if (elements.segmentFilter) elements.segmentFilter.value = ""; },
+      condition: () => { state.condition = ""; if (elements.conditionFilter) elements.conditionFilter.value = ""; },
+      availability: () => { state.availability = ""; if (elements.availabilityFilter) elements.availabilityFilter.value = ""; },
+      sale: () => { state.sale = false; },
+      newOnly: () => { state.newOnly = false; }
+    };
+    resetMap[key]?.();
+    state.page = 1;
+    applyFilters();
+  }
+
+  function renderSearchSuggestions(value) {
+    if (!elements.searchSuggestions) return;
+    const query = normalize(value);
+    if (!query || query.length < 2) {
+      elements.searchSuggestions.hidden = true;
+      elements.searchSuggestions.innerHTML = "";
+      return;
+    }
+
+    const productMatches = products.filter(product => matchesSearch(product, query)).slice(0, 4);
+    const brandMatches = [...new Set(products.map(product => product.brand))]
+      .filter(brand => normalize(brand).includes(query))
+      .slice(0, 3);
+    const categoryMatches = [...new Set(products.map(product => product.category))]
+      .filter(category => normalize(category).includes(query))
+      .slice(0, 3);
+
+    const groups = [];
+    if (productMatches.length) {
+      groups.push(`<div class="search-suggestion-group"><span>Pieces</span>${productMatches.map(product => `
+        <button type="button" data-open-product="${product.id}"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.brand)}</small></button>`).join("")}</div>`);
+    }
+    if (brandMatches.length) {
+      groups.push(`<div class="search-suggestion-group"><span>Labels</span>${brandMatches.map(brand => `
+        <button type="button" data-suggest-brand="${escapeHtml(brand)}"><strong>${escapeHtml(brand)}</strong></button>`).join("")}</div>`);
+    }
+    if (categoryMatches.length) {
+      groups.push(`<div class="search-suggestion-group"><span>Categories</span>${categoryMatches.map(category => `
+        <button type="button" data-suggest-category="${escapeHtml(category)}"><strong>${escapeHtml(category)}</strong></button>`).join("")}</div>`);
+    }
+
+    elements.searchSuggestions.innerHTML = groups.join("") || `<div class="search-suggestion-empty">Tekan Enter untuk mencari “${escapeHtml(value)}”</div>`;
+    elements.searchSuggestions.hidden = false;
   }
 
   function findProduct(id) {
@@ -1938,7 +2099,7 @@ Apakah masih tersedia?`;
   function resetFilters() {
     Object.assign(state, {
       query: "", brand: "", category: "", mainCategory: "",
-      segment: "", condition: "", availability: "", sale: false,
+      segment: "", condition: "", availability: "", sale: false, newOnly: false,
       sort: "recommended", page: 1
     });
 
@@ -1954,17 +2115,21 @@ Apakah masih tersedia?`;
   }
 
   function handleProductAction(event) {
-    const detailButton = event.target.closest("[data-open-product]");
-    if (detailButton) {
-      openProduct(findProduct(detailButton.dataset.openProduct));
-      return;
-    }
     const quickAdd = event.target.closest("[data-quick-add]");
     if (quickAdd) {
+      event.preventDefault();
+      event.stopPropagation();
       const product = findProduct(quickAdd.dataset.quickAdd);
       const variant = product?.variants.find(v => v.stock > 0 && v.status === "Aktif");
       if (product && variant) addToCart(product, variant);
       else showToast("Produk ini sedang habis.");
+      return;
+    }
+
+    const detailButton = event.target.closest("[data-open-product]");
+    if (detailButton) {
+      if (elements.searchSuggestions) elements.searchSuggestions.hidden = true;
+      openProduct(findProduct(detailButton.dataset.openProduct));
     }
   }
 
@@ -2045,12 +2210,21 @@ Apakah masih tersedia?`;
 
     let searchTimer;
     elements.searchInput?.addEventListener("input", event => {
+      const value = event.target.value;
+      renderSearchSuggestions(value);
       clearTimeout(searchTimer);
       searchTimer = setTimeout(() => {
-        state.query = event.target.value;
+        state.query = value;
         state.page = 1;
         applyFilters();
       }, 180);
+    });
+
+    elements.searchInput?.addEventListener("focus", event => renderSearchSuggestions(event.target.value));
+    elements.searchInput?.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        elements.searchSuggestions && (elements.searchSuggestions.hidden = true);
+      }
     });
 
     [
@@ -2075,11 +2249,15 @@ Apakah masih tersedia?`;
 
     elements.resetFiltersBtn?.addEventListener("click", resetFilters);
     elements.emptyResetBtn?.addEventListener("click", resetFilters);
-    elements.clearSaleFilter?.addEventListener("click", () => {
-      state.sale = false;
-      state.page = 1;
-      applyFilters();
+    elements.filterToggleBtn?.addEventListener("click", openFilters);
+    elements.filterCloseBtn?.addEventListener("click", closeFilters);
+    elements.filterShowResultsBtn?.addEventListener("click", closeFilters);
+    document.querySelectorAll("[data-close-filters]").forEach(node => node.addEventListener("click", closeFilters));
+    elements.loadMoreBtn?.addEventListener("click", loadMoreProducts);
+    document.querySelectorAll("[data-quick-filter]").forEach(button => {
+      button.addEventListener("click", () => toggleQuickFilter(button.dataset.quickFilter));
     });
+    elements.clearSaleFilter?.addEventListener("click", () => clearFilterKey("sale"));
 
     document.addEventListener("click", event => {
       if (
@@ -2099,6 +2277,41 @@ Apakah masih tersedia?`;
       }
 
       if (event.target.closest("[data-open-product], [data-quick-add]")) handleProductAction(event);
+
+      const clearChip = event.target.closest("[data-clear-filter]");
+      if (clearChip) {
+        clearFilterKey(clearChip.dataset.clearFilter);
+        return;
+      }
+
+      const suggestBrand = event.target.closest("[data-suggest-brand]");
+      if (suggestBrand) {
+        state.brand = suggestBrand.dataset.suggestBrand;
+        if (elements.brandFilter) elements.brandFilter.value = state.brand;
+        state.query = "";
+        if (elements.searchInput) elements.searchInput.value = "";
+        state.page = 1;
+        elements.searchSuggestions && (elements.searchSuggestions.hidden = true);
+        applyFilters();
+        return;
+      }
+
+      const suggestCategory = event.target.closest("[data-suggest-category]");
+      if (suggestCategory) {
+        state.category = suggestCategory.dataset.suggestCategory;
+        state.mainCategory = "";
+        if (elements.categoryFilter) elements.categoryFilter.value = state.category;
+        state.query = "";
+        if (elements.searchInput) elements.searchInput.value = "";
+        state.page = 1;
+        elements.searchSuggestions && (elements.searchSuggestions.hidden = true);
+        applyFilters();
+        return;
+      }
+
+      if (elements.searchSuggestions && !event.target.closest(".catalog-search-shell")) {
+        elements.searchSuggestions.hidden = true;
+      }
 
       const mainCategory = event.target.closest("[data-main-category]");
       if (mainCategory) {
@@ -2120,13 +2333,6 @@ Apakah masih tersedia?`;
       }
     });
 
-    elements.prevPageBtn?.addEventListener("click", () => setPage(state.page - 1));
-    elements.nextPageBtn?.addEventListener("click", () => setPage(state.page + 1));
-    elements.pageNumbers?.addEventListener("click", event => {
-      const button = event.target.closest("[data-page]");
-      if (button) setPage(Number(button.dataset.page));
-    });
-
     $$('[data-close-modal]').forEach(button => button.addEventListener("click", closeProduct));
     elements.openCartBtn?.addEventListener("click", openCart);
     elements.promoOpenCartBtn?.addEventListener("click", openCart);
@@ -2146,13 +2352,26 @@ Apakah masih tersedia?`;
     });
 
     document.addEventListener("keydown", event => {
+      if (event.key === "/" && IS_CATALOG_PAGE && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "SELECT") {
+        event.preventDefault();
+        focusCatalogSearch();
+        return;
+      }
+
+      if ((event.key === "Enter" || event.key === " ") && event.target?.matches?.(".product-card-catalog[data-open-product]")) {
+        event.preventDefault();
+        openProduct(findProduct(event.target.dataset.openProduct));
+        return;
+      }
+
       if (event.key !== "Escape") return;
 
       elements.categoryNavDropdown?.classList.remove("open");
       elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
       elements.brandNavDropdown?.classList.remove("open");
       elements.brandNavToggle?.setAttribute("aria-expanded", "false");
-
+      if (elements.searchSuggestions) elements.searchSuggestions.hidden = true;
+      if (elements.filterDrawer?.classList.contains("open")) closeFilters();
       if (elements.modal.classList.contains("open")) closeProduct();
       if (elements.cartDrawer.classList.contains("open")) closeCart();
     });
