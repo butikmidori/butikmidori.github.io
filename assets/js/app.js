@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "3.6.1";
+  const APP_VERSION = "4.0.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -270,6 +270,12 @@
     productGrid: $("#productGrid"),
     featuredGrid: $("#featuredGrid"),
     prelovedGrid: $("#prelovedGrid"),
+    editorialEditGrid: $("#editorialEditGrid"),
+    freshSection: $("#fresh"),
+    freshGrid: $("#freshGrid"),
+    brandDiscoveryGrid: $("#brandDiscoveryGrid"),
+    continueSection: $("#continueExploring"),
+    continueGrid: $("#continueGrid"),
     resultCount: $("#resultCount"),
     emptyState: $("#emptyState"),
     paginationWrap: $("#paginationWrap"),
@@ -295,7 +301,16 @@
     heroSliderPrev: $("#heroSliderPrev"),
     heroSliderNext: $("#heroSliderNext"),
     heroSliderDots: $("#heroSliderDots"),
-    heroSliderStatus: $("#heroSliderStatus")
+    heroSliderStatus: $("#heroSliderStatus"),
+    heroCopy: $("#heroCopy"),
+    heroKickerText: $("#heroKickerText"),
+    heroTitle: $("#heroTitle"),
+    heroDescription: $("#heroDescription"),
+    heroPrimaryLink: $("#heroPrimaryLink"),
+    heroMediaLink: $("#heroMediaLink"),
+    heroMediaLinkLabel: $("#heroMediaLinkLabel"),
+    statBrandsHero: $("#statBrandsHero"),
+    statProductsHero: $("#statProductsHero")
   };
 
   const IS_CATALOG_PAGE = Boolean(elements.productGrid);
@@ -777,7 +792,9 @@ Apakah masih tersedia?`;
   function renderSummary() {
     const values = {
       statProducts: catalog.summary.products.toLocaleString("id-ID"),
-      statBrands: catalog.summary.brands.toLocaleString("id-ID")
+      statBrands: catalog.summary.brands.toLocaleString("id-ID"),
+      statProductsHero: catalog.summary.products.toLocaleString("id-ID"),
+      statBrandsHero: catalog.summary.brands.toLocaleString("id-ID")
     };
     Object.entries(values).forEach(([id, value]) => {
       const node = document.getElementById(id);
@@ -836,6 +853,31 @@ Apakah masih tersedia?`;
       if (elements.heroSliderDots) elements.heroSliderDots.hidden = !hasMultipleSlides;
     };
 
+    const updateHeroEditorial = slide => {
+      if (!slide) return;
+      const kicker = slide.dataset.kicker || "The mi.do.ri Edit";
+      const title = slide.dataset.title || "Meet the New You.";
+      const copy = slide.dataset.copy || "Curated Muslim Fashion from selected labels.";
+      const link = slide.dataset.link || "katalog.html#katalog";
+      const linkLabel = slide.dataset.linkLabel || "Explore the edit";
+
+      if (elements.heroKickerText) elements.heroKickerText.textContent = kicker;
+      if (elements.heroTitle) elements.heroTitle.textContent = title;
+      if (elements.heroDescription) elements.heroDescription.textContent = copy;
+      if (elements.heroPrimaryLink) {
+        elements.heroPrimaryLink.href = link;
+        elements.heroPrimaryLink.firstChild.textContent = `${linkLabel} `;
+      }
+      if (elements.heroMediaLink) elements.heroMediaLink.href = link;
+      if (elements.heroMediaLinkLabel) elements.heroMediaLinkLabel.textContent = linkLabel;
+
+      if (elements.heroCopy) {
+        elements.heroCopy.classList.remove("is-swapping");
+        void elements.heroCopy.offsetWidth;
+        elements.heroCopy.classList.add("is-swapping");
+      }
+    };
+
     const showSlide = (index, restart = false) => {
       if (!slides.length) return;
 
@@ -848,6 +890,8 @@ Apakah masih tersedia?`;
         slide.classList.toggle("is-active", active);
         slide.setAttribute("aria-hidden", String(!active));
       });
+
+      updateHeroEditorial(slides[currentIndex]);
 
       elements.heroSliderDots?.querySelectorAll(".hero-slider-dot").forEach((dot, dotIndex) => {
         const active = dotIndex === currentIndex;
@@ -1064,18 +1108,24 @@ Apakah masih tersedia?`;
     ].join("");
   }
 
-  function renderProductCard(product) {
+  function renderProductCard(product, options = {}) {
     const availability = productAvailability(product);
+    const isHomeCard = options.home === true;
+    const images = productImages(product);
+    const secondImage = images[1] || "";
     const info = [
       product.colors.length ? `${product.colors.length} warna` : "",
       product.sizes.length ? product.sizes.slice(0, 3).join(", ") : ""
     ].filter(Boolean).join(" · ");
 
     return `
-      <article class="product-card">
+      <article class="product-card${isHomeCard ? " product-card-home" : ""}">
         <div class="product-image-wrap">
           <button class="product-image-open" type="button" data-open-product="${product.id}" aria-label="Buka detail ${escapeHtml(product.name)}">
-            ${imageMarkup(product, "product-image")}
+            <span class="product-image-stack">
+              ${imageMarkup(product, "product-image product-image-primary")}
+              ${secondImage ? `<img class="product-image product-image-secondary" src="${escapeHtml(secondImage)}" alt="${escapeHtml(product.name)} — foto 2" loading="lazy" decoding="async">` : ""}
+            </span>
           </button>
           <div class="product-badges">${productBadges(product)}</div>
           ${availability === "limited" ? `<span class="badge badge-limited badge-stock-bottom-left">Stok menipis</span>` : ""}
@@ -1089,10 +1139,10 @@ Apakah masih tersedia?`;
           <div class="product-price${isPromoActive(product) ? " has-promo" : ""}">${productPriceMarkup(product, true)}</div>
           <p class="product-card-info" title="${escapeHtml(info)}">${escapeHtml(info)}</p>
           <div class="product-actions">
-            <button class="button button-primary" type="button" data-open-product="${product.id}">Pilih produk</button>
-            <a class="quick-wa" href="${whatsappProductUrl(product)}" target="_blank" rel="noopener" aria-label="Tanya ${escapeHtml(product.name)} via WhatsApp">
+            <button class="button button-primary" type="button" data-open-product="${product.id}">${isHomeCard ? "Lihat detail" : "Pilih produk"}</button>
+            ${isHomeCard ? "" : `<a class="quick-wa" href="${whatsappProductUrl(product)}" target="_blank" rel="noopener" aria-label="Tanya ${escapeHtml(product.name)} via WhatsApp">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L0 24l6.5-1.7a11.8 11.8 0 0 0 5.6 1.4h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.1-1.2-6-3.5-8.4Z"></path></svg>
-            </a>
+            </a>`}
           </div>
         </div>
       </article>`;
@@ -1144,33 +1194,238 @@ Apakah masih tersedia?`;
       .filter(product => product.isFeatured === true)
       .filter(product => productAvailability(product) !== "out");
 
-    const featured = selectedProducts
+    let featured = selectedProducts
       .filter(product =>
         product.condition !== "Preloved" &&
         product.brand !== "PRELOVED"
       )
       .sort(sortCuratedHomeProducts)
-      .slice(0, 5);
+      .slice(0, 4);
 
-    const preloved = selectedProducts
+    let preloved = selectedProducts
       .filter(product =>
         product.condition === "Preloved" ||
         product.brand === "PRELOVED"
       )
       .sort(sortCuratedHomeProducts)
-      .slice(0, 5);
+      .slice(0, 4);
+
+    // Keep the homepage useful when the live source is unavailable or
+    // Featured flags have not been curated yet. Explicit Featured choices
+    // always win; these are graceful fallbacks only.
+    if (!featured.length) {
+      featured = selectDiverseProducts(
+        products.filter(product => product.condition !== "Preloved" && product.brand !== "PRELOVED"),
+        4
+      );
+    }
+
+    if (!preloved.length) {
+      preloved = products
+        .filter(product => product.condition === "Preloved" || product.brand === "PRELOVED")
+        .filter(product => productAvailability(product) !== "out")
+        .sort((a, b) => Number(Boolean(b.images?.find(Boolean))) - Number(Boolean(a.images?.find(Boolean))) || b.totalStock - a.totalStock)
+        .slice(0, 4);
+    }
 
     if (elements.featuredGrid) {
       elements.featuredGrid.innerHTML = featured.length
-        ? featured.map(renderProductCard).join("")
+        ? featured.map(product => renderProductCard(product, { home: true })).join("")
         : '<div class="section-empty-note">Belum ada Featured Product yang dipilih di Google Sheets.</div>';
     }
 
     if (elements.prelovedGrid) {
       elements.prelovedGrid.innerHTML = preloved.length
-        ? preloved.map(renderProductCard).join("")
+        ? preloved.map(product => renderProductCard(product, { home: true })).join("")
         : '<div class="section-empty-note">Belum ada produk Preloved yang dipilih di Google Sheets.</div>';
     }
+  }
+
+  function homeProductCandidates(predicate) {
+    return products
+      .filter(product => productAvailability(product) !== "out")
+      .filter(product => product.brand !== "BOX")
+      .filter(predicate)
+      .sort((a, b) =>
+        Number(Boolean(b.images?.find(Boolean))) - Number(Boolean(a.images?.find(Boolean))) ||
+        Number(b.isFeatured === true) - Number(a.isFeatured === true) ||
+        b.totalStock - a.totalStock ||
+        a.name.localeCompare(b.name, "id")
+      );
+  }
+
+  function representativeProduct(predicate) {
+    return homeProductCandidates(predicate).find(product => firstProductImage(product)) || null;
+  }
+
+  function renderEditorialEdits() {
+    if (!elements.editorialEditGrid) return;
+
+    const edits = [
+      {
+        kicker: "01 · Layering",
+        title: "Soft Structure",
+        description: "Outerwear and knitwear that add shape without making the look feel heavy.",
+        href: "katalog.html?kelompok=outerwear#katalog",
+        predicate: product => product.condition !== "Preloved" && ["Outer", "Sweater"].includes(product.category)
+      },
+      {
+        kicker: "02 · Occasion",
+        title: "Dress Notes",
+        description: "Dresses and coordinated sets for days that deserve a little more intention.",
+        href: "katalog.html?kelompok=dress-set#katalog",
+        predicate: product => product.condition !== "Preloved" && ["Dress", "Set"].includes(product.category)
+      },
+      {
+        kicker: "03 · Little Edit",
+        title: "For Little Ones",
+        description: "Playful pieces for kids, curated across mi.do.ri's multibrand selection.",
+        href: "katalog.html?segmen=Anak#katalog",
+        predicate: product => product.condition !== "Preloved" && product.segment === "Anak"
+      }
+    ];
+
+    elements.editorialEditGrid.innerHTML = edits.map((edit, index) => {
+      const candidates = homeProductCandidates(edit.predicate);
+      const representative = candidates.find(product => firstProductImage(product));
+      const image = representative ? firstProductImage(representative) : "";
+      const count = candidates.length;
+
+      return `
+        <article class="editorial-edit-card editorial-edit-card-${index + 1}" data-reveal-item style="--reveal-delay:${index * 80}ms">
+          <a class="editorial-edit-media" href="${escapeHtml(edit.href)}" aria-label="Explore ${escapeHtml(edit.title)}">
+            ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(representative.name)}" loading="lazy" decoding="async">` : '<span class="editorial-edit-placeholder"></span>'}
+          </a>
+          <div class="editorial-edit-copy">
+            <span>${escapeHtml(edit.kicker)}</span>
+            <h3>${escapeHtml(edit.title)}</h3>
+            <p>${escapeHtml(edit.description)}</p>
+            <div class="editorial-edit-actions">
+              <a href="${escapeHtml(edit.href)}">Explore ${count.toLocaleString("id-ID")} pieces <b>↗</b></a>
+              ${representative ? `<button type="button" data-open-product="${escapeHtml(representative.id)}">Quick view · ${escapeHtml(representative.name)}</button>` : ""}
+            </div>
+          </div>
+        </article>`;
+    }).join("");
+  }
+
+  function renderFreshProducts() {
+    if (!elements.freshSection || !elements.freshGrid) return;
+    const fresh = products
+      .filter(product => product.isNew === true)
+      .filter(product => product.condition !== "Preloved")
+      .filter(product => productAvailability(product) !== "out")
+      .sort(sortCuratedHomeProducts)
+      .slice(0, 4);
+
+    if (!fresh.length) {
+      elements.freshSection.hidden = true;
+      return;
+    }
+
+    elements.freshGrid.innerHTML = fresh.map(product => renderProductCard(product, { home: true })).join("");
+    elements.freshSection.hidden = false;
+  }
+
+  function renderBrandDiscovery() {
+    if (!elements.brandDiscoveryGrid) return;
+
+    const brandMap = new Map();
+    products.forEach(product => {
+      if (!product.brand || ["PRELOVED", "BOX"].includes(product.brand)) return;
+      if (product.condition === "Preloved" || productAvailability(product) === "out") return;
+      if (!brandMap.has(product.brand)) brandMap.set(product.brand, []);
+      brandMap.get(product.brand).push(product);
+    });
+
+    const brandStories = [...brandMap.entries()]
+      .map(([brand, items]) => {
+        const representative = items
+          .filter(product => firstProductImage(product))
+          .sort((a, b) =>
+            Number(b.isFeatured === true) - Number(a.isFeatured === true) ||
+            b.totalStock - a.totalStock
+          )[0];
+        return { brand, items, representative };
+      })
+      .filter(story => story.representative)
+      .sort((a, b) => b.items.length - a.items.length || a.brand.localeCompare(b.brand, "id"))
+      .slice(0, 4);
+
+    if (!brandStories.length) {
+      elements.brandDiscoveryGrid.innerHTML = '<div class="section-empty-note">Brand stories akan tampil saat foto produk tersedia.</div>';
+      return;
+    }
+
+    elements.brandDiscoveryGrid.innerHTML = brandStories.map((story, index) => `
+      <a class="brand-discovery-card" href="${catalogUrl({ brand: story.brand })}" data-reveal-item style="--reveal-delay:${index * 70}ms">
+        <span class="brand-discovery-index">0${index + 1}</span>
+        <div class="brand-discovery-media">
+          <img src="${escapeHtml(firstProductImage(story.representative))}" alt="${escapeHtml(story.representative.name)}" loading="lazy" decoding="async">
+        </div>
+        <div class="brand-discovery-copy">
+          <span>${story.items.length.toLocaleString("id-ID")} pieces</span>
+          <h3>${escapeHtml(story.brand)}</h3>
+          <p>Explore brand <b>↗</b></p>
+        </div>
+      </a>`).join("");
+  }
+
+  const RECENTLY_VIEWED_KEY = "midori-recently-viewed-v1";
+
+  function getRecentlyViewedIds() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(RECENTLY_VIEWED_KEY) || "[]");
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function rememberRecentlyViewed(product) {
+    if (!product?.id) return;
+    const ids = getRecentlyViewedIds().filter(id => id !== product.id);
+    ids.unshift(product.id);
+    localStorage.setItem(RECENTLY_VIEWED_KEY, JSON.stringify(ids.slice(0, 8)));
+    renderRecentlyViewed();
+  }
+
+  function renderRecentlyViewed() {
+    if (!elements.continueSection || !elements.continueGrid) return;
+    const recent = getRecentlyViewedIds()
+      .map(id => findProduct(id))
+      .filter(Boolean)
+      .filter(product => productAvailability(product) !== "out")
+      .slice(0, 4);
+
+    if (!recent.length) {
+      elements.continueSection.hidden = true;
+      return;
+    }
+
+    elements.continueGrid.innerHTML = recent.map(product => renderProductCard(product, { home: true })).join("");
+    elements.continueSection.hidden = false;
+  }
+
+  function setupRevealMotion() {
+    const targets = [...document.querySelectorAll("[data-reveal], [data-reveal-item]")];
+    if (!targets.length) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      targets.forEach(target => target.classList.add("is-revealed"));
+      return;
+    }
+
+    document.documentElement.classList.add("reveal-ready");
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-revealed");
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+
+    targets.forEach(target => observer.observe(target));
   }
 
   function matchesSearch(product, query) {
@@ -1418,6 +1673,7 @@ Apakah masih tersedia?`;
 
   function openProduct(product, updateUrl = true) {
     if (!product) return;
+    rememberRecentlyViewed(product);
     const variants = availableVariants(product);
     const defaultVariant = variants.find(v => v.stock > 0) || variants[0];
     const availability = productAvailability(product);
@@ -1842,7 +2098,7 @@ Apakah masih tersedia?`;
         elements.brandNavToggle?.setAttribute("aria-expanded", "false");
       }
 
-      if (event.target.closest("[data-product-grid]")) handleProductAction(event);
+      if (event.target.closest("[data-open-product], [data-quick-add]")) handleProductAction(event);
 
       const mainCategory = event.target.closest("[data-main-category]");
       if (mainCategory) {
@@ -1915,13 +2171,18 @@ Apakah masih tersedia?`;
     renderBrandNavigation();
     renderSummary();
     renderHero();
+    renderEditorialEdits();
     renderCategories();
     renderCuratedSections();
+    renderFreshProducts();
+    renderBrandDiscovery();
+    renderRecentlyViewed();
     bindEvents();
     renderCart();
     applyFilters();
     openProductFromUrl();
     focusSearchFromUrl();
+    setupRevealMotion();
     document.documentElement.dataset.midoriApp = APP_VERSION;
   } catch (error) {
     console.error(`mi.do.ri Webstore ${APP_VERSION} gagal dimuat:`, error);
