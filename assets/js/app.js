@@ -1,12 +1,13 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.1.0";
+  const APP_VERSION = "4.2.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
   const PRODUCT_PATH_PREFIX = "/produk/";
   let modalReturnUrl = null;
+  let modalInteractionController = null;
 
   const LIVE_CATALOG_URL = "https://script.google.com/macros/s/AKfycbxPJRajjNGt6VzSBEisLnO-dMp3RuyGaljk_uyXF_duR-_CLdeXZmIC_MVZSXfyCEmb/exec";
   const LIVE_CATALOG_TIMEOUT = 12000;
@@ -517,7 +518,7 @@
     return videoItem ? [...imageItems, videoItem] : imageItems;
   }
 
-  function renderModalMainMedia(item, product) {
+  function renderModalMainMedia(item, product, playVideo = false) {
     if (!item) return imageMarkup(product, "modal-main-media-image");
 
     if (item.type === "image") {
@@ -525,28 +526,47 @@
       return `<img class="modal-main-media-image" src="${escapeHtml(item.src)}" alt="${escapeHtml(item.alt || product.name)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false">${placeholder}`;
     }
 
+    if (!playVideo && item.type === "video") {
+      const poster = firstProductImage(product);
+      const providerLabel = item.provider === "youtube" ? "YouTube film" : item.provider === "direct" ? "Product film" : "Product video";
+      const posterVisual = poster
+        ? `<img class="modal-video-poster-image" src="${escapeHtml(poster)}" alt="${escapeHtml(product.name)} — video preview" loading="lazy">`
+        : `<div class="modal-video-poster-placeholder ${placeholderClass(product)}"><strong>${escapeHtml(productInitials(product))}</strong><small>${escapeHtml(product.brand)}</small></div>`;
+      const playControl = item.provider === "link"
+        ? `<a class="modal-video-play" href="${escapeHtml(item.url)}" target="_blank" rel="noopener"><span class="modal-video-play-icon" aria-hidden="true">▶</span><span><strong>Watch product film</strong><small>${providerLabel}</small></span></a>`
+        : `<button class="modal-video-play" type="button" data-play-video><span class="modal-video-play-icon" aria-hidden="true">▶</span><span><strong>Watch product film</strong><small>${providerLabel}</small></span></button>`;
+      return `
+        <div class="modal-video-poster">
+          ${posterVisual}
+          <span class="modal-video-poster-shade" aria-hidden="true"></span>
+          ${playControl}
+          <a class="modal-video-external" href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="Buka video di tab baru">Open ↗</a>
+        </div>`;
+    }
+
     if (item.provider === "youtube") {
+      const separator = item.embedUrl.includes("?") ? "&" : "?";
       return `
         <div class="modal-main-media-video-wrap">
-          <iframe class="modal-main-media-embed" src="${escapeHtml(item.embedUrl)}" title="${escapeHtml(product.name)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          <iframe class="modal-main-media-embed" src="${escapeHtml(item.embedUrl + separator + 'autoplay=1')}" title="${escapeHtml(product.name)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
-        <div class="modal-media-caption"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka video di tab baru</a></div>`;
+        <div class="modal-media-caption"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Open video ↗</a></div>`;
     }
 
     if (item.provider === "direct") {
       return `
         <div class="modal-main-media-video-wrap">
-          <video class="modal-main-media-video" src="${escapeHtml(item.embedUrl)}" controls playsinline preload="metadata"></video>
+          <video class="modal-main-media-video" src="${escapeHtml(item.embedUrl)}" controls autoplay playsinline preload="metadata"></video>
         </div>
-        <div class="modal-media-caption"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka video di tab baru</a></div>`;
+        <div class="modal-media-caption"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Open video ↗</a></div>`;
     }
 
     return `
       <div class="modal-media-link-fallback">
         <div class="modal-media-link-icon" aria-hidden="true">▶</div>
-        <h3>Video produk tersedia</h3>
-        <p>Klik tombol di bawah untuk menonton video produk ini.</p>
-        <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka video</a>
+        <h3>Product film</h3>
+        <p>Video produk tersedia melalui sumber eksternal.</p>
+        <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Watch video ↗</a>
       </div>`;
   }
 
@@ -1178,7 +1198,7 @@ Apakah masih tersedia?`;
     ].filter(Boolean).join(" · ");
 
     return `
-      <article class="product-card${isHomeCard ? " product-card-home" : ""}${isCatalogCard ? " product-card-catalog" : ""}"${isCatalogCard ? ` data-open-product="${product.id}" role="link" tabindex="0" aria-label="Buka detail ${escapeHtml(product.name)}"` : ""}>
+      <article class="product-card${isHomeCard ? " product-card-home" : ""}${isCatalogCard ? " product-card-catalog" : ""}" data-open-product="${product.id}" role="link" tabindex="0" aria-label="Buka detail ${escapeHtml(product.name)}">
         <div class="product-image-wrap">
           <button class="product-image-open" type="button" data-open-product="${product.id}" aria-label="Buka detail ${escapeHtml(product.name)}">
             <span class="product-image-stack">
@@ -1197,13 +1217,6 @@ Apakah masih tersedia?`;
           ${isCatalogCard ? "" : `<div class="product-rating">● <span>${stockLabel(availability)}</span></div>`}
           <div class="product-price${isPromoActive(product) ? " has-promo" : ""}">${productPriceMarkup(product, true)}</div>
           <p class="product-card-info" title="${escapeHtml(info)}">${escapeHtml(info)}</p>
-          ${isCatalogCard ? `<span class="catalog-card-affordance" aria-hidden="true">View piece ↗</span>` : `
-          <div class="product-actions">
-            <button class="button button-primary" type="button" data-open-product="${product.id}">${isHomeCard ? "Lihat detail" : "Pilih produk"}</button>
-            ${isHomeCard ? "" : `<a class="quick-wa" href="${whatsappProductUrl(product)}" target="_blank" rel="noopener" aria-label="Tanya ${escapeHtml(product.name)} via WhatsApp">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L0 24l6.5-1.7a11.8 11.8 0 0 0 5.6 1.4h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.1-1.2-6-3.5-8.4Z"></path></svg>
-            </a>`}
-          </div>`}
         </div>
       </article>`;
   }
@@ -1832,16 +1845,76 @@ Apakah masih tersedia?`;
       </div>`;
   }
 
+  function productStoryLabel(product) {
+    if (product.condition === "Preloved") return "SECOND CHAPTER";
+    if (isPromoActive(product)) return "SALE EDIT";
+    if (product.isNew) return "NEW ARRIVAL";
+    if (product.isFeatured) return "FEATURED";
+    return "";
+  }
+
+  function variantChoiceLabel(variant) {
+    if (!variant) return "Pilih varian";
+    return [variant.color || "Tanpa warna", variant.size || "Tanpa ukuran"].join(" · ");
+  }
+
+  function variantStateLabel(variant) {
+    if (!variant) return "Tidak tersedia";
+    if (variant.stock <= 0) return "Habis";
+    return stockLabel(variant.stock <= 2 ? "limited" : "available");
+  }
+
+  function renderVariantPicker(variants, defaultVariant) {
+    const nativeOptions = variants.map(variant => `
+      <option value="${escapeHtml(variant.sku)}" ${variant === defaultVariant ? "selected" : ""} ${variant.stock <= 0 ? "disabled" : ""}>
+        ${escapeHtml(variantChoiceLabel(variant))} · ${escapeHtml(variantStateLabel(variant))}
+      </option>`).join("");
+
+    const customOptions = variants.map(variant => {
+      const selected = variant === defaultVariant;
+      const disabled = variant.stock <= 0;
+      return `
+        <button class="variant-picker-option${selected ? " is-selected" : ""}${disabled ? " is-disabled" : ""}" type="button" role="option" data-variant-option="${escapeHtml(variant.sku)}" aria-selected="${selected ? "true" : "false"}" ${disabled ? "disabled" : ""}>
+          <span class="variant-picker-option-copy">
+            <strong>${escapeHtml(variant.color || "Tanpa warna")}</strong>
+            <small>${escapeHtml(variant.size || "Tanpa ukuran")}</small>
+          </span>
+          <em>${escapeHtml(variantStateLabel(variant))}</em>
+        </button>`;
+    }).join("");
+
+    return `
+      <select class="variant-select variant-select-native" id="variantSelect" tabindex="-1" aria-hidden="true">${nativeOptions}</select>
+      <div class="variant-picker" id="variantPicker">
+        <button class="variant-picker-trigger" id="variantPickerTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span class="variant-picker-choice">
+            <strong id="variantPickerValue">${escapeHtml(variantChoiceLabel(defaultVariant))}</strong>
+            <small id="variantPickerState">${escapeHtml(variantStateLabel(defaultVariant))}</small>
+          </span>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"></path></svg>
+        </button>
+        <div class="variant-picker-menu" id="variantPickerMenu" role="listbox" aria-label="Pilihan warna dan ukuran" hidden>${customOptions}</div>
+      </div>`;
+  }
+
   function openProduct(product, updateUrl = true) {
     if (!product) return;
     rememberRecentlyViewed(product);
+    modalInteractionController?.abort();
+    modalInteractionController = new AbortController();
+    const interactionSignal = modalInteractionController.signal;
+
     const variants = availableVariants(product);
     const defaultVariant = variants.find(v => v.stock > 0) || variants[0];
     const availability = productAvailability(product);
     const mediaItemsForProduct = productMediaItems(product);
+    const storyLabel = productStoryLabel(product);
+    const titleLength = String(product.name || "").length;
+    const titleClass = titleLength > 32 ? " is-long" : titleLength > 20 ? " is-medium" : "";
+    const whatsappIcon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L0 24l6.5-1.7a11.8 11.8 0 0 0 5.6 1.4h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.1-1.2-6-3.5-8.4Z"></path></svg>`;
 
     elements.modalContent.innerHTML = `
-      <article class="modal-product">
+      <article class="modal-product modal-product-v42">
         <div class="modal-gallery">
           <div class="modal-product-badges">${productBadges(product)}</div>
           <div class="modal-main-image" id="modalMainMedia">${renderModalMainMedia(mediaItemsForProduct[0], product)}</div>
@@ -1850,8 +1923,11 @@ Apakah masih tersedia?`;
         <div class="modal-info">
           <div class="modal-heading-row">
             <div class="modal-heading-copy">
-              <p class="product-brand">${escapeHtml(product.brand)}</p>
-              <h2 id="modalProductName">${escapeHtml(product.name)}</h2>
+              <div class="modal-product-context">
+                ${storyLabel ? `<span class="product-story-label">${escapeHtml(storyLabel)}</span>` : ""}
+                <p class="product-brand">${escapeHtml(product.brand)}</p>
+              </div>
+              <h2 id="modalProductName" class="${titleClass.trim()}">${escapeHtml(product.name)}</h2>
             </div>
             <button class="modal-share-button" id="modalShareButton" type="button" aria-label="Salin link ${escapeHtml(product.name)}" title="Salin link produk">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a3 3 0 1 0-2.83-4A3 3 0 0 0 15 5c0 .2.02.4.06.58L8.91 9.1A3 3 0 1 0 9 14.83l6.08 3.47A3 3 0 1 0 16 16.55l-6.07-3.47a3.06 3.06 0 0 0 0-2.15l6.11-3.5c.53.36 1.17.57 1.86.57Z"></path></svg>
@@ -1859,37 +1935,40 @@ Apakah masih tersedia?`;
             </button>
           </div>
           <div class="modal-price${isPromoActive(product) ? " has-promo" : ""}" id="modalPrice">${defaultVariant ? variantPriceMarkup(product, defaultVariant) : productPriceMarkup(product)}</div>
-          <div id="detailStockBadge" class="detail-stock-badge" hidden>
-            Stok menipis
-          </div>
-          <label class="variant-label" for="variantSelect">Pilih warna dan ukuran</label>
-          <select class="variant-select" id="variantSelect">
-            ${variants.map(variant => `
-              <option value="${escapeHtml(variant.sku)}" ${variant === defaultVariant ? "selected" : ""} ${variant.stock <= 0 ? "disabled" : ""}>
-                ${escapeHtml(variant.color || "Tanpa warna")} · ${escapeHtml(variant.size || "Tanpa ukuran")} · ${variant.stock > 0 ? stockLabel(variant.stock <= 2 ? "limited" : "available") : "Habis"}
-              </option>`).join("")}
-          </select>
+          <div id="detailStockBadge" class="detail-stock-badge" hidden>Stok menipis</div>
 
-          <div class="variant-status">
-            <span class="variant-sku-label">Kode <strong id="modalSku">${escapeHtml(defaultVariant?.sku || "-")}</strong></span>
+          <div class="variant-picker-block">
+            <span class="variant-label">Pilih warna dan ukuran</span>
+            ${renderVariantPicker(variants, defaultVariant)}
+          </div>
+
+          <div class="variant-meta-line">
+            <span>Kode <strong id="modalSku">${escapeHtml(defaultVariant?.sku || "-")}</strong></span>
+            <i aria-hidden="true">·</i>
             <span id="modalStock">${defaultVariant ? stockLabel(defaultVariant.stock <= 0 ? "out" : defaultVariant.stock <= 2 ? "limited" : "available") : stockLabel(availability)}</span>
           </div>
 
           <div class="modal-mobile-cta" aria-label="Aksi produk">
             <button class="button button-primary" type="button" data-modal-add-cart ${!defaultVariant || defaultVariant.stock <= 0 ? "disabled" : ""}>Tambah ke pilihan</button>
-            <a class="button button-wa" data-modal-whatsapp href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">WhatsApp</a>
+            <a class="button button-wa button-wa-luxury" data-modal-whatsapp href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">${whatsappIcon}<span>WhatsApp</span></a>
           </div>
 
           ${renderProductDetailSections(product)}
 
           <div class="modal-actions modal-actions-desktop">
             <button class="button button-primary" type="button" data-modal-add-cart ${!defaultVariant || defaultVariant.stock <= 0 ? "disabled" : ""}>Tambah ke pilihan</button>
-            <a class="button button-wa" data-modal-whatsapp href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">Tanya via WhatsApp</a>
+            <a class="button button-wa button-wa-luxury" data-modal-whatsapp href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">${whatsappIcon}<span>Tanya via WhatsApp</span></a>
           </div>
         </div>
       </article>`;
 
     const variantSelect = $("#variantSelect");
+    const variantPicker = $("#variantPicker");
+    const variantPickerTrigger = $("#variantPickerTrigger");
+    const variantPickerMenu = $("#variantPickerMenu");
+    const variantPickerValue = $("#variantPickerValue");
+    const variantPickerState = $("#variantPickerState");
+    const variantOptions = [...elements.modalContent.querySelectorAll("[data-variant-option]")];
     const addButtons = [...elements.modalContent.querySelectorAll("[data-modal-add-cart]")];
     const waButtons = [...elements.modalContent.querySelectorAll("[data-modal-whatsapp]")];
     const shareButton = $("#modalShareButton");
@@ -1904,6 +1983,79 @@ Apakah masih tersedia?`;
       waButtons.forEach(link => { link.href = whatsappProductUrl(product, variant); });
     }
 
+    function closeVariantPicker({ focus = false } = {}) {
+      if (!variantPickerMenu || !variantPickerTrigger) return;
+      variantPickerMenu.hidden = true;
+      variantPicker.classList.remove("is-open");
+      variantPickerTrigger.setAttribute("aria-expanded", "false");
+      if (focus) variantPickerTrigger.focus();
+    }
+
+    function openVariantPicker({ focusOption = false } = {}) {
+      if (!variantPickerMenu || !variantPickerTrigger) return;
+      variantPickerMenu.hidden = false;
+      variantPicker.classList.add("is-open");
+      variantPickerTrigger.setAttribute("aria-expanded", "true");
+      if (focusOption) {
+        const selected = variantOptions.find(option => option.classList.contains("is-selected") && !option.disabled)
+          || variantOptions.find(option => !option.disabled);
+        selected?.focus();
+      }
+    }
+
+    function syncVariantPicker(variant) {
+      if (!variant) return;
+      if (variantPickerValue) variantPickerValue.textContent = variantChoiceLabel(variant);
+      if (variantPickerState) variantPickerState.textContent = variantStateLabel(variant);
+      variantOptions.forEach(option => {
+        const selected = option.dataset.variantOption === variant.sku;
+        option.classList.toggle("is-selected", selected);
+        option.setAttribute("aria-selected", selected ? "true" : "false");
+      });
+    }
+
+    variantPickerTrigger?.addEventListener("click", () => {
+      if (variantPickerMenu?.hidden) openVariantPicker();
+      else closeVariantPicker();
+    }, { signal: interactionSignal });
+
+    variantPickerTrigger?.addEventListener("keydown", event => {
+      if (["ArrowDown", "Enter", " "].includes(event.key)) {
+        event.preventDefault();
+        openVariantPicker({ focusOption: true });
+      }
+    }, { signal: interactionSignal });
+
+    variantOptions.forEach(option => {
+      option.addEventListener("click", () => {
+        if (option.disabled || !variantSelect) return;
+        variantSelect.value = option.dataset.variantOption;
+        variantSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        closeVariantPicker({ focus: true });
+      }, { signal: interactionSignal });
+    });
+
+    variantPickerMenu?.addEventListener("keydown", event => {
+      const enabledOptions = variantOptions.filter(option => !option.disabled);
+      const currentIndex = enabledOptions.indexOf(document.activeElement);
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        closeVariantPicker({ focus: true });
+        return;
+      }
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        const direction = event.key === "ArrowDown" ? 1 : -1;
+        const nextIndex = Math.max(0, Math.min(enabledOptions.length - 1, currentIndex + direction));
+        enabledOptions[nextIndex]?.focus();
+      }
+    }, { signal: interactionSignal });
+
+    elements.modal.addEventListener("click", event => {
+      if (variantPicker && !variantPicker.contains(event.target)) closeVariantPicker();
+    }, { signal: interactionSignal });
+
     function configureDetailAccordions() {
       const compact = window.matchMedia("(max-width: 700px)").matches;
       detailAccordions.forEach(section => {
@@ -1917,14 +2069,23 @@ Apakah masih tersedia?`;
           const next = !section.classList.contains("is-open");
           section.classList.toggle("is-open", next);
           button.setAttribute("aria-expanded", next ? "true" : "false");
-        });
+        }, { signal: interactionSignal });
       });
+    }
+
+    function bindMainMediaActions(item) {
+      const playButton = modalMainMedia?.querySelector("[data-play-video]");
+      playButton?.addEventListener("click", () => {
+        if (!modalMainMedia || !item) return;
+        modalMainMedia.innerHTML = renderModalMainMedia(item, product, true);
+      }, { signal: interactionSignal });
     }
 
     function setActiveMedia(index) {
       const item = mediaItems[index];
       if (!item || !modalMainMedia) return;
       modalMainMedia.innerHTML = renderModalMainMedia(item, product);
+      bindMainMediaActions(item);
       mediaThumbs.forEach((thumb, thumbIndex) => {
         const active = thumbIndex === index;
         thumb.classList.toggle("is-active", active);
@@ -1935,12 +2096,14 @@ Apakah masih tersedia?`;
     mediaThumbs.forEach(thumb => {
       thumb.addEventListener("click", () => {
         setActiveMedia(Number(thumb.dataset.mediaIndex || 0));
-      });
+      }, { signal: interactionSignal });
     });
 
+    bindMainMediaActions(mediaItems[0]);
     configureDetailAccordions();
     updateDetailStockBadge(defaultVariant);
     setActionState(defaultVariant);
+    syncVariantPicker(defaultVariant);
 
     variantSelect?.addEventListener("change", () => {
       const variant = selectedVariant();
@@ -1949,24 +2112,23 @@ Apakah masih tersedia?`;
       $("#modalPrice").innerHTML = variantPriceMarkup(product, variant);
       $("#modalSku").textContent = variant.sku;
       $("#modalStock").textContent = stockLabel(variant.stock <= 0 ? "out" : variant.stock <= 2 ? "limited" : "available");
+      syncVariantPicker(variant);
       setActionState(variant);
-    });
+    }, { signal: interactionSignal });
 
     addButtons.forEach(button => {
       button.addEventListener("click", () => {
         const variant = selectedVariant();
         if (variant) addToCart(product, variant);
-      });
+      }, { signal: interactionSignal });
     });
 
-    shareButton?.addEventListener("click", () => copyProductLink(product, shareButton));
+    shareButton?.addEventListener("click", () => copyProductLink(product, shareButton), { signal: interactionSignal });
 
     elements.modal.classList.add("open");
     elements.modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("no-scroll");
 
-    // Keep a clean, crawlable product URL in the address bar.
-    // The matching static /produk/<slug>/ page contains the product-specific Open Graph metadata.
     const currentUrl = new URL(window.location.href);
     if (!currentUrl.pathname.startsWith(PRODUCT_PATH_PREFIX)) {
       modalReturnUrl = urlWithoutProduct(currentUrl);
@@ -1975,6 +2137,8 @@ Apakah masih tersedia?`;
   }
 
   function closeProduct() {
+    modalInteractionController?.abort();
+    modalInteractionController = null;
     elements.modal.classList.remove("open");
     elements.modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("no-scroll");
@@ -2358,7 +2522,7 @@ Apakah masih tersedia?`;
         return;
       }
 
-      if ((event.key === "Enter" || event.key === " ") && event.target?.matches?.(".product-card-catalog[data-open-product]")) {
+      if ((event.key === "Enter" || event.key === " ") && event.target?.matches?.(".product-card[data-open-product]")) {
         event.preventDefault();
         openProduct(findProduct(event.target.dataset.openProduct));
         return;
