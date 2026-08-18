@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.2.0";
+  const APP_VERSION = "4.5.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -179,7 +179,7 @@
     },
     {
       id: "outerwear",
-      label: "Outerwear",
+      label: "Luaran",
       icon: "assets/images/categories/category-outerwear.webp",
       categories: ["Sweater", "Outer"]
     },
@@ -305,6 +305,9 @@
     cartCount: $("#cartCount"),
     cartItems: $("#cartItems"),
     cartEmpty: $("#cartEmpty"),
+    cartFooter: $("#cartFooter"),
+    cartSelectionCount: $("#cartSelectionCount"),
+    cartFooterMeta: $("#cartFooterMeta"),
     cartTotal: $("#cartTotal"),
     sendCartBtn: $("#sendCartBtn"),
     clearCartBtn: $("#clearCartBtn"),
@@ -528,19 +531,19 @@
 
     if (!playVideo && item.type === "video") {
       const poster = firstProductImage(product);
-      const providerLabel = item.provider === "youtube" ? "YouTube film" : item.provider === "direct" ? "Product film" : "Product video";
+      const providerLabel = item.provider === "youtube" ? "YouTube" : item.provider === "direct" ? "Video produk" : "Video eksternal";
       const posterVisual = poster
-        ? `<img class="modal-video-poster-image" src="${escapeHtml(poster)}" alt="${escapeHtml(product.name)} — video preview" loading="lazy">`
+        ? `<img class="modal-video-poster-image" src="${escapeHtml(poster)}" alt="${escapeHtml(product.name)} — pratinjau video" loading="lazy">`
         : `<div class="modal-video-poster-placeholder ${placeholderClass(product)}"><strong>${escapeHtml(productInitials(product))}</strong><small>${escapeHtml(product.brand)}</small></div>`;
       const playControl = item.provider === "link"
-        ? `<a class="modal-video-play" href="${escapeHtml(item.url)}" target="_blank" rel="noopener"><span class="modal-video-play-icon" aria-hidden="true">▶</span><span><strong>Watch product film</strong><small>${providerLabel}</small></span></a>`
-        : `<button class="modal-video-play" type="button" data-play-video><span class="modal-video-play-icon" aria-hidden="true">▶</span><span><strong>Watch product film</strong><small>${providerLabel}</small></span></button>`;
+        ? `<a class="modal-video-play" href="${escapeHtml(item.url)}" target="_blank" rel="noopener"><span class="modal-video-play-icon" aria-hidden="true">▶</span><span><strong>Tonton video produk</strong><small>${providerLabel}</small></span></a>`
+        : `<button class="modal-video-play" type="button" data-play-video><span class="modal-video-play-icon" aria-hidden="true">▶</span><span><strong>Tonton video produk</strong><small>${providerLabel}</small></span></button>`;
       return `
         <div class="modal-video-poster">
           ${posterVisual}
           <span class="modal-video-poster-shade" aria-hidden="true"></span>
           ${playControl}
-          <a class="modal-video-external" href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="Buka video di tab baru">Open ↗</a>
+          <a class="modal-video-external" href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="Buka video di tab baru">Buka ↗</a>
         </div>`;
     }
 
@@ -550,7 +553,7 @@
         <div class="modal-main-media-video-wrap">
           <iframe class="modal-main-media-embed" src="${escapeHtml(item.embedUrl + separator + 'autoplay=1')}" title="${escapeHtml(product.name)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
-        <div class="modal-media-caption"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Open video ↗</a></div>`;
+        <div class="modal-media-caption"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka video ↗</a></div>`;
     }
 
     if (item.provider === "direct") {
@@ -558,15 +561,15 @@
         <div class="modal-main-media-video-wrap">
           <video class="modal-main-media-video" src="${escapeHtml(item.embedUrl)}" controls autoplay playsinline preload="metadata"></video>
         </div>
-        <div class="modal-media-caption"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Open video ↗</a></div>`;
+        <div class="modal-media-caption"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Buka video ↗</a></div>`;
     }
 
     return `
       <div class="modal-media-link-fallback">
         <div class="modal-media-link-icon" aria-hidden="true">▶</div>
-        <h3>Product film</h3>
+        <h3>Video produk</h3>
         <p>Video produk tersedia melalui sumber eksternal.</p>
-        <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Watch video ↗</a>
+        <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Tonton video ↗</a>
       </div>`;
   }
 
@@ -610,23 +613,23 @@
 
   function whatsappProductUrl(product, variant = null) {
     const chosen = variant || product.variants.find(v => v.stock > 0) || product.variants[0];
-    const details = chosen
-      ? `
-Kode: ${chosen.sku}
-Warna/Motif: ${chosen.color || "-"}
-Ukuran: ${chosen.size || "-"}`
-      : "";
-    const promoLabel = isPromoActive(product) && product.promoLabel ? `
-Promo: ${product.promoLabel}` : "";
-    const message = `Halo mi.do.ri, saya tertarik dengan produk:
-
-${product.name}
-Brand: ${product.brand}${details}${promoLabel}
-${whatsappPriceLines(product, chosen)}
-
-Link katalog: ${productUrl(product)}
-
-Apakah masih tersedia?`;
+    const variantBits = chosen
+      ? [chosen.color && chosen.color !== "Tanpa warna" ? chosen.color : "", chosen.size && chosen.size !== "Tanpa ukuran" ? `Ukuran ${chosen.size}` : ""].filter(Boolean)
+      : [];
+    const currentPrice = chosen ? discountedPrice(Number(chosen.price || 0), product) : Number(product.priceMin || 0);
+    const isLimited = chosen ? Number(chosen.stock || 0) > 0 && Number(chosen.stock || 0) <= 2 : productAvailability(product) === "limited";
+    const isPreloved = String(product.condition || "").toLowerCase() === "preloved";
+    const intro = isPreloved
+      ? `Halo mi.do.ri 👋\nSaya tertarik dengan produk Preloved ini:`
+      : `Halo mi.do.ri 👋\nSaya tertarik dengan produk ini:`;
+    const contextQuestion = isPreloved
+      ? "Boleh dibantu cek kondisi dan ketersediaannya?"
+      : isLimited
+        ? "Boleh dibantu cek apakah varian ini masih tersedia?"
+        : "Boleh dibantu cek stoknya?";
+    const variantLine = variantBits.length ? `\n${variantBits.join(" · ")}` : "";
+    const codeLine = chosen?.sku ? `\nKode: ${chosen.sku}` : "";
+    const message = `${intro}\n\n${product.name} — ${product.brand}${variantLine}\n${formatCurrency(currentPrice)}${codeLine}\n\n${contextQuestion}\n\nLink produk:\n${productUrl(product)}`;
     return `https://wa.me/${store.whatsapp}?text=${encodeURIComponent(message)}`;
   }
 
@@ -714,14 +717,34 @@ Apakah masih tersedia?`;
 
     const allActive = !state.brand;
     const links = [
-      `<a role="menuitem" class="${allActive ? "is-active" : ""}" href="katalog.html#katalog"${allActive ? ' aria-current="page"' : ""}>Semua Brand</a>`,
+      `<a role="menuitem" class="nav-brand-all${allActive ? " is-active" : ""}" href="katalog.html#katalog"${allActive ? ' aria-current="page"' : ""}>Semua brand <span aria-hidden="true">↗</span></a>`,
       ...activeBrands.map(brand => {
         const active = normalize(state.brand) === normalize(brand);
-        return `<a role="menuitem" class="${active ? "is-active" : ""}" href="katalog.html?brand=${encodeURIComponent(brand)}#katalog"${active ? ' aria-current="page"' : ""}>${escapeHtml(brand)}</a>`;
+        return `<a role="menuitem" data-brand-nav-item data-brand-search="${escapeHtml(normalize(brand))}" class="${active ? "is-active" : ""}" href="katalog.html?brand=${encodeURIComponent(brand)}#katalog"${active ? ' aria-current="page"' : ""}>${escapeHtml(brand)}</a>`;
       })
     ];
 
-    elements.brandNavMenu.innerHTML = links.join("");
+    elements.brandNavMenu.innerHTML = `
+      <div class="nav-brand-search-shell">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg>
+        <input type="search" inputmode="search" autocomplete="off" data-brand-nav-search aria-label="Cari brand" placeholder="Cari brand...">
+      </div>
+      <div class="nav-brand-links">${links.join("")}</div>
+      <p class="nav-brand-empty" data-brand-nav-empty hidden>Brand tidak ditemukan.</p>`;
+  }
+
+  function filterBrandNavigation(query) {
+    if (!elements.brandNavMenu) return;
+    const term = normalize(query || "");
+    const items = [...elements.brandNavMenu.querySelectorAll("[data-brand-nav-item]")];
+    let visible = 0;
+    items.forEach(item => {
+      const match = !term || String(item.dataset.brandSearch || "").includes(term);
+      item.hidden = !match;
+      if (match) visible += 1;
+    });
+    const empty = elements.brandNavMenu.querySelector("[data-brand-nav-empty]");
+    if (empty) empty.hidden = visible > 0 || !term;
   }
 
   function catalogUrl(parameters = {}) {
@@ -782,42 +805,42 @@ Apakah masih tersedia?`;
     }
 
     const mainGroup = state.mainCategory ? getMainCategoryGroup(state.mainCategory) : null;
-    let eyebrow = "Full catalog";
+    let eyebrow = "Katalog lengkap";
     let title = "Seluruh koleksi mi.do.ri";
-    let description = "Semua pieces aktif dari label pilihan mi.do.ri.";
+    let description = "Semua produk aktif dari brand pilihan mi.do.ri.";
 
     if (state.query) {
-      eyebrow = "Search results";
+      eyebrow = "Hasil pencarian";
       title = `Hasil untuk “${state.query}”`;
-      description = `${state.filtered.length.toLocaleString("id-ID")} pieces yang paling dekat dengan pencarianmu.`;
+      description = `${state.filtered.length.toLocaleString("id-ID")} produk yang paling sesuai dengan pencarianmu.`;
     } else if (state.brand) {
-      eyebrow = "Brand edit";
+      eyebrow = "Pilihan brand";
       title = state.brand;
-      description = `${state.filtered.length.toLocaleString("id-ID")} pieces dari ${state.brand} tersedia di mi.do.ri.`;
+      description = `${state.filtered.length.toLocaleString("id-ID")} produk dari ${state.brand} tersedia di mi.do.ri.`;
     } else if (state.condition === "Preloved") {
       eyebrow = "Second Chapter";
-      title = "Preloved pieces, next story.";
-      description = `${state.filtered.length.toLocaleString("id-ID")} preloved pieces siap menemukan wardrobe berikutnya.`;
+      title = "Preloved untuk cerita berikutnya.";
+      description = `${state.filtered.length.toLocaleString("id-ID")} produk Preloved siap melanjutkan cerita berikutnya.`;
     } else if (state.sale) {
-      eyebrow = "Current offer";
-      title = "The SALE Edit";
-      description = `${state.filtered.length.toLocaleString("id-ID")} pieces dengan promo yang sedang aktif.`;
+      eyebrow = "Promo saat ini";
+      title = "Pilihan SALE";
+      description = `${state.filtered.length.toLocaleString("id-ID")} produk dengan promo yang sedang aktif.`;
     } else if (state.newOnly) {
-      eyebrow = "Just in";
-      title = "New Arrivals";
-      description = `${state.filtered.length.toLocaleString("id-ID")} fresh pieces yang baru masuk ke mi.do.ri.`;
+      eyebrow = "Koleksi terbaru";
+      title = "Baru di mi.do.ri";
+      description = `${state.filtered.length.toLocaleString("id-ID")} produk terbaru di mi.do.ri.`;
     } else if (mainGroup) {
-      eyebrow = "Category edit";
-      title = `The ${mainGroup.label} Edit`;
-      description = `${state.filtered.length.toLocaleString("id-ID")} pieces dalam pilihan ${mainGroup.label}.`;
+      eyebrow = "Pilihan kategori";
+      title = `Pilihan ${mainGroup.label}`;
+      description = `${state.filtered.length.toLocaleString("id-ID")} produk dalam pilihan ${mainGroup.label}.`;
     } else if (state.category) {
-      eyebrow = "Category edit";
-      title = `The ${state.category} Edit`;
-      description = `${state.filtered.length.toLocaleString("id-ID")} pieces dalam kategori ${state.category}.`;
+      eyebrow = "Pilihan kategori";
+      title = `Pilihan ${state.category}`;
+      description = `${state.filtered.length.toLocaleString("id-ID")} produk dalam kategori ${state.category}.`;
     } else if (state.segment) {
-      eyebrow = "For you";
-      title = state.segment === "Anak" ? "The Little Edit" : "The Adult Edit";
-      description = `${state.filtered.length.toLocaleString("id-ID")} pieces untuk segmen ${state.segment.toLowerCase()}.`;
+      eyebrow = "Untukmu";
+      title = state.segment === "Anak" ? "Pilihan untuk Si Kecil" : "Pilihan Dewasa";
+      description = `${state.filtered.length.toLocaleString("id-ID")} produk untuk segmen ${state.segment.toLowerCase()}.`;
     }
 
     if (elements.catalogEyebrow) elements.catalogEyebrow.textContent = eyebrow;
@@ -934,10 +957,10 @@ Apakah masih tersedia?`;
     const updateHeroEditorial = slide => {
       if (!slide) return;
       const kicker = slide.dataset.kicker || "The mi.do.ri Edit";
-      const title = slide.dataset.title || "Meet the New You.";
-      const copy = slide.dataset.copy || "Curated Muslim Fashion from selected labels.";
+      const title = slide.dataset.title || "Meet the new you.";
+      const copy = slide.dataset.copy || "Fashion muslim pilihan dari berbagai brand.";
       const link = slide.dataset.link || "katalog.html#katalog";
-      const linkLabel = slide.dataset.linkLabel || "Explore the edit";
+      const linkLabel = slide.dataset.linkLabel || "Lihat pilihan";
 
       if (elements.heroKickerText) elements.heroKickerText.textContent = kicker;
       if (elements.heroTitle) elements.heroTitle.textContent = title;
@@ -1304,7 +1327,7 @@ Apakah masih tersedia?`;
     if (elements.featuredGrid) {
       elements.featuredGrid.innerHTML = featured.length
         ? featured.map(product => renderProductCard(product, { home: true })).join("")
-        : '<div class="section-empty-note">Belum ada Featured Product yang dipilih di Google Sheets.</div>';
+        : '<div class="section-empty-note">Belum ada produk pilihan yang ditandai di Google Sheets.</div>';
     }
 
     if (elements.prelovedGrid) {
@@ -1336,23 +1359,23 @@ Apakah masih tersedia?`;
 
     const edits = [
       {
-        kicker: "01 · Layering",
-        title: "Soft Structure",
-        description: "Outerwear and knitwear that add shape without making the look feel heavy.",
+        kicker: "01 · Padu padan",
+        title: "Struktur Ringan",
+        description: "Luaran dan rajut yang memberi bentuk tanpa membuat tampilan terasa berat.",
         href: "katalog.html?kelompok=outerwear#katalog",
         predicate: product => product.condition !== "Preloved" && ["Outer", "Sweater"].includes(product.category)
       },
       {
-        kicker: "02 · Occasion",
-        title: "Dress Notes",
-        description: "Dresses and coordinated sets for days that deserve a little more intention.",
+        kicker: "02 · Momen spesial",
+        title: "Dress Pilihan",
+        description: "Dress dan set yang cocok untuk hari yang ingin terasa lebih istimewa.",
         href: "katalog.html?kelompok=dress-set#katalog",
         predicate: product => product.condition !== "Preloved" && ["Dress", "Set"].includes(product.category)
       },
       {
-        kicker: "03 · Little Edit",
-        title: "For Little Ones",
-        description: "Playful pieces for kids, curated across mi.do.ri's multibrand selection.",
+        kicker: "03 · Si kecil",
+        title: "Untuk Si Kecil",
+        description: "Pilihan ceria untuk anak dari berbagai brand mi.do.ri.",
         href: "katalog.html?segmen=Anak#katalog",
         predicate: product => product.condition !== "Preloved" && product.segment === "Anak"
       }
@@ -1366,7 +1389,7 @@ Apakah masih tersedia?`;
 
       return `
         <article class="editorial-edit-card editorial-edit-card-${index + 1}" data-reveal-item style="--reveal-delay:${index * 80}ms">
-          <a class="editorial-edit-media" href="${escapeHtml(edit.href)}" aria-label="Explore ${escapeHtml(edit.title)}">
+          <a class="editorial-edit-media" href="${escapeHtml(edit.href)}" aria-label="Jelajahi ${escapeHtml(edit.title)}">
             ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(representative.name)}" loading="lazy" decoding="async">` : '<span class="editorial-edit-placeholder"></span>'}
           </a>
           <div class="editorial-edit-copy">
@@ -1374,8 +1397,8 @@ Apakah masih tersedia?`;
             <h3>${escapeHtml(edit.title)}</h3>
             <p>${escapeHtml(edit.description)}</p>
             <div class="editorial-edit-actions">
-              <a href="${escapeHtml(edit.href)}">Explore ${count.toLocaleString("id-ID")} pieces <b>↗</b></a>
-              ${representative ? `<button type="button" data-open-product="${escapeHtml(representative.id)}">Quick view · ${escapeHtml(representative.name)}</button>` : ""}
+              <a href="${escapeHtml(edit.href)}">Jelajahi ${count.toLocaleString("id-ID")} produk <b>↗</b></a>
+              ${representative ? `<button type="button" data-open-product="${escapeHtml(representative.id)}">Lihat cepat · ${escapeHtml(representative.name)}</button>` : ""}
             </div>
           </div>
         </article>`;
@@ -1426,7 +1449,7 @@ Apakah masih tersedia?`;
       .slice(0, 4);
 
     if (!brandStories.length) {
-      elements.brandDiscoveryGrid.innerHTML = '<div class="section-empty-note">Brand stories akan tampil saat foto produk tersedia.</div>';
+      elements.brandDiscoveryGrid.innerHTML = '<div class="section-empty-note">Jelajah brand akan tampil saat foto produk tersedia.</div>';
       return;
     }
 
@@ -1437,9 +1460,9 @@ Apakah masih tersedia?`;
           <img src="${escapeHtml(firstProductImage(story.representative))}" alt="${escapeHtml(story.representative.name)}" loading="lazy" decoding="async">
         </div>
         <div class="brand-discovery-copy">
-          <span>${story.items.length.toLocaleString("id-ID")} pieces</span>
+          <span>${story.items.length.toLocaleString("id-ID")} produk</span>
           <h3>${escapeHtml(story.brand)}</h3>
-          <p>Explore brand <b>↗</b></p>
+          <p>Lihat brand <b>↗</b></p>
         </div>
       </a>`).join("");
   }
@@ -1586,7 +1609,7 @@ Apakah masih tersedia?`;
     if (state.condition) chips.push(["condition", state.condition === "Preloved" ? "Preloved" : state.condition]);
     if (state.availability) chips.push(["availability", stockLabel(state.availability)]);
     if (state.sale) chips.push(["sale", "SALE"]);
-    if (state.newOnly) chips.push(["newOnly", "New"]);
+    if (state.newOnly) chips.push(["newOnly", "Baru"]);
 
     elements.activeFilterChips.innerHTML = chips.map(([key, label]) => `
       <button type="button" class="active-filter-chip" data-clear-filter="${key}">
@@ -1610,7 +1633,7 @@ Apakah masih tersedia?`;
     const shown = Math.min(state.filtered.length, state.page * state.perPage);
     const total = state.filtered.length;
     if (elements.catalogProgress) {
-      elements.catalogProgress.textContent = `Menampilkan ${shown.toLocaleString("id-ID")} dari ${total.toLocaleString("id-ID")} pieces`;
+      elements.catalogProgress.textContent = `Menampilkan ${shown.toLocaleString("id-ID")} dari ${total.toLocaleString("id-ID")} produk`;
     }
     if (elements.loadMoreBtn) {
       const hasMore = shown < total;
@@ -1693,15 +1716,15 @@ Apakah masih tersedia?`;
 
     const groups = [];
     if (productMatches.length) {
-      groups.push(`<div class="search-suggestion-group"><span>Pieces</span>${productMatches.map(product => `
+      groups.push(`<div class="search-suggestion-group"><span>Produk</span>${productMatches.map(product => `
         <button type="button" data-open-product="${product.id}"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.brand)}</small></button>`).join("")}</div>`);
     }
     if (brandMatches.length) {
-      groups.push(`<div class="search-suggestion-group"><span>Labels</span>${brandMatches.map(brand => `
+      groups.push(`<div class="search-suggestion-group"><span>Brand</span>${brandMatches.map(brand => `
         <button type="button" data-suggest-brand="${escapeHtml(brand)}"><strong>${escapeHtml(brand)}</strong></button>`).join("")}</div>`);
     }
     if (categoryMatches.length) {
-      groups.push(`<div class="search-suggestion-group"><span>Categories</span>${categoryMatches.map(category => `
+      groups.push(`<div class="search-suggestion-group"><span>Kategori</span>${categoryMatches.map(category => `
         <button type="button" data-suggest-category="${escapeHtml(category)}"><strong>${escapeHtml(category)}</strong></button>`).join("")}</div>`);
     }
 
@@ -1847,9 +1870,9 @@ Apakah masih tersedia?`;
 
   function productStoryLabel(product) {
     if (product.condition === "Preloved") return "SECOND CHAPTER";
-    if (isPromoActive(product)) return "SALE EDIT";
-    if (product.isNew) return "NEW ARRIVAL";
-    if (product.isFeatured) return "FEATURED";
+    if (isPromoActive(product)) return "PILIHAN SALE";
+    if (product.isNew) return "BARU DATANG";
+    if (product.isFeatured) return "PILIHAN";
     return "";
   }
 
@@ -1940,12 +1963,6 @@ Apakah masih tersedia?`;
           <div class="variant-picker-block">
             <span class="variant-label">Pilih warna dan ukuran</span>
             ${renderVariantPicker(variants, defaultVariant)}
-          </div>
-
-          <div class="variant-meta-line">
-            <span>Kode <strong id="modalSku">${escapeHtml(defaultVariant?.sku || "-")}</strong></span>
-            <i aria-hidden="true">·</i>
-            <span id="modalStock">${defaultVariant ? stockLabel(defaultVariant.stock <= 0 ? "out" : defaultVariant.stock <= 2 ? "limited" : "available") : stockLabel(availability)}</span>
           </div>
 
           <div class="modal-mobile-cta" aria-label="Aksi produk">
@@ -2110,8 +2127,6 @@ Apakah masih tersedia?`;
       updateDetailStockBadge(variant);
       if (!variant) return;
       $("#modalPrice").innerHTML = variantPriceMarkup(product, variant);
-      $("#modalSku").textContent = variant.sku;
-      $("#modalStock").textContent = stockLabel(variant.stock <= 0 ? "out" : variant.stock <= 2 ? "limited" : "available");
       syncVariantPicker(variant);
       setActionState(variant);
     }, { signal: interactionSignal });
@@ -2158,6 +2173,8 @@ Apakah masih tersedia?`;
         if (!product || !variant) return item;
         return {
           ...item,
+          brand: product.brand,
+          condition: product.condition || item.condition || "Baru",
           originalPrice: variant.price,
           price: discountedPrice(variant.price, product),
           discountPercent: isPromoActive(product) ? promoPercent(product) : 0,
@@ -2188,6 +2205,7 @@ Apakah masih tersedia?`;
       productId: product.id,
       name: product.name,
       brand: product.brand,
+      condition: product.condition || "Baru",
       image: firstProductImage(product),
       placeholder: productInitials(product),
       placeholderClass: placeholderClass(product),
@@ -2209,29 +2227,41 @@ Apakah masih tersedia?`;
   }
 
   function renderCart() {
-    elements.cartCount.textContent = state.cart.length;
-    elements.cartCount.style.display = state.cart.length ? "grid" : "none";
-    elements.cartEmpty.classList.toggle("hidden", state.cart.length > 0);
-    elements.cartItems.classList.toggle("hidden", state.cart.length === 0);
-    elements.sendCartBtn.disabled = state.cart.length === 0;
-    elements.clearCartBtn.disabled = state.cart.length === 0;
+    const count = state.cart.length;
+    const pieceLabel = `${count} produk`;
 
-    elements.cartItems.innerHTML = state.cart.map(item => `
+    elements.cartCount.textContent = count;
+    elements.cartCount.style.display = count ? "grid" : "none";
+    elements.cartEmpty.classList.toggle("hidden", count > 0);
+    elements.cartItems.classList.toggle("hidden", count === 0);
+    if (elements.cartFooter) elements.cartFooter.hidden = count === 0;
+    if (elements.cartSelectionCount) elements.cartSelectionCount.textContent = pieceLabel;
+    if (elements.cartFooterMeta) elements.cartFooterMeta.textContent = `Estimasi pilihan · ${pieceLabel}`;
+    if (elements.sendCartBtn) elements.sendCartBtn.disabled = count === 0;
+    if (elements.clearCartBtn) elements.clearCartBtn.disabled = count === 0;
+
+    elements.cartItems.innerHTML = state.cart.map(item => {
+      const variantBits = [
+        item.color && item.color !== "Tanpa warna" ? item.color : "",
+        item.size && item.size !== "Tanpa ukuran" ? item.size : ""
+      ].filter(Boolean);
+      const variantLine = variantBits.length ? variantBits.join(" · ") : "Varian terpilih";
+      return `
       <article class="cart-item">
         <div class="cart-thumb">
           ${item.image
             ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><div class="product-placeholder ${escapeHtml(item.placeholderClass)}" hidden><span><strong>${escapeHtml(item.placeholder)}</strong><small>${escapeHtml(item.brand)}</small></span></div>`
             : `<div class="product-placeholder ${escapeHtml(item.placeholderClass)}"><span><strong>${escapeHtml(item.placeholder)}</strong><small>${escapeHtml(item.brand)}</small></span></div>`}
         </div>
-        <div>
+        <div class="cart-item-copy">
+          <span class="cart-item-brand">${escapeHtml(item.brand)}</span>
           <h3>${escapeHtml(item.name)}</h3>
-          <p>${escapeHtml(item.brand)}</p>
-          <p>${escapeHtml(item.color || "Tanpa warna")} · ${escapeHtml(item.size || "Tanpa ukuran")}</p>
-          <p>SKU ${escapeHtml(item.sku)}</p>
+          <p class="cart-item-variant">${escapeHtml(variantLine)}</p>
           <div class="cart-item-price${item.discountPercent ? " has-promo" : ""}">${item.discountPercent && item.originalPrice ? `<span class="original-price">${formatCurrency(item.originalPrice)}</span><span class="discounted-price">${formatCurrency(item.price)}</span>` : `<span class="current-price">${formatCurrency(item.price)}</span>`}</div>
         </div>
         <button class="remove-cart-item" type="button" data-remove-sku="${escapeHtml(item.sku)}" aria-label="Hapus ${escapeHtml(item.name)}">×</button>
-      </article>`).join("");
+      </article>`;
+    }).join("");
 
     const total = state.cart.reduce((sum, item) => sum + Number(item.price || 0), 0);
     elements.cartTotal.textContent = formatCurrency(total);
@@ -2252,11 +2282,21 @@ Apakah masih tersedia?`;
 
   function sendCartToWhatsApp() {
     if (!state.cart.length) return;
-    const lines = state.cart.map((item, index) =>
-      `${index + 1}. ${item.name}\n   Brand: ${item.brand}\n   Kode: ${item.sku}\n   Warna/Motif: ${item.color || "-"}\n   Ukuran: ${item.size || "-"}\n   ${item.discountPercent && item.originalPrice ? `Harga normal: ${formatCurrency(item.originalPrice)}\n   Harga promo: ${formatCurrency(item.price)} (-${item.discountPercent}%)` : `Harga: ${formatCurrency(item.price)}`}`
-    );
+    const count = state.cart.length;
+    const lines = state.cart.map((item, index) => {
+      const variantBits = [
+        item.color && item.color !== "Tanpa warna" ? item.color : "",
+        item.size && item.size !== "Tanpa ukuran" ? `Ukuran ${item.size}` : ""
+      ].filter(Boolean);
+      const variantLine = variantBits.length ? `\n${variantBits.join(" · ")}` : "";
+      return `${index + 1}. ${item.name} — ${item.brand}${variantLine}\n${formatCurrency(item.price)}\nKode: ${item.sku}`;
+    });
     const total = state.cart.reduce((sum, item) => sum + Number(item.price || 0), 0);
-    const message = `Halo mi.do.ri, saya ingin menanyakan ketersediaan produk berikut:\n\n${lines.join("\n\n")}\n\nPerkiraan total: ${formatCurrency(total)}\n\nMohon konfirmasi stok dan cara pemesanannya. Terima kasih.`;
+    const hasPreloved = state.cart.some(item => String(item.condition || "").toLowerCase() === "preloved");
+    const closing = hasPreloved
+      ? "Boleh dibantu cek stok, kondisi Preloved, dan cara memesannya? Terima kasih."
+      : "Boleh dibantu cek stok dan cara memesannya? Terima kasih.";
+    const message = `Halo mi.do.ri 👋\nSaya ingin dibantu cek ${count} pilihan ini:\n\n${lines.join("\n\n")}\n\nEstimasi pilihan: ${formatCurrency(total)}\n\n${closing}`;
     window.open(`https://wa.me/${store.whatsapp}?text=${encodeURIComponent(message)}`, "_blank", "noopener");
   }
 
@@ -2361,6 +2401,16 @@ Apakah masih tersedia?`;
       elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
       const open = elements.brandNavDropdown.classList.toggle("open");
       elements.brandNavToggle.setAttribute("aria-expanded", String(open));
+    });
+
+    elements.brandNavMenu?.addEventListener("input", event => {
+      const input = event.target.closest("[data-brand-nav-search]");
+      if (!input) return;
+      filterBrandNavigation(input.value);
+    });
+
+    elements.brandNavMenu?.addEventListener("click", event => {
+      if (event.target.closest("[data-brand-nav-search]")) event.stopPropagation();
     });
 
     $$("#mainNav a").forEach(link => link.addEventListener("click", () => {
