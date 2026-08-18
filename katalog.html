@@ -22,13 +22,13 @@
   <meta name="twitter:image" content="https://butikmidori.github.io/assets/images/share/midori-default.jpg">
   <link rel="canonical" href="https://butikmidori.github.io/katalog.html">
   <title>mi.do.ri — Fashion Muslim Multibrand</title>
-  <meta name="midori-version" content="4.5.0">
+  <meta name="midori-version" content="4.7.0">
   <link rel="icon" type="image/png" href="assets/images/brand/favicon-midori.png">
   <link rel="apple-touch-icon" href="assets/images/brand/favicon-midori.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=4.5.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=4.7.0">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -140,8 +140,8 @@
             <span>Katalog</span>
           </nav>
           <span class="eyebrow">Katalog mi.do.ri</span>
-          <h1>Temukan koleksi yang kamu cari.</h1>
-          <p><strong id="catalogIntroProducts">0</strong> produk dari <strong id="catalogIntroBrands">0</strong> brand pilihan — dikurasi agar mudah kamu jelajahi.</p>
+          <h1>Cari yang kamu suka.</h1>
+          <p>Mau dress, atasan, hijab, atau yang lain? Tinggal cari.</p>
         </div>
         <a class="catalog-intro-link" href="index.html#midori-edit">Jelajahi The mi.do.ri Edit <span>↗</span></a>
       </div>
@@ -244,12 +244,12 @@
       <div class="container catalog-visit-compact-inner">
         <div>
           <span class="editorial-eyebrow">Kunjungi mi.do.ri</span>
-          <h2>Ingin melihat langsung?</h2>
-          <p>Jl. Soekarno Hatta No.17, Girimaya · Pangkalpinang</p>
+          <h2>Mau lihat langsung?</h2>
+          <p>Lihat-lihat dulu online. Kalau cocok, mampir ke butik.</p>
         </div>
         <div class="catalog-visit-actions">
-          <a href="https://maps.app.goo.gl/FdjLp5pzG6gVRzin6" target="_blank" rel="noopener">Google Maps <span>↗</span></a>
-          <a href="https://wa.me/628117177667" target="_blank" rel="noopener">WhatsApp <span>↗</span></a>
+          <a href="https://maps.app.goo.gl/FdjLp5pzG6gVRzin6" target="_blank" rel="noopener">Buka Google Maps <span>↗</span></a>
+          <a href="https://wa.me/628117177667" target="_blank" rel="noopener">Hubungi via WhatsApp <span>↗</span></a>
         </div>
       </div>
     </section>
@@ -299,6 +299,38 @@
     <span class="floating-wa-tooltip" aria-hidden="true">Hubungi mi.do.ri</span>
   </a>
 
+
+  <div class="global-search" id="globalSearch" aria-hidden="true">
+    <div class="global-search-backdrop" data-close-global-search></div>
+    <section class="global-search-panel" role="dialog" aria-modal="true" aria-labelledby="globalSearchTitle">
+      <div class="global-search-header">
+        <div>
+          <span class="editorial-eyebrow">Pencarian mi.do.ri</span>
+          <h2 id="globalSearchTitle">Apa yang sedang kamu cari?</h2>
+        </div>
+        <button class="global-search-close" type="button" data-close-global-search aria-label="Tutup pencarian">×</button>
+      </div>
+      <form class="global-search-form" id="globalSearchForm" role="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+        <input id="globalSearchInput" type="search" autocomplete="off" placeholder="Cari produk, brand, kategori, warna…" aria-controls="globalSearchResults">
+        <kbd>/</kbd>
+      </form>
+      <div class="global-search-results" id="globalSearchResults" aria-live="polite">
+        <div class="global-search-intro">
+          <p>Mulai dengan nama produk, brand, kategori, atau warna yang kamu suka.</p>
+          <div class="global-search-quicklinks">
+            <a href="katalog.html?sale=1#katalog">SALE</a>
+            <a href="katalog.html?kondisi=Preloved#katalog">Preloved</a>
+            <a href="katalog.html#katalog">Lihat semua koleksi</a>
+          </div>
+        </div>
+      </div>
+      <div class="global-search-footer" id="globalSearchFooter" hidden>
+        <button type="button" id="globalSearchViewAll">Lihat semua hasil <span>↗</span></button>
+        <small>Enter untuk membuka semua hasil</small>
+      </div>
+    </section>
+  </div>
   <div class="modal" id="productModal" aria-hidden="true">
     <div class="modal-backdrop" data-close-modal></div>
     <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modalProductName">
@@ -341,7 +373,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="assets/data/catalog-data.js?v=4.5.0"></script>
-  <script src="assets/js/app.js?v=4.5.0"></script>
+  <script src="assets/data/catalog-data.js?v=4.7.0"></script>
+  <script src="assets/js/app.js?v=4.7.0"></script>
 </body>
 </html>
