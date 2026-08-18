@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.7.1";
+  const APP_VERSION = "4.8.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -1703,38 +1703,63 @@
     applyFilters();
   }
 
+  function getSearchSuggestionMatches(value, limits = {}) {
+    const raw = String(value || "").trim();
+    const query = normalize(raw);
+    const productLimit = Number(limits.products || 4);
+    const brandLimit = Number(limits.brands || 3);
+    const categoryLimit = Number(limits.categories || 3);
+
+    if (!query || query.length < 2) {
+      return { raw, query, productMatches: [], brandMatches: [], categoryMatches: [] };
+    }
+
+    const productMatches = products.filter(product => matchesSearch(product, query)).slice(0, productLimit);
+    const brandMatches = [...new Set(products.map(product => product.brand).filter(Boolean))]
+      .filter(brand => normalize(brand).includes(query))
+      .slice(0, brandLimit);
+    const categoryMatches = [...new Set(products.map(product => product.category).filter(Boolean))]
+      .filter(category => normalize(category).includes(query))
+      .slice(0, categoryLimit);
+
+    return { raw, query, productMatches, brandMatches, categoryMatches };
+  }
+
+  function renderSearchSuggestionGroups(matches, mode = "catalog") {
+    const groups = [];
+    const isGlobal = mode === "global";
+    const productAttr = isGlobal ? "data-global-open-product" : "data-open-product";
+    const brandAttr = isGlobal ? "data-global-brand" : "data-suggest-brand";
+    const categoryAttr = isGlobal ? "data-global-category" : "data-suggest-category";
+    const extraClass = isGlobal ? " global-search-suggestion-group" : "";
+
+    if (matches.productMatches.length) {
+      groups.push(`<div class="search-suggestion-group${extraClass}"><span>Produk</span>${matches.productMatches.map(product => `
+        <button type="button" ${productAttr}="${escapeHtml(product.id)}"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.brand)}</small></button>`).join("")}</div>`);
+    }
+    if (matches.brandMatches.length) {
+      groups.push(`<div class="search-suggestion-group${extraClass}"><span>Brand</span>${matches.brandMatches.map(brand => `
+        <button type="button" ${brandAttr}="${escapeHtml(brand)}"><strong>${escapeHtml(brand)}</strong></button>`).join("")}</div>`);
+    }
+    if (matches.categoryMatches.length) {
+      groups.push(`<div class="search-suggestion-group${extraClass}"><span>Kategori</span>${matches.categoryMatches.map(category => `
+        <button type="button" ${categoryAttr}="${escapeHtml(category)}"><strong>${escapeHtml(category)}</strong></button>`).join("")}</div>`);
+    }
+
+    return groups.join("");
+  }
+
   function renderSearchSuggestions(value) {
     if (!elements.searchSuggestions) return;
-    const query = normalize(value);
-    if (!query || query.length < 2) {
+    const matches = getSearchSuggestionMatches(value);
+    if (!matches.query || matches.query.length < 2) {
       elements.searchSuggestions.hidden = true;
       elements.searchSuggestions.innerHTML = "";
       return;
     }
 
-    const productMatches = products.filter(product => matchesSearch(product, query)).slice(0, 4);
-    const brandMatches = [...new Set(products.map(product => product.brand))]
-      .filter(brand => normalize(brand).includes(query))
-      .slice(0, 3);
-    const categoryMatches = [...new Set(products.map(product => product.category))]
-      .filter(category => normalize(category).includes(query))
-      .slice(0, 3);
-
-    const groups = [];
-    if (productMatches.length) {
-      groups.push(`<div class="search-suggestion-group"><span>Produk</span>${productMatches.map(product => `
-        <button type="button" data-open-product="${product.id}"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.brand)}</small></button>`).join("")}</div>`);
-    }
-    if (brandMatches.length) {
-      groups.push(`<div class="search-suggestion-group"><span>Brand</span>${brandMatches.map(brand => `
-        <button type="button" data-suggest-brand="${escapeHtml(brand)}"><strong>${escapeHtml(brand)}</strong></button>`).join("")}</div>`);
-    }
-    if (categoryMatches.length) {
-      groups.push(`<div class="search-suggestion-group"><span>Kategori</span>${categoryMatches.map(category => `
-        <button type="button" data-suggest-category="${escapeHtml(category)}"><strong>${escapeHtml(category)}</strong></button>`).join("")}</div>`);
-    }
-
-    elements.searchSuggestions.innerHTML = groups.join("") || `<div class="search-suggestion-empty">Tekan Enter untuk mencari “${escapeHtml(value)}”</div>`;
+    const markup = renderSearchSuggestionGroups(matches, "catalog");
+    elements.searchSuggestions.innerHTML = markup || `<div class="search-suggestion-empty">Tekan Enter untuk mencari “${escapeHtml(matches.raw)}”</div>`;
     elements.searchSuggestions.hidden = false;
   }
 
@@ -1922,7 +1947,15 @@
           </span>
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"></path></svg>
         </button>
-        <div class="variant-picker-menu" id="variantPickerMenu" role="listbox" aria-label="Pilihan warna dan ukuran" hidden>${customOptions}</div>
+        <button class="variant-picker-sheet-backdrop" id="variantPickerBackdrop" type="button" aria-label="Tutup pilihan warna dan ukuran" hidden></button>
+        <div class="variant-picker-menu" id="variantPickerMenu" role="listbox" aria-label="Pilihan warna dan ukuran" hidden>
+          <div class="variant-picker-sheet-header" id="variantPickerSheetHeader">
+            <span class="variant-picker-sheet-grab" aria-hidden="true"></span>
+            <div><small>PILIH VARIAN</small><strong>Warna & ukuran</strong></div>
+            <button class="variant-picker-sheet-close" id="variantPickerSheetClose" type="button" aria-label="Tutup">×</button>
+          </div>
+          <div class="variant-picker-sheet-options">${customOptions}</div>
+        </div>
       </div>`;
   }
 
@@ -1989,6 +2022,9 @@
     const variantPicker = $("#variantPicker");
     const variantPickerTrigger = $("#variantPickerTrigger");
     const variantPickerMenu = $("#variantPickerMenu");
+    const variantPickerBackdrop = $("#variantPickerBackdrop");
+    const variantPickerSheetHeader = $("#variantPickerSheetHeader");
+    const variantPickerSheetClose = $("#variantPickerSheetClose");
     const variantPickerValue = $("#variantPickerValue");
     const variantPickerState = $("#variantPickerState");
     const variantOptions = [...elements.modalContent.querySelectorAll("[data-variant-option]")];
@@ -2006,10 +2042,14 @@
       waButtons.forEach(link => { link.href = whatsappProductUrl(product, variant); });
     }
 
+    const mobileVariantSheet = () => window.matchMedia("(max-width: 700px)").matches;
+
     function closeVariantPicker({ focus = false } = {}) {
       if (!variantPickerMenu || !variantPickerTrigger) return;
       variantPickerMenu.hidden = true;
+      if (variantPickerBackdrop) variantPickerBackdrop.hidden = true;
       variantPicker.classList.remove("is-open");
+      document.body.classList.remove("variant-sheet-open");
       variantPickerTrigger.setAttribute("aria-expanded", "false");
       if (focus) variantPickerTrigger.focus();
     }
@@ -2019,6 +2059,18 @@
       variantPickerMenu.hidden = false;
       variantPicker.classList.add("is-open");
       variantPickerTrigger.setAttribute("aria-expanded", "true");
+
+      if (mobileVariantSheet()) {
+        if (variantPickerBackdrop) variantPickerBackdrop.hidden = false;
+        document.body.classList.add("variant-sheet-open");
+        window.setTimeout(() => {
+          const selected = variantOptions.find(option => option.classList.contains("is-selected") && !option.disabled)
+            || variantOptions.find(option => !option.disabled);
+          selected?.scrollIntoView({ block: "nearest" });
+        }, 40);
+        return;
+      }
+
       if (focusOption) {
         const selected = variantOptions.find(option => option.classList.contains("is-selected") && !option.disabled)
           || variantOptions.find(option => !option.disabled);
@@ -2048,6 +2100,21 @@
         openVariantPicker({ focusOption: true });
       }
     }, { signal: interactionSignal });
+
+    variantPickerBackdrop?.addEventListener("click", () => closeVariantPicker({ focus: true }), { signal: interactionSignal });
+    variantPickerSheetClose?.addEventListener("click", () => closeVariantPicker({ focus: true }), { signal: interactionSignal });
+
+    let variantSheetTouchStart = null;
+    variantPickerSheetHeader?.addEventListener("touchstart", event => {
+      if (!mobileVariantSheet() || !event.touches?.length) return;
+      variantSheetTouchStart = event.touches[0].clientY;
+    }, { signal: interactionSignal, passive: true });
+    variantPickerSheetHeader?.addEventListener("touchend", event => {
+      if (variantSheetTouchStart == null || !mobileVariantSheet()) return;
+      const endY = event.changedTouches?.[0]?.clientY ?? variantSheetTouchStart;
+      if (endY - variantSheetTouchStart > 72) closeVariantPicker({ focus: true });
+      variantSheetTouchStart = null;
+    }, { signal: interactionSignal, passive: true });
 
     variantOptions.forEach(option => {
       option.addEventListener("click", () => {
@@ -2162,7 +2229,7 @@
     modalInteractionController = null;
     elements.modal.classList.remove("open");
     elements.modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("no-scroll");
+    document.body.classList.remove("no-scroll", "variant-sheet-open");
 
     const fallbackUrl = IS_CATALOG_PAGE ? "/katalog.html#katalog" : "/";
     history.replaceState({}, "", modalReturnUrl || fallbackUrl);
@@ -2365,10 +2432,9 @@
 
   function renderGlobalSearch(value = "") {
     if (!elements.globalSearchResults) return;
-    const raw = String(value || "").trim();
-    const query = normalize(raw);
+    const matches = getSearchSuggestionMatches(value, { products: 4, brands: 3, categories: 3 });
 
-    if (query.length < 2) {
+    if (!matches.query || matches.query.length < 2) {
       elements.globalSearchResults.innerHTML = `
         <div class="global-search-intro">
           <p>Mulai dengan nama produk, brand, kategori, atau warna yang kamu suka.</p>
@@ -2382,30 +2448,17 @@
       return;
     }
 
-    const productMatches = products.filter(product => matchesSearch(product, query)).slice(0, 4);
-    const brandMatches = [...new Set(products.map(product => product.brand).filter(Boolean))]
-      .filter(brand => normalize(brand).includes(query)).slice(0, 4);
-    const categoryMatches = [...new Set(products.map(product => product.category).filter(Boolean))]
-      .filter(category => normalize(category).includes(query)).slice(0, 4);
+    const markup = renderSearchSuggestionGroups(matches, "global");
+    elements.globalSearchResults.innerHTML = markup
+      ? `<div class="global-search-unified-suggestions">${markup}</div>`
+      : `<div class="search-suggestion-empty global-search-empty-compact">Belum ada yang pas. Coba kata lain.</div>`;
 
-    const sections = [];
-    if (productMatches.length) {
-      sections.push(`<section class="global-search-group global-search-products"><div class="global-search-group-title"><span>Produk</span><small>${productMatches.length} pilihan</small></div><div class="global-search-product-list">${productMatches.map(product => `
-        <button class="global-search-product" type="button" data-global-open-product="${escapeHtml(product.id)}">
-          <span class="global-search-product-media">${globalSearchProductThumb(product)}</span>
-          <span class="global-search-product-copy"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.brand)}</small><em>${escapeHtml(globalSearchProductPrice(product))}</em></span>
-          <span class="global-search-arrow">↗</span>
-        </button>`).join("")}</div></section>`);
+    if (elements.globalSearchFooter) {
+      elements.globalSearchFooter.hidden = false;
+      if (elements.globalSearchViewAll) {
+        elements.globalSearchViewAll.innerHTML = `Lihat semua hasil untuk “${escapeHtml(matches.raw)}” <span>↗</span>`;
+      }
     }
-    if (brandMatches.length || categoryMatches.length) {
-      sections.push(`<div class="global-search-secondary-grid">
-        ${brandMatches.length ? `<section class="global-search-group"><div class="global-search-group-title"><span>Brand</span></div>${brandMatches.map(brand => `<button class="global-search-text-result" type="button" data-global-brand="${escapeHtml(brand)}"><strong>${escapeHtml(brand)}</strong><span>↗</span></button>`).join("")}</section>` : ""}
-        ${categoryMatches.length ? `<section class="global-search-group"><div class="global-search-group-title"><span>Kategori</span></div>${categoryMatches.map(category => `<button class="global-search-text-result" type="button" data-global-category="${escapeHtml(category)}"><strong>${escapeHtml(category)}</strong><span>↗</span></button>`).join("")}</section>` : ""}
-      </div>`);
-    }
-
-    elements.globalSearchResults.innerHTML = sections.join("") || `<div class="global-search-empty"><span>Belum menemukan yang pas.</span><p>Coba kata lain, atau lihat seluruh koleksi mi.do.ri.</p></div>`;
-    if (elements.globalSearchFooter) elements.globalSearchFooter.hidden = false;
   }
 
   function openGlobalSearch(initialValue = "") {
