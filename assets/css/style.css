@@ -7900,3 +7900,102 @@ body[data-page="catalog"] .catalog-page-intro p { font-size: 15px !important; }
   .global-search-panel,
   .global-search-product { transition: none !important; }
 }
+
+
+/* =========================================================
+   mi.do.ri v4.7.1 — Mobile Detail & Microcopy Fix
+   Stable bottom CTA, readable accordion, proper WhatsApp icon.
+   ========================================================= */
+
+.button-wa-luxury svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  fill: currentColor;
+}
+
+@media (max-width: 700px) {
+  /* The desktop centering transform created a containing block for
+     position:fixed children. Removing it makes the CTA truly viewport-fixed. */
+  .modal-dialog {
+    inset: 14px;
+    width: auto;
+    height: auto;
+    max-height: none;
+    transform: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-radius: 24px;
+    overscroll-behavior: contain;
+    scroll-padding-bottom: 104px;
+  }
+
+  .modal-product-v42 .modal-info {
+    /* Reserved space ensures the final accordion/content can scroll fully
+       above the persistent action bar instead of being covered by it. */
+    padding: 25px 19px 118px !important;
+  }
+
+  .modal-mobile-cta {
+    position: fixed !important;
+    left: 28px !important;
+    right: 28px !important;
+    bottom: calc(26px + env(safe-area-inset-bottom)) !important;
+    z-index: 520 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0,1.08fr) minmax(0,.92fr) !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 8px !important;
+    border: 1px solid rgba(15,61,52,.12) !important;
+    border-radius: 15px !important;
+    background: rgba(247,246,241,.96) !important;
+    box-shadow: 0 10px 28px rgba(15,61,52,.13) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .modal-mobile-cta .button {
+    min-width: 0;
+    min-height: 46px !important;
+    padding: 10px 10px !important;
+    border-radius: 11px !important;
+    font-size: 13px !important;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+
+  .modal-mobile-cta .button-wa-luxury {
+    gap: 7px !important;
+  }
+
+  .modal-mobile-cta .button-wa-luxury svg {
+    width: 17px;
+    height: 17px;
+    flex-basis: 17px;
+  }
+
+  /* Keep the product information compact enough that the persistent CTA
+     remains helpful rather than visually dominant. */
+  .product-detail-toggle {
+    min-height: 50px !important;
+    padding: 12px 0 !important;
+  }
+  .product-detail-toggle > span {
+    font-size: 18px !important;
+    font-weight: 500 !important;
+  }
+  .product-detail-panel {
+    padding-bottom: 14px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .modal-mobile-cta {
+    left: 23px !important;
+    right: 23px !important;
+  }
+  .modal-mobile-cta .button {
+    font-size: 12px !important;
+  }
+}
