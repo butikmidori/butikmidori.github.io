@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.7.0";
+  const APP_VERSION = "4.7.1";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -1940,7 +1940,7 @@
     const storyLabel = productStoryLabel(product);
     const titleLength = String(product.name || "").length;
     const titleClass = titleLength > 32 ? " is-long" : titleLength > 20 ? " is-medium" : "";
-    const whatsappIcon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L0 24l6.5-1.7a11.8 11.8 0 0 0 5.6 1.4h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.1-1.2-6-3.5-8.4Z"></path></svg>`;
+    const whatsappIcon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L0 24l6.5-1.7a11.8 11.8 0 0 0 5.6 1.4h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.1-1.2-6-3.5-8.4ZM12.2 21.7h-.1c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.9 1 1-3.8-.2-.4a9.8 9.8 0 1 1 8.7 4.8Zm5.4-7.3c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.8-2.8-1.5-3.9-3.4-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.6l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9 0 1.7 1.2 3.3 1.4 3.5.2.2 2.4 3.7 5.9 5.2.8.4 1.5.6 2 .7.8.3 1.6.2 2.2.1.7-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3Z"></path></svg>`;
 
     elements.modalContent.innerHTML = `
       <article class="modal-product modal-product-v42">
@@ -1973,14 +1973,14 @@
 
           <div class="modal-mobile-cta" aria-label="Aksi produk">
             <button class="button button-primary" type="button" data-modal-add-cart ${!defaultVariant || defaultVariant.stock <= 0 ? "disabled" : ""}>Tambah ke pilihan</button>
-            <a class="button button-wa button-wa-luxury" data-modal-whatsapp href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">${whatsappIcon}<span>WhatsApp</span></a>
+            <a class="button button-wa button-wa-luxury" data-modal-whatsapp href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">${whatsappIcon}<span>Tanya di WhatsApp</span></a>
           </div>
 
           ${renderProductDetailSections(product)}
 
           <div class="modal-actions modal-actions-desktop">
             <button class="button button-primary" type="button" data-modal-add-cart ${!defaultVariant || defaultVariant.stock <= 0 ? "disabled" : ""}>Tambah ke pilihan</button>
-            <a class="button button-wa button-wa-luxury" data-modal-whatsapp href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">${whatsappIcon}<span>Tanya via WhatsApp</span></a>
+            <a class="button button-wa button-wa-luxury" data-modal-whatsapp href="${whatsappProductUrl(product, defaultVariant)}" target="_blank" rel="noopener">${whatsappIcon}<span>Tanya di WhatsApp</span></a>
           </div>
         </div>
       </article>`;
