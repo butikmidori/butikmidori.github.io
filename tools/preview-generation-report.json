@@ -1,9 +1,9 @@
 {
-  "version": "4.5.0",
-  "catalog_source": "live",
+  "version": "4.7.0",
+  "catalog_source": "local",
   "products_total": 166,
   "products_active": 166,
   "share_pages": 166,
-  "share_images": 101,
+  "share_images": 70,
   "fallback_image_fields_updated": 0
 }
