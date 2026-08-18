@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.5.0";
+  const APP_VERSION = "4.7.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -253,6 +253,12 @@
     brandNavMenu: $("#brandNavMenu"),
     searchInput: $("#searchInput"),
     searchJump: $(".search-jump"),
+    globalSearch: $("#globalSearch"),
+    globalSearchInput: $("#globalSearchInput"),
+    globalSearchResults: $("#globalSearchResults"),
+    globalSearchFooter: $("#globalSearchFooter"),
+    globalSearchForm: $("#globalSearchForm"),
+    globalSearchViewAll: $("#globalSearchViewAll"),
     brandFilter: $("#brandFilter"),
     categoryFilter: $("#categoryFilter"),
     segmentFilter: $("#segmentFilter"),
@@ -1360,22 +1366,22 @@
     const edits = [
       {
         kicker: "01 · Padu padan",
-        title: "Struktur Ringan",
-        description: "Luaran dan rajut yang memberi bentuk tanpa membuat tampilan terasa berat.",
+        title: "Gampang Dipadu",
+        description: "Luaran dan rajut yang tinggal dipadukan dengan yang sudah ada di lemari.",
         href: "katalog.html?kelompok=outerwear#katalog",
         predicate: product => product.condition !== "Preloved" && ["Outer", "Sweater"].includes(product.category)
       },
       {
         kicker: "02 · Momen spesial",
-        title: "Dress Pilihan",
-        description: "Dress dan set yang cocok untuk hari yang ingin terasa lebih istimewa.",
+        title: "Buat Hari Spesial",
+        description: "Dress dan set buat kondangan, acara keluarga, atau saat ingin tampil sedikit lebih istimewa.",
         href: "katalog.html?kelompok=dress-set#katalog",
         predicate: product => product.condition !== "Preloved" && ["Dress", "Set"].includes(product.category)
       },
       {
         kicker: "03 · Si kecil",
-        title: "Untuk Si Kecil",
-        description: "Pilihan ceria untuk anak dari berbagai brand mi.do.ri.",
+        title: "Buat Si Kecil",
+        description: "Dari yang santai sampai yang rapi, pilih yang paling cocok buat mereka.",
         href: "katalog.html?segmen=Anak#katalog",
         predicate: product => product.condition !== "Preloved" && product.segment === "Anak"
       }
@@ -2337,6 +2343,103 @@
     }
   }
 
+  function globalSearchCatalogUrl(query = "") {
+    const url = new URL("katalog.html", window.location.href);
+    if (query.trim()) url.searchParams.set("q", query.trim());
+    url.searchParams.set("focus", "search");
+    url.hash = "katalog";
+    return `${url.pathname.split("/").pop()}${url.search}${url.hash}`;
+  }
+
+  function globalSearchProductPrice(product) {
+    const variant = product.variants?.find(v => v.status === "Aktif" && v.stock > 0) || product.variants?.find(v => v.status === "Aktif") || product.variants?.[0];
+    const price = effectivePrice(product, variant);
+    return price ? currency(price) : "Lihat detail";
+  }
+
+  function globalSearchProductThumb(product) {
+    const image = firstProductImage(product);
+    if (image) return `<img src="${escapeHtml(image)}" alt="" loading="lazy">`;
+    return `<span class="global-search-result-placeholder">${escapeHtml(productInitials(product))}</span>`;
+  }
+
+  function renderGlobalSearch(value = "") {
+    if (!elements.globalSearchResults) return;
+    const raw = String(value || "").trim();
+    const query = normalize(raw);
+
+    if (query.length < 2) {
+      elements.globalSearchResults.innerHTML = `
+        <div class="global-search-intro">
+          <p>Mulai dengan nama produk, brand, kategori, atau warna yang kamu suka.</p>
+          <div class="global-search-quicklinks">
+            <a href="katalog.html?sale=1#katalog">SALE</a>
+            <a href="katalog.html?kondisi=Preloved#katalog">Preloved</a>
+            <a href="katalog.html#katalog">Lihat semua koleksi</a>
+          </div>
+        </div>`;
+      if (elements.globalSearchFooter) elements.globalSearchFooter.hidden = true;
+      return;
+    }
+
+    const productMatches = products.filter(product => matchesSearch(product, query)).slice(0, 4);
+    const brandMatches = [...new Set(products.map(product => product.brand).filter(Boolean))]
+      .filter(brand => normalize(brand).includes(query)).slice(0, 4);
+    const categoryMatches = [...new Set(products.map(product => product.category).filter(Boolean))]
+      .filter(category => normalize(category).includes(query)).slice(0, 4);
+
+    const sections = [];
+    if (productMatches.length) {
+      sections.push(`<section class="global-search-group global-search-products"><div class="global-search-group-title"><span>Produk</span><small>${productMatches.length} pilihan</small></div><div class="global-search-product-list">${productMatches.map(product => `
+        <button class="global-search-product" type="button" data-global-open-product="${escapeHtml(product.id)}">
+          <span class="global-search-product-media">${globalSearchProductThumb(product)}</span>
+          <span class="global-search-product-copy"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.brand)}</small><em>${escapeHtml(globalSearchProductPrice(product))}</em></span>
+          <span class="global-search-arrow">↗</span>
+        </button>`).join("")}</div></section>`);
+    }
+    if (brandMatches.length || categoryMatches.length) {
+      sections.push(`<div class="global-search-secondary-grid">
+        ${brandMatches.length ? `<section class="global-search-group"><div class="global-search-group-title"><span>Brand</span></div>${brandMatches.map(brand => `<button class="global-search-text-result" type="button" data-global-brand="${escapeHtml(brand)}"><strong>${escapeHtml(brand)}</strong><span>↗</span></button>`).join("")}</section>` : ""}
+        ${categoryMatches.length ? `<section class="global-search-group"><div class="global-search-group-title"><span>Kategori</span></div>${categoryMatches.map(category => `<button class="global-search-text-result" type="button" data-global-category="${escapeHtml(category)}"><strong>${escapeHtml(category)}</strong><span>↗</span></button>`).join("")}</section>` : ""}
+      </div>`);
+    }
+
+    elements.globalSearchResults.innerHTML = sections.join("") || `<div class="global-search-empty"><span>Belum menemukan yang pas.</span><p>Coba kata lain, atau lihat seluruh koleksi mi.do.ri.</p></div>`;
+    if (elements.globalSearchFooter) elements.globalSearchFooter.hidden = false;
+  }
+
+  function openGlobalSearch(initialValue = "") {
+    if (!elements.globalSearch) {
+      window.location.href = globalSearchCatalogUrl(initialValue);
+      return;
+    }
+    elements.categoryNavDropdown?.classList.remove("open");
+    elements.brandNavDropdown?.classList.remove("open");
+    elements.globalSearch.classList.add("open");
+    elements.globalSearch.setAttribute("aria-hidden", "false");
+    document.body.classList.add("no-scroll");
+    if (elements.globalSearchInput) {
+      elements.globalSearchInput.value = initialValue;
+      renderGlobalSearch(initialValue);
+      window.setTimeout(() => elements.globalSearchInput.focus(), 60);
+    }
+  }
+
+  function closeGlobalSearch({ restoreFocus = false } = {}) {
+    if (!elements.globalSearch) return;
+    elements.globalSearch.classList.remove("open");
+    elements.globalSearch.setAttribute("aria-hidden", "true");
+    if (!elements.modal?.classList.contains("open") && !elements.cartDrawer?.classList.contains("open") && !elements.filterDrawer?.classList.contains("open")) {
+      document.body.classList.remove("no-scroll");
+    }
+    if (restoreFocus) elements.searchJump?.focus();
+  }
+
+  function submitGlobalSearch() {
+    const query = elements.globalSearchInput?.value.trim() || "";
+    window.location.href = globalSearchCatalogUrl(query);
+  }
+
   function focusCatalogSearch({ cleanUrl = false } = {}) {
     if (!IS_CATALOG_PAGE || !elements.searchInput) return;
 
@@ -2370,9 +2473,37 @@
 
   function bindEvents() {
     elements.searchJump?.addEventListener("click", event => {
-      if (!IS_CATALOG_PAGE) return;
       event.preventDefault();
-      focusCatalogSearch();
+      openGlobalSearch(IS_CATALOG_PAGE ? (elements.searchInput?.value || state.query || "") : "");
+    });
+
+    elements.globalSearchInput?.addEventListener("input", event => renderGlobalSearch(event.target.value));
+    elements.globalSearchForm?.addEventListener("submit", event => {
+      event.preventDefault();
+      submitGlobalSearch();
+    });
+    elements.globalSearchViewAll?.addEventListener("click", submitGlobalSearch);
+    elements.globalSearch?.addEventListener("click", event => {
+      if (event.target.closest("[data-close-global-search]")) {
+        closeGlobalSearch({ restoreFocus: true });
+        return;
+      }
+      const productButton = event.target.closest("[data-global-open-product]");
+      if (productButton) {
+        const product = findProduct(productButton.dataset.globalOpenProduct);
+        closeGlobalSearch();
+        if (product) openProduct(product);
+        return;
+      }
+      const brandButton = event.target.closest("[data-global-brand]");
+      if (brandButton) {
+        window.location.href = `katalog.html?brand=${encodeURIComponent(brandButton.dataset.globalBrand)}#katalog`;
+        return;
+      }
+      const categoryButton = event.target.closest("[data-global-category]");
+      if (categoryButton) {
+        window.location.href = `katalog.html?kategori=${encodeURIComponent(categoryButton.dataset.globalCategory)}#katalog`;
+      }
     });
 
     elements.navToggle?.addEventListener("click", () => {
@@ -2566,9 +2697,9 @@
     });
 
     document.addEventListener("keydown", event => {
-      if (event.key === "/" && IS_CATALOG_PAGE && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "SELECT") {
+      if (event.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) {
         event.preventDefault();
-        focusCatalogSearch();
+        openGlobalSearch(IS_CATALOG_PAGE ? (elements.searchInput?.value || state.query || "") : "");
         return;
       }
 
@@ -2585,6 +2716,7 @@
       elements.brandNavDropdown?.classList.remove("open");
       elements.brandNavToggle?.setAttribute("aria-expanded", "false");
       if (elements.searchSuggestions) elements.searchSuggestions.hidden = true;
+      if (elements.globalSearch?.classList.contains("open")) closeGlobalSearch({ restoreFocus: true });
       if (elements.filterDrawer?.classList.contains("open")) closeFilters();
       if (elements.modal.classList.contains("open")) closeProduct();
       if (elements.cartDrawer.classList.contains("open")) closeCart();
