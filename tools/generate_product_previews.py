@@ -38,7 +38,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 SITE = "https://butikmidori.github.io"
-VERSION = "4.8.2"
+VERSION = "4.9.0"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -419,6 +419,7 @@ def bump_site_version(root: Path) -> None:
         text = re.sub(r'<meta name="midori-version" content="[^"]+">', f'<meta name="midori-version" content="{VERSION}">', text)
         text = re.sub(r'assets/css/style\.css\?v=[^"\']+', f'assets/css/style.css?v={VERSION}', text)
         text = re.sub(r'assets/data/catalog-data\.js\?v=[^"\']+', f'assets/data/catalog-data.js?v={VERSION}', text)
+        text = re.sub(r'assets/data/homepage-config\.js\?v=[^"\']+', f'assets/data/homepage-config.js?v={VERSION}', text)
         text = re.sub(r'assets/js/app\.js\?v=[^"\']+', f'assets/js/app.js?v={VERSION}', text)
         path.write_text(text, encoding="utf-8")
 
