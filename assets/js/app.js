@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.8.0";
+  const APP_VERSION = "4.8.2";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -1238,7 +1238,7 @@
           <div class="product-badges">${productBadges(product)}</div>
           ${availability === "limited" ? `<span class="badge badge-limited badge-stock-bottom-left">Stok menipis</span>` : ""}
           ${product.condition === "Preloved" ? `<span class="badge badge-preloved badge-preloved-bottom-right">Preloved</span>` : ""}
-          <button class="product-favorite" type="button" data-quick-add="${product.id}" aria-label="Tambah ${escapeHtml(product.name)} ke daftar pilihan">♡</button>
+          <button class="product-favorite" type="button" data-quick-add="${product.id}" aria-label="Tambah ${escapeHtml(product.name)} ke daftar pilihan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"></path></svg></button>
         </div>
         <div class="product-body">
           <p class="product-brand">${escapeHtml(product.brand)}</p>
@@ -2524,6 +2524,35 @@
     }
   }
 
+  function resetNavigationState() {
+    elements.mainNav?.classList.remove("open");
+    elements.navToggle?.setAttribute("aria-expanded", "false");
+    elements.categoryNavDropdown?.classList.remove("open");
+    elements.categoryNavToggle?.setAttribute("aria-expanded", "false");
+    elements.brandNavDropdown?.classList.remove("open");
+    elements.brandNavToggle?.setAttribute("aria-expanded", "false");
+  }
+
+  function bindNavigationViewportGuard() {
+    if (!window.matchMedia) return;
+    const tabletNavQuery = window.matchMedia("(max-width: 900px)");
+    let wasTablet = tabletNavQuery.matches;
+
+    const handleViewportChange = event => {
+      const isTablet = typeof event?.matches === "boolean" ? event.matches : tabletNavQuery.matches;
+      if (isTablet !== wasTablet) {
+        resetNavigationState();
+        wasTablet = isTablet;
+      }
+    };
+
+    if (typeof tabletNavQuery.addEventListener === "function") {
+      tabletNavQuery.addEventListener("change", handleViewportChange);
+    } else if (typeof tabletNavQuery.addListener === "function") {
+      tabletNavQuery.addListener(handleViewportChange);
+    }
+  }
+
   function bindEvents() {
     elements.searchJump?.addEventListener("click", event => {
       event.preventDefault();
@@ -2795,6 +2824,7 @@
     renderFreshProducts();
     renderBrandDiscovery();
     renderRecentlyViewed();
+    bindNavigationViewportGuard();
     bindEvents();
     renderCart();
     applyFilters();
