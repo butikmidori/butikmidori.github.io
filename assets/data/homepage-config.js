@@ -22,17 +22,17 @@
 window.MIDORI_HOME_CONFIG = {
   editorialEdits: {
     mixMatch: {
-      product: "puru-kambera-classy-cardigan-kids-s-m",
+      product: "puru-kambera-arine-blazer",
       coverImage: ""
     },
 
     specialMoment: {
-      product: "senja-asha-dress-kids",
+      product: "anindyascarf-rafea-dress",
       coverImage: ""
     },
 
     kids: {
-      product: "senja-asha-koko-kids",
+      product: "heart-troops-niaz-koko-kids",
       coverImage: ""
     }
   }
