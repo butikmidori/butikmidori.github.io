@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.8.2";
+  const APP_VERSION = "4.9.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -1360,11 +1360,65 @@
     return homeProductCandidates(predicate).find(product => firstProductImage(product)) || null;
   }
 
+  function editorialEditConfig(key) {
+    return window.MIDORI_HOME_CONFIG?.editorialEdits?.[key] || {};
+  }
+
+  function resolveEditorialRepresentative(edit, candidates) {
+    const config = editorialEditConfig(edit.key);
+    const configuredSlug = normalizeMediaValue(config.product);
+    const configuredCover = normalizeMediaValue(config.coverImage);
+    const configuredProduct = configuredSlug
+      ? products.find(product =>
+          product.slug === configuredSlug &&
+          product.brand !== "BOX" &&
+          productAvailability(product) !== "out"
+        )
+      : null;
+
+    if (configuredProduct && (configuredCover || firstProductImage(configuredProduct))) {
+      return {
+        product: configuredProduct,
+        image: configuredCover || firstProductImage(configuredProduct),
+        fallbackImage: configuredCover ? firstProductImage(configuredProduct) : "",
+        manual: true
+      };
+    }
+
+    const fallbackProduct = candidates.find(product => firstProductImage(product)) || null;
+    return {
+      product: fallbackProduct,
+      image: fallbackProduct ? firstProductImage(fallbackProduct) : "",
+      fallbackImage: "",
+      manual: false
+    };
+  }
+
+  function bindEditorialCoverFallbacks() {
+    elements.editorialEditGrid
+      ?.querySelectorAll("img[data-editorial-cover]")
+      .forEach(image => {
+        image.addEventListener("error", () => {
+          const fallback = image.dataset.fallbackSrc || "";
+          if (fallback && image.getAttribute("src") !== fallback) {
+            image.dataset.fallbackSrc = "";
+            image.src = fallback;
+            return;
+          }
+
+          const placeholder = document.createElement("span");
+          placeholder.className = "editorial-edit-placeholder";
+          image.replaceWith(placeholder);
+        }, { once: false });
+      });
+  }
+
   function renderEditorialEdits() {
     if (!elements.editorialEditGrid) return;
 
     const edits = [
       {
+        key: "mixMatch",
         kicker: "01 · Padu padan",
         title: "Gampang Dipadu",
         description: "Luaran dan rajut yang tinggal dipadukan dengan yang sudah ada di lemari.",
@@ -1372,6 +1426,7 @@
         predicate: product => product.condition !== "Preloved" && ["Outer", "Sweater"].includes(product.category)
       },
       {
+        key: "specialMoment",
         kicker: "02 · Momen spesial",
         title: "Buat Hari Spesial",
         description: "Dress dan set buat kondangan, acara keluarga, atau saat ingin tampil sedikit lebih istimewa.",
@@ -1379,9 +1434,10 @@
         predicate: product => product.condition !== "Preloved" && ["Dress", "Set"].includes(product.category)
       },
       {
+        key: "kids",
         kicker: "03 · Si kecil",
-        title: "Buat Si Kecil",
-        description: "Dari yang santai sampai yang rapi, pilih yang paling cocok buat mereka.",
+        title: "Yang lucu-lucu buat si kecil.",
+        description: "Nyaman dipakai, gampang disukai.",
         href: "katalog.html?segmen=Anak#katalog",
         predicate: product => product.condition !== "Preloved" && product.segment === "Anak"
       }
@@ -1389,14 +1445,18 @@
 
     elements.editorialEditGrid.innerHTML = edits.map((edit, index) => {
       const candidates = homeProductCandidates(edit.predicate);
-      const representative = candidates.find(product => firstProductImage(product));
-      const image = representative ? firstProductImage(representative) : "";
+      const resolved = resolveEditorialRepresentative(edit, candidates);
+      const representative = resolved.product;
+      const image = resolved.image;
       const count = candidates.length;
+      const fallbackAttr = resolved.fallbackImage
+        ? ` data-fallback-src="${escapeHtml(resolved.fallbackImage)}"`
+        : "";
 
       return `
         <article class="editorial-edit-card editorial-edit-card-${index + 1}" data-reveal-item style="--reveal-delay:${index * 80}ms">
           <a class="editorial-edit-media" href="${escapeHtml(edit.href)}" aria-label="Jelajahi ${escapeHtml(edit.title)}">
-            ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(representative.name)}" loading="lazy" decoding="async">` : '<span class="editorial-edit-placeholder"></span>'}
+            ${image ? `<img data-editorial-cover src="${escapeHtml(image)}"${fallbackAttr} alt="${escapeHtml(representative.name)}" loading="lazy" decoding="async">` : '<span class="editorial-edit-placeholder"></span>'}
           </a>
           <div class="editorial-edit-copy">
             <span>${escapeHtml(edit.kicker)}</span>
@@ -1409,6 +1469,8 @@
           </div>
         </article>`;
     }).join("");
+
+    bindEditorialCoverFallbacks();
   }
 
   function renderFreshProducts() {
