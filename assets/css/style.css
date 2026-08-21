@@ -8097,3 +8097,260 @@ body[data-page="catalog"] .catalog-page-intro p { font-size: 15px !important; }
   .global-search-intro { min-height: 92px; }
   .global-search-unified-suggestions .search-suggestion-group button { min-height: 50px; padding: 11px 10px; }
 }
+
+
+/* =========================================================
+   mi.do.ri v4.8.1 — Tablet Navigation Refinement
+   One navigation behavior for every hamburger viewport (<=900px).
+   ========================================================= */
+@media (max-width: 900px) {
+  /* The hamburger and its submenus now share one breakpoint. This avoids
+     the 761–900px gap where the shell was mobile but dropdowns were desktop. */
+  .main-nav {
+    top: 72px !important;
+    left: 18px !important;
+    right: 18px !important;
+    width: auto !important;
+    max-height: calc(100vh - 92px) !important;
+    max-height: calc(100dvh - 92px) !important;
+    align-content: start !important;
+    align-items: stretch !important;
+    grid-auto-rows: max-content !important;
+    gap: 4px !important;
+    padding: 12px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    border-radius: 18px !important;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .main-nav.open { display: grid !important; }
+
+  .main-nav > a {
+    width: 100%;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    padding: 11px 13px !important;
+    box-sizing: border-box;
+  }
+
+  .nav-dropdown {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .nav-dropdown-toggle {
+    width: 100% !important;
+    min-height: 46px;
+    justify-content: space-between !important;
+    padding: 11px 13px !important;
+    border-radius: 11px !important;
+    box-sizing: border-box;
+    text-align: left !important;
+  }
+
+  .nav-dropdown-toggle::after { display: none !important; }
+
+  .nav-dropdown-toggle:hover,
+  .nav-dropdown-toggle:focus-visible,
+  .nav-dropdown.open .nav-dropdown-toggle {
+    background: var(--green-soft) !important;
+  }
+
+  /* Critical tablet fix: remove desktop absolute/floating dropdown geometry. */
+  .nav-dropdown-menu,
+  .nav-brand-menu {
+    position: static !important;
+    inset: auto !important;
+    left: auto !important;
+    top: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: 0 !important;
+    margin: 0 5px !important;
+    padding: 0 7px !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: #F8FAF8 !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    transform: none !important;
+    box-sizing: border-box;
+    transition: max-height .24s ease, padding .24s ease, margin .24s ease !important;
+  }
+
+  /* Touch tablets must not open dropdowns from :hover / :focus-within alone. */
+  .nav-dropdown:hover .nav-dropdown-menu,
+  .nav-dropdown:focus-within .nav-dropdown-menu {
+    max-height: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .nav-dropdown.open .nav-dropdown-menu {
+    max-height: min(52vh, 430px) !important;
+    max-height: min(52dvh, 430px) !important;
+    margin-top: 5px !important;
+    margin-bottom: 7px !important;
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    pointer-events: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-dropdown.open .nav-brand-menu {
+    max-height: min(56vh, 470px) !important;
+    max-height: min(56dvh, 470px) !important;
+    overflow: hidden !important;
+  }
+
+  .main-nav .nav-dropdown-menu a {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    padding: 9px 10px !important;
+    border-radius: 9px !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    box-sizing: border-box;
+  }
+
+  .nav-brand-search-shell {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 3 !important;
+    margin: 2px 2px 7px !important;
+    padding: 10px 11px !important;
+    background: #FFFFFF !important;
+  }
+
+  .nav-brand-links {
+    max-height: min(42vh, 330px) !important;
+    max-height: min(42dvh, 330px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 650px) {
+  .main-nav {
+    top: 66px !important;
+    left: 12px !important;
+    right: 12px !important;
+    max-height: calc(100vh - 80px) !important;
+    max-height: calc(100dvh - 80px) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .main-nav { padding: 10px !important; }
+  .main-nav > a,
+  .nav-dropdown-toggle { min-height: 44px; padding-block: 10px !important; }
+}
+
+/* =========================================================
+   mi.do.ri v4.8.2 — Tablet Product Detail & Favorite Fix
+   Tablet product detail follows normal document flow; favorite
+   controls keep a true circular geometry across Safari/tablets.
+   ========================================================= */
+
+/* Stable, device-independent favorite control. Using an SVG avoids
+   Unicode heart metrics changing the perceived shape/alignment. */
+.product-card .product-favorite {
+  inline-size: 38px !important;
+  block-size: 38px !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  aspect-ratio: 1 / 1;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  flex: 0 0 38px;
+  line-height: 0 !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.product-card .product-favorite svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  /* Once the detail layout becomes one column, the gallery must stop
+     being sticky. Otherwise Safari keeps it layered over following content. */
+  .modal-product-v42 {
+    display: block !important;
+  }
+
+  .modal-product-v42 .modal-gallery {
+    position: static !important;
+    top: auto !important;
+    align-self: auto !important;
+    z-index: auto !important;
+    padding: 18px 18px 0 !important;
+  }
+
+  .modal-product-v42 .modal-main-image {
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  .modal-product-v42 .modal-media-strip,
+  .modal-product-v42 .modal-media-caption {
+    max-width: 720px;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .modal-product-v42 .modal-gallery {
+    padding: 12px 12px 0 !important;
+  }
+
+  .product-card .product-favorite {
+    inline-size: 36px !important;
+    block-size: 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    flex-basis: 36px;
+  }
+
+  .product-card .product-favorite svg {
+    width: 19px;
+    height: 19px;
+  }
+}
