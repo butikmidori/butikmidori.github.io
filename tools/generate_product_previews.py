@@ -38,7 +38,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 SITE = "https://butikmidori.github.io"
-VERSION = "4.9.0"
+VERSION = "4.10.0"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -97,7 +97,7 @@ def fetch_live_catalog(root: Path) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "mi.do.ri-preview-generator/4.8.2",
+            "User-Agent": "mi.do.ri-preview-generator/4.10.0",
             "Accept": "application/json,text/javascript,*/*;q=0.8",
         },
     )
@@ -150,14 +150,14 @@ def normalize_catalog_media(catalog: dict[str, Any]) -> None:
         images: list[str] = []
         for key in (
             "images", "image", "photo", "foto",
-            "FOTO_UTAMA", "FOTO_2", "FOTO_3",
-            "foto_utama", "foto_2", "foto_3",
-            "fotoUtama", "foto2", "foto3",
-            "image1", "image2", "image3",
-            "IMAGE_1", "IMAGE_2", "IMAGE_3",
+            "FOTO_UTAMA", "FOTO_2", "FOTO_3", "FOTO_4", "FOTO_5", "FOTO_6",
+            "foto_utama", "foto_2", "foto_3", "foto_4", "foto_5", "foto_6",
+            "fotoUtama", "foto2", "foto3", "foto4", "foto5", "foto6",
+            "image1", "image2", "image3", "image4", "image5", "image6",
+            "IMAGE_1", "IMAGE_2", "IMAGE_3", "IMAGE_4", "IMAGE_5", "IMAGE_6",
         ):
             push_media_candidate(images, product.get(key))
-        product["images"] = images
+        product["images"] = images[:6]
 
         product["video"] = normalize_media_value(
             product.get("video")
@@ -217,7 +217,7 @@ def map_local_images(root: Path, catalog: dict[str, Any]) -> tuple[int, int]:
         candidates = index.get(pid, [])
         if candidates:
             with_photo += 1
-            rels = [p.relative_to(root).as_posix() for p in candidates]
+            rels = [p.relative_to(root).as_posix() for p in candidates][:6]
             current = [str(x) for x in (product.get("images") or []) if x]
             if current != rels:
                 product["images"] = rels

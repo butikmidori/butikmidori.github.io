@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.9.0";
+  const APP_VERSION = "4.10.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -27,6 +27,22 @@
   }
 
 
+  function mergeFallbackProductMedia(liveCatalog, fallbackCatalog) {
+    if (!Array.isArray(liveCatalog?.products) || !Array.isArray(fallbackCatalog?.products)) return;
+
+    const fallbackById = new Map(fallbackCatalog.products.map(product => [String(product.id || ""), product]));
+    const fallbackBySlug = new Map(fallbackCatalog.products.map(product => [String(product.slug || ""), product]));
+
+    liveCatalog.products = liveCatalog.products.map(product => {
+      const fallbackProduct = fallbackById.get(String(product.id || ""))
+        || fallbackBySlug.get(String(product.slug || ""));
+      const mergedImages = [];
+      pushMediaCandidate(mergedImages, product.images);
+      pushMediaCandidate(mergedImages, fallbackProduct?.images);
+      return { ...product, images: mergedImages.slice(0, 6) };
+    });
+  }
+
   async function loadCatalog() {
     const fallback = window.MIDORI_CATALOG;
 
@@ -41,6 +57,7 @@
         throw new Error("Format data Google Sheets tidak valid.");
       }
 
+      mergeFallbackProductMedia(liveCatalog, fallback);
       window.MIDORI_CATALOG = liveCatalog;
       window.MIDORI_CATALOG_SOURCE = "google-sheets";
       document.documentElement.dataset.catalogSource = "google-sheets";
@@ -129,21 +146,36 @@
       normalized.FOTO_UTAMA,
       normalized.FOTO_2,
       normalized.FOTO_3,
+      normalized.FOTO_4,
+      normalized.FOTO_5,
+      normalized.FOTO_6,
       normalized.foto_utama,
       normalized.foto_2,
       normalized.foto_3,
+      normalized.foto_4,
+      normalized.foto_5,
+      normalized.foto_6,
       normalized.fotoUtama,
       normalized.foto2,
       normalized.foto3,
+      normalized.foto4,
+      normalized.foto5,
+      normalized.foto6,
       normalized.image1,
       normalized.image2,
       normalized.image3,
+      normalized.image4,
+      normalized.image5,
+      normalized.image6,
       normalized.IMAGE_1,
       normalized.IMAGE_2,
-      normalized.IMAGE_3
+      normalized.IMAGE_3,
+      normalized.IMAGE_4,
+      normalized.IMAGE_5,
+      normalized.IMAGE_6
     ].forEach(value => pushMediaCandidate(images, value));
 
-    normalized.images = images;
+    normalized.images = images.slice(0, 6);
 
     normalized.video = normalizeMediaValue(
       normalized.video ||
