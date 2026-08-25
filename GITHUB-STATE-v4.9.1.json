@@ -1,0 +1,44 @@
+{
+  "baseline_version": "4.9.1",
+  "baseline_type": "synced-project-checkpoint",
+  "baseline_date": "2026-08-25",
+  "runtime_version": "4.9.0",
+  "github": {
+    "repository": "butikmidori/butikmidori.github.io",
+    "branch": "main",
+    "head_sha": "e3e7eb905fbe200e301818bfc218b7cb05949d62"
+  },
+  "database": {
+    "name": "DATABASE KATALOG MI.DO.RI — LIVE",
+    "products_active": 166,
+    "variants_active": 336,
+    "brands": 22,
+    "stock_from_variant_stock": 609
+  },
+  "generator_report": {
+    "catalog_source": "live",
+    "products_total": 166,
+    "products_active": 166,
+    "share_pages": 166,
+    "share_images": 133,
+    "fallback_image_fields_updated": 2
+  },
+  "homepage_editorial": {
+    "mixMatch": "puru-kambera-arine-blazer",
+    "specialMoment": "anindyascarf-rafea-dress",
+    "kids": "heart-troops-niaz-koko-kids"
+  },
+  "verified_media": [
+    "assets/images/products/prd0005-02.webp",
+    "assets/images/products/prd0006-02.webp"
+  ],
+  "source_of_truth": {
+    "code_media_config": "GitHub main",
+    "product_metadata": "PRODUK_MASTER",
+    "variants_prices_stock": "VARIAN_STOK",
+    "brand_identity_status": "BRAND_MASTER",
+    "catalog_data_js": "generated fallback",
+    "product_pages": "generated",
+    "share_images": "generated"
+  }
+}

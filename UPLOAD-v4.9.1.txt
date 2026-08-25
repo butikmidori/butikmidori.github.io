@@ -1,0 +1,14 @@
+mi.do.ri v4.9.1 — GitHub housekeeping docs
+
+UPLOAD KE ROOT REPOSITORY:
+1. PROJECT-STATE.md
+2. SYNC-AUDIT-v4.9.1.md
+3. CHANGELOG-v4.9.1.md
+4. GITHUB-STATE-v4.9.1.json  (opsional tetapi direkomendasikan)
+
+Tidak perlu upload file XLSX snapshot ke GitHub.
+Tidak perlu menjalankan Update Product Previews setelah upload dokumen ini,
+karena package ini tidak mengubah runtime/data/generated assets.
+
+Setelah dokumen masuk, project update berikutnya harus mengambil source dari
+GitHub main terbaru + Google Sheets LIVE terbaru.
