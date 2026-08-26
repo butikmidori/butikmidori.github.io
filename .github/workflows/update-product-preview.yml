@@ -28,20 +28,17 @@ jobs:
       - name: Install preview dependency
         run: python -m pip install -r tools/requirements-preview.txt
 
-      - name: Verify custom domain canonicalization
-        run: python tools/ensure_custom_domain.py
-
-      - name: Apply SEO foundation
-        run: python tools/ensure_seo_foundation.py
+      - name: Apply portrait product share preview
+        run: python tools/ensure_share_preview_45.py
 
       - name: Generate product pages, sitemap, and share previews
         run: python tools/generate_product_previews.py --source live --write-fallback
 
-      - name: Commit generated SEO and previews
+      - name: Commit generated previews
         shell: bash
         run: |
           if [ -z "$(git status --porcelain)" ]; then
-            echo "Tidak ada perubahan SEO/preview."
+            echo "Tidak ada perubahan preview."
             exit 0
           fi
           git config user.name "github-actions[bot]"
@@ -58,7 +55,7 @@ jobs:
             sitemap.xml \
             robots.txt \
             PROJECT-STATE.md \
-            CHANGELOG-v4.12.0.md \
+            CHANGELOG-v4.12.1.md \
             .nojekyll
-          git commit -m "Release v4.12.0 SEO foundation"
+          git commit -m "Release v4.12.1 portrait product share previews"
           git push
