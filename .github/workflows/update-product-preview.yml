@@ -31,6 +31,9 @@ jobs:
       - name: Enable up to six product photos
         run: python tools/enable_six_product_photos.py
 
+      - name: Enable spreadsheet homepage curation
+        run: python tools/enable_homepage_sheet_curation.py
+
       - name: Generate product share pages and images
         run: python tools/generate_product_previews.py --source live --write-fallback
 
@@ -44,5 +47,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add produk assets/images/share assets/data/catalog-data.js index.html katalog.html assets/js/app.js tools/generate_product_previews.py tools/preview-generation-report.json .nojekyll
-          git commit -m "Update catalog media support to six photos"
+          git commit -m "Enable spreadsheet homepage curation"
           git push
