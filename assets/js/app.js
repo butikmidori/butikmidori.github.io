@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.10.0";
+  const APP_VERSION = "4.11.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.github.io";
@@ -185,6 +185,27 @@
       normalized.videoUrl ||
       normalized.VIDEO_URL ||
       normalized.Video
+    );
+
+    normalized.brandHomeOrder = homepageOrderValue(
+      normalized.brandHomeOrder ??
+      normalized.URUTAN_BRAND_BERANDA ??
+      normalized.urutan_brand_beranda
+    );
+    normalized.brandHomeImage = homepageImageValue(
+      normalized.brandHomeImage ??
+      normalized.FOTO_BRAND_BERANDA ??
+      normalized.foto_brand_beranda
+    );
+    normalized.prelovedHomeOrder = homepageOrderValue(
+      normalized.prelovedHomeOrder ??
+      normalized.URUTAN_PRELOVED_BERANDA ??
+      normalized.urutan_preloved_beranda
+    );
+    normalized.prelovedHomeImage = homepageImageValue(
+      normalized.prelovedHomeImage ??
+      normalized.FOTO_PRELOVED_BERANDA ??
+      normalized.foto_preloved_beranda
     );
 
     return normalized;
@@ -489,8 +510,8 @@
     return normalizeMediaValue(product?.video);
   }
 
-  function imageMarkup(product, className = "") {
-    const image = firstProductImage(product);
+  function imageMarkup(product, className = "", imageOverride = "") {
+    const image = normalizeMediaValue(imageOverride) || firstProductImage(product);
     const placeholder = `<div class="product-placeholder ${placeholderClass(product)} ${className}" ${image ? "hidden" : ""}><span><strong>${escapeHtml(productInitials(product))}</strong><small>${escapeHtml(product.brand)}</small></span></div>`;
     if (!image) return placeholder;
     return `<img class="${className}" src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false">${placeholder}`;
@@ -1247,12 +1268,58 @@
     ].join("");
   }
 
+  function homepageOrderValue(value) {
+    const number = Number(value);
+    return Number.isInteger(number) && number >= 1 && number <= 4 ? number : 0;
+  }
+
+  function homepageImageValue(value) {
+    const number = Number(value);
+    return Number.isInteger(number) && number >= 1 && number <= 6 ? number : 0;
+  }
+
+  function homepageProductImage(product, imageNumber) {
+    const images = productImages(product);
+    const selected = homepageImageValue(imageNumber);
+    return (selected ? images[selected - 1] : "") || images[0] || "";
+  }
+
+  function homepageSlots(manualProducts, orderField, fallbackProducts) {
+    const slots = Array(4).fill(null);
+    const usedIds = new Set();
+
+    [...manualProducts]
+      .sort((a, b) =>
+        homepageOrderValue(a[orderField]) - homepageOrderValue(b[orderField]) ||
+        Number(Boolean(firstProductImage(b))) - Number(Boolean(firstProductImage(a))) ||
+        b.totalStock - a.totalStock ||
+        a.name.localeCompare(b.name, "id")
+      )
+      .forEach(product => {
+        const order = homepageOrderValue(product[orderField]);
+        if (!order || slots[order - 1]) return;
+        slots[order - 1] = product;
+        usedIds.add(product.id);
+      });
+
+    fallbackProducts.forEach(product => {
+      if (usedIds.has(product.id)) return;
+      const emptyIndex = slots.findIndex(item => !item);
+      if (emptyIndex < 0) return;
+      slots[emptyIndex] = product;
+      usedIds.add(product.id);
+    });
+
+    return slots.filter(Boolean).slice(0, 4);
+  }
+
   function renderProductCard(product, options = {}) {
     const availability = productAvailability(product);
     const isHomeCard = options.home === true;
     const isCatalogCard = IS_CATALOG_PAGE && !isHomeCard;
     const images = productImages(product);
-    const secondImage = images[1] || "";
+    const primaryImage = homepageProductImage(product, options.imageIndex);
+    const secondImage = images.find(image => image && image !== primaryImage) || "";
     const info = [
       product.colors.length ? `${product.colors.length} warna` : "",
       product.sizes.length ? product.sizes.slice(0, 3).join(", ") : ""
@@ -1263,7 +1330,7 @@
         <div class="product-image-wrap">
           <button class="product-image-open" type="button" data-open-product="${product.id}" aria-label="Buka detail ${escapeHtml(product.name)}">
             <span class="product-image-stack">
-              ${imageMarkup(product, "product-image product-image-primary")}
+              ${imageMarkup(product, "product-image product-image-primary", primaryImage)}
               ${secondImage ? `<img class="product-image product-image-secondary" src="${escapeHtml(secondImage)}" alt="${escapeHtml(product.name)} — foto 2" loading="lazy" decoding="async">` : ""}
             </span>
           </button>
@@ -1328,7 +1395,7 @@
       .filter(product => product.isFeatured === true)
       .filter(product => productAvailability(product) !== "out");
 
-    let featured = selectedProducts
+    const featured = selectedProducts
       .filter(product =>
         product.condition !== "Preloved" &&
         product.brand !== "PRELOVED"
@@ -1336,30 +1403,42 @@
       .sort(sortCuratedHomeProducts)
       .slice(0, 4);
 
-    let preloved = selectedProducts
+    const allPreloved = products
       .filter(product =>
         product.condition === "Preloved" ||
         product.brand === "PRELOVED"
       )
-      .sort(sortCuratedHomeProducts)
-      .slice(0, 4);
-
-    // Keep the homepage useful when the live source is unavailable or
-    // Featured flags have not been curated yet. Explicit Featured choices
-    // always win; these are graceful fallbacks only.
-    if (!featured.length) {
-      featured = selectDiverseProducts(
-        products.filter(product => product.condition !== "Preloved" && product.brand !== "PRELOVED"),
-        4
+      .filter(product => productAvailability(product) !== "out")
+      .sort((a, b) =>
+        Number(Boolean(b.images?.find(Boolean))) -
+          Number(Boolean(a.images?.find(Boolean))) ||
+        b.totalStock - a.totalStock ||
+        a.name.localeCompare(b.name, "id")
       );
-    }
 
-    if (!preloved.length) {
-      preloved = products
-        .filter(product => product.condition === "Preloved" || product.brand === "PRELOVED")
-        .filter(product => productAvailability(product) !== "out")
-        .sort((a, b) => Number(Boolean(b.images?.find(Boolean))) - Number(Boolean(a.images?.find(Boolean))) || b.totalStock - a.totalStock)
+    const manualPreloved = allPreloved
+      .filter(product => homepageOrderValue(product.prelovedHomeOrder));
+
+    let preloved;
+
+    if (manualPreloved.length) {
+      preloved = homepageSlots(
+        manualPreloved,
+        "prelovedHomeOrder",
+        allPreloved
+      );
+    } else {
+      preloved = selectedProducts
+        .filter(product =>
+          product.condition === "Preloved" ||
+          product.brand === "PRELOVED"
+        )
+        .sort(sortCuratedHomeProducts)
         .slice(0, 4);
+
+      if (!preloved.length) {
+        preloved = allPreloved.slice(0, 4);
+      }
     }
 
     if (elements.featuredGrid) {
@@ -1370,7 +1449,10 @@
 
     if (elements.prelovedGrid) {
       elements.prelovedGrid.innerHTML = preloved.length
-        ? preloved.map(product => renderProductCard(product, { home: true })).join("")
+        ? preloved.map(product => renderProductCard(product, {
+            home: true,
+            imageIndex: product.prelovedHomeImage
+          })).join("")
         : '<div class="section-empty-note">Belum ada produk Preloved yang dipilih di Google Sheets.</div>';
     }
   }
@@ -1534,19 +1616,70 @@
       brandMap.get(product.brand).push(product);
     });
 
-    const brandStories = [...brandMap.entries()]
-      .map(([brand, items]) => {
+    const autoStories = [...brandMap.entries()]
+      .map(([brandName, items]) => {
         const representative = items
           .filter(product => firstProductImage(product))
           .sort((a, b) =>
             Number(b.isFeatured === true) - Number(a.isFeatured === true) ||
-            b.totalStock - a.totalStock
+            b.totalStock - a.totalStock ||
+            a.name.localeCompare(b.name, "id")
           )[0];
-        return { brand, items, representative };
+
+        return {
+          brand: brandName,
+          items,
+          representative,
+          image: representative ? firstProductImage(representative) : ""
+        };
       })
       .filter(story => story.representative)
-      .sort((a, b) => b.items.length - a.items.length || a.brand.localeCompare(b.brand, "id"))
-      .slice(0, 4);
+      .sort((a, b) =>
+        b.items.length - a.items.length ||
+        a.brand.localeCompare(b.brand, "id")
+      );
+
+    const manualCandidates = products
+      .filter(product =>
+        homepageOrderValue(product.brandHomeOrder) &&
+        product.brand &&
+        !["PRELOVED", "BOX"].includes(product.brand) &&
+        product.condition !== "Preloved" &&
+        productAvailability(product) !== "out" &&
+        firstProductImage(product)
+      )
+      .sort((a, b) =>
+        homepageOrderValue(a.brandHomeOrder) -
+          homepageOrderValue(b.brandHomeOrder) ||
+        b.totalStock - a.totalStock ||
+        a.name.localeCompare(b.name, "id")
+      );
+
+    const slots = Array(4).fill(null);
+    const usedBrands = new Set();
+
+    manualCandidates.forEach(product => {
+      const order = homepageOrderValue(product.brandHomeOrder);
+      if (!order || slots[order - 1] || usedBrands.has(product.brand)) return;
+
+      slots[order - 1] = {
+        brand: product.brand,
+        items: brandMap.get(product.brand) || [product],
+        representative: product,
+        image: homepageProductImage(product, product.brandHomeImage)
+      };
+      usedBrands.add(product.brand);
+    });
+
+    autoStories.forEach(story => {
+      if (usedBrands.has(story.brand)) return;
+      const emptyIndex = slots.findIndex(item => !item);
+      if (emptyIndex < 0) return;
+      slots[emptyIndex] = story;
+      usedBrands.add(story.brand);
+    });
+
+    const brandStories = slots.filter(Boolean).slice(0, 4);
 
     if (!brandStories.length) {
       elements.brandDiscoveryGrid.innerHTML = '<div class="section-empty-note">Jelajah brand akan tampil saat foto produk tersedia.</div>';
@@ -1557,7 +1690,7 @@
       <a class="brand-discovery-card" href="${catalogUrl({ brand: story.brand })}" data-reveal-item style="--reveal-delay:${index * 70}ms">
         <span class="brand-discovery-index">0${index + 1}</span>
         <div class="brand-discovery-media">
-          <img src="${escapeHtml(firstProductImage(story.representative))}" alt="${escapeHtml(story.representative.name)}" loading="lazy" decoding="async">
+          <img src="${escapeHtml(story.image || firstProductImage(story.representative))}" alt="${escapeHtml(story.representative.name)}" loading="lazy" decoding="async">
         </div>
         <div class="brand-discovery-copy">
           <span>${story.items.length.toLocaleString("id-ID")} produk</span>
