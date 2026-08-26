@@ -1,9 +1,9 @@
 # mi.do.ri — Project State
 
 ## Baseline
-- Project baseline checkpoint: **v4.12.1 — Portrait Product Share Preview**
+- Project baseline checkpoint: **v4.12.2 — Cross-platform Share Safe Framing**
 - Tanggal checkpoint: **2026-08-26**
-- Frontend/runtime saat checkpoint: **v4.12.1**
+- Frontend/runtime saat checkpoint: **v4.12.2**
 - Repository canonical: `butikmidori/butikmidori.github.io`
 - Branch canonical: `main`
 - GitHub HEAD runtime: lihat branch `main` LIVE; GitHub tetap menjadi authority terbaru.
@@ -29,7 +29,7 @@
 - Generated product share pages: **166**
 - Generated social share images: **133**
 - Catalog source: **live**
-- Runtime/generator: **v4.12.1**
+- Runtime/generator: **v4.12.2**
 
 ## Media Produk
 `FOTO_UTAMA` → `FOTO_2` → `FOTO_3` → `FOTO_4` → `FOTO_5` → `FOTO_6` → `URL_VIDEO`
@@ -121,6 +121,16 @@ window.MIDORI_HOME_CONFIG = {
 - Metadata Open Graph memakai dimensi 1080×1350 bila share image produk tersedia.
 - Produk tanpa foto lokal tetap memakai fallback social image yang ada; tidak ada foto yang ditebak.
 - `assets/images/share/**` tetap generated dan diregenerasi oleh workflow.
+
+## Cross-platform Share Safe Framing — v4.12.2
+- Format product-specific social preview tetap **portrait 4:5 (1080×1350)**.
+- Foto tetap full-bleed; tidak ada ruang kosong kiri/kanan.
+- Sharp hero digeser turun ringan sekitar 9% untuk memberi safe area yang lebih baik saat platform seperti Threads melakukan center-crop landscape.
+- Area atas yang terbuka diisi dari foto yang sama dengan blur lembut, bukan warna/panel kosong.
+- Transisi sharp image dibuat feathered agar tidak muncul garis sambungan keras.
+- Overlay Warm Cream, brand, nama produk, wordmark `mi.do.ri`, dan metadata Open Graph 1080×1350 tetap dipertahankan.
+- Tidak ada perubahan pada foto sumber, data Google Sheets, katalog, canonical URL, sitemap, robots.txt, DNS, atau HTTPS.
+- Hasil final tetap dapat berbeda antar-platform karena crop preview ditentukan oleh platform.
 
 ## Aturan Update Aman
 1. Mulai selalu dari GitHub `main` dan Sheets LIVE terbaru.

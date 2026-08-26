@@ -39,7 +39,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 SITE = "https://butikmidori.id"
-VERSION = "4.12.1"
+VERSION = "4.12.2"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -98,7 +98,7 @@ def fetch_live_catalog(root: Path) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "mi.do.ri-preview-generator/4.12.1",
+            "User-Agent": "mi.do.ri-preview-generator/4.12.2",
             "Accept": "application/json,text/javascript,*/*;q=0.8",
         },
     )
@@ -324,12 +324,40 @@ def make_product_card(src: Path, dest: Path, product: dict[str, Any]) -> None:
     """
     width, height = 1080, 1350
     img = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
-    canvas = ImageOps.fit(
+    # Build the normal 4:5 cover first.
+    cover = ImageOps.fit(
         img,
         (width, height),
         method=Image.Resampling.LANCZOS,
         centering=(0.5, 0.46),
-    ).convert("RGBA")
+    ).convert("RGB")
+
+    # Cross-platform safe framing:
+    # Threads-style feed cards often center-crop a portrait OG image into a
+    # wide landscape window. Moving the sharp hero down by ~9% keeps more of
+    # the face / upper outfit inside that center crop. The newly exposed top
+    # area is filled from the same photo with a soft blur, never a blank panel.
+    # The small bottom loss sits underneath the existing cream information
+    # panel, so the WhatsApp 4:5 composition remains visually balanced.
+    safe_shift = 120
+    feather = 84
+    background = cover.filter(ImageFilter.GaussianBlur(radius=22))
+
+    shifted = Image.new("RGB", (width, height), (247, 246, 241))
+    shifted.paste(cover, (0, safe_shift))
+
+    mask = Image.new("L", (width, height), 0)
+    mask_draw = ImageDraw.Draw(mask)
+    for y in range(safe_shift, min(height, safe_shift + feather)):
+        progress = (y - safe_shift) / max(1, feather)
+        mask_draw.line((0, y, width, y), fill=int(255 * progress))
+    if safe_shift + feather < height:
+        mask_draw.rectangle(
+            (0, safe_shift + feather, width, height),
+            fill=255,
+        )
+
+    canvas = Image.composite(shifted, background, mask).convert("RGBA")
 
     # Soft transition into a lightly translucent Warm Cream information panel.
     overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
