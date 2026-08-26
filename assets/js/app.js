@@ -1,7 +1,7 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.11.1";
+  const APP_VERSION = "4.12.0";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
   const SITE_ORIGIN = "https://butikmidori.id";
@@ -1328,12 +1328,12 @@
     return `
       <article class="product-card${isHomeCard ? " product-card-home" : ""}${isCatalogCard ? " product-card-catalog" : ""}" data-open-product="${product.id}" role="link" tabindex="0" aria-label="Buka detail ${escapeHtml(product.name)}">
         <div class="product-image-wrap">
-          <button class="product-image-open" type="button" data-open-product="${product.id}" aria-label="Buka detail ${escapeHtml(product.name)}">
+          <a class="product-image-open" href="${productSharePath(product)}" data-open-product="${product.id}" aria-label="Buka detail ${escapeHtml(product.name)}">
             <span class="product-image-stack">
               ${imageMarkup(product, "product-image product-image-primary", primaryImage)}
               ${secondImage ? `<img class="product-image product-image-secondary" src="${escapeHtml(secondImage)}" alt="${escapeHtml(product.name)} — foto 2" loading="lazy" decoding="async">` : ""}
             </span>
-          </button>
+          </a>
           <div class="product-badges">${productBadges(product)}</div>
           ${availability === "limited" ? `<span class="badge badge-limited badge-stock-bottom-left">Stok menipis</span>` : ""}
           ${product.condition === "Preloved" ? `<span class="badge badge-preloved badge-preloved-bottom-right">Preloved</span>` : ""}
@@ -2632,6 +2632,7 @@
 
     const detailButton = event.target.closest("[data-open-product]");
     if (detailButton) {
+      event.preventDefault();
       if (elements.searchSuggestions) elements.searchSuggestions.hidden = true;
       openProduct(findProduct(detailButton.dataset.openProduct));
     }

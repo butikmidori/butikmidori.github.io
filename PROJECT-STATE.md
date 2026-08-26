@@ -1,12 +1,12 @@
 # mi.do.ri — Project State
 
 ## Baseline
-- Project baseline checkpoint: **v4.11.1 — Custom Domain Canonicalization**
+- Project baseline checkpoint: **v4.12.0 — SEO Foundation & Indexable Product Pages**
 - Tanggal checkpoint: **2026-08-26**
-- Frontend/runtime saat checkpoint: **v4.11.1**
+- Frontend/runtime saat checkpoint: **v4.12.0**
 - Repository canonical: `butikmidori/butikmidori.github.io`
 - Branch canonical: `main`
-- GitHub HEAD runtime yang diverifikasi: `3d8ef283a180cd4d69de28f6ff70fd7cb7ca1b36`
+- GitHub HEAD runtime: lihat branch `main` LIVE; GitHub tetap menjadi authority terbaru.
 - Database live: **DATABASE KATALOG MI.DO.RI — LIVE**
 
 > v4.11.0 menambahkan kontrol editorial homepage langsung dari `PRODUK_MASTER` untuk section **Brand pilihan** dan **Second Chapter / Preloved**, tanpa mengubah source of truth SKU, harga, stok, atau media produk.
@@ -29,7 +29,7 @@
 - Generated product share pages: **166**
 - Generated social share images: **133**
 - Catalog source: **live**
-- Runtime/generator: **v4.11.1**
+- Runtime/generator: **v4.12.0**
 
 ## Media Produk
 `FOTO_UTAMA` → `FOTO_2` → `FOTO_3` → `FOTO_4` → `FOTO_5` → `FOTO_6` → `URL_VIDEO`
@@ -102,6 +102,15 @@ window.MIDORI_HOME_CONFIG = {
 - `index.html` dan `katalog.html` memakai domain baru untuk canonical, Open Graph, dan Twitter image.
 - `tools/generate_product_previews.py` memakai domain baru sehingga seluruh `produk/**` generated ikut canonical ke domain baru.
 - Domain lama `butikmidori.github.io` tidak lagi dipakai sebagai URL publik/canonical di source runtime/generator.
+
+## SEO Foundation — v4.12.0
+- `produk/**` tetap generated, tetapi menjadi halaman produk statis yang indexable dan tidak lagi auto-redirect.
+- Product card menyediakan crawlable `<a href="/produk/<slug>/">` sambil mempertahankan modal untuk klik normal saat JavaScript aktif.
+- Halaman produk generated memakai deskripsi/detail LIVE yang tersedia dan menambahkan `Product` + `BreadcrumbList` JSON-LD.
+- Generator membuat `sitemap.xml` dari homepage, katalog, dan seluruh produk aktif.
+- Generator membuat `robots.txt` yang mengizinkan crawling dan menunjuk ke sitemap.
+- Title katalog dibedakan dari homepage.
+- Link internal eksplisit ke `index.html` dinormalisasi ke canonical homepage `/`.
 
 ## Aturan Update Aman
 1. Mulai selalu dari GitHub `main` dan Sheets LIVE terbaru.
