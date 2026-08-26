@@ -1,10 +1,10 @@
 (async () => {
   "use strict";
 
-  const APP_VERSION = "4.11.0";
+  const APP_VERSION = "4.11.1";
   window.MIDORI_APP_VERSION = APP_VERSION;
 
-  const SITE_ORIGIN = "https://butikmidori.github.io";
+  const SITE_ORIGIN = "https://butikmidori.id";
   const PRODUCT_PATH_PREFIX = "/produk/";
   let modalReturnUrl = null;
   let modalInteractionController = null;

@@ -1,9 +1,9 @@
 # mi.do.ri — Project State
 
 ## Baseline
-- Project baseline checkpoint: **v4.11.0 — Homepage Curation via Google Sheets**
+- Project baseline checkpoint: **v4.11.1 — Custom Domain Canonicalization**
 - Tanggal checkpoint: **2026-08-26**
-- Frontend/runtime saat checkpoint: **v4.11.0**
+- Frontend/runtime saat checkpoint: **v4.11.1**
 - Repository canonical: `butikmidori/butikmidori.github.io`
 - Branch canonical: `main`
 - GitHub HEAD runtime yang diverifikasi: `3d8ef283a180cd4d69de28f6ff70fd7cb7ca1b36`
@@ -29,7 +29,7 @@
 - Generated product share pages: **166**
 - Generated social share images: **133**
 - Catalog source: **live**
-- Runtime/generator: **v4.11.0**
+- Runtime/generator: **v4.11.1**
 
 ## Media Produk
 `FOTO_UTAMA` → `FOTO_2` → `FOTO_3` → `FOTO_4` → `FOTO_5` → `FOTO_6` → `URL_VIDEO`
@@ -91,6 +91,17 @@ window.MIDORI_HOME_CONFIG = {
   }
 };
 ```
+
+
+## Custom Domain — v4.11.1
+- Domain publik/canonical: `https://butikmidori.id`
+- GitHub Pages tetap menjadi hosting.
+- `CNAME` tetap `butikmidori.id`.
+- `www.butikmidori.id` tetap boleh menunjuk ke `butikmidori.github.io` sebagai target teknis DNS GitHub Pages.
+- `assets/js/app.js` memakai domain baru untuk link produk/WhatsApp/copy link.
+- `index.html` dan `katalog.html` memakai domain baru untuk canonical, Open Graph, dan Twitter image.
+- `tools/generate_product_previews.py` memakai domain baru sehingga seluruh `produk/**` generated ikut canonical ke domain baru.
+- Domain lama `butikmidori.github.io` tidak lagi dipakai sebagai URL publik/canonical di source runtime/generator.
 
 ## Aturan Update Aman
 1. Mulai selalu dari GitHub `main` dan Sheets LIVE terbaru.
