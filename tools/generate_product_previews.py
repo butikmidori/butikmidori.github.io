@@ -32,14 +32,14 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from PIL import Image, ImageFilter, ImageOps
+    from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 except ImportError as exc:  # pragma: no cover
     raise SystemExit(
         "Pillow belum terpasang. Jalankan: python -m pip install -r tools/requirements-preview.txt"
     ) from exc
 
 SITE = "https://butikmidori.id"
-VERSION = "4.12.0"
+VERSION = "4.12.1"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -98,7 +98,7 @@ def fetch_live_catalog(root: Path) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "mi.do.ri-preview-generator/4.12.0",
+            "User-Agent": "mi.do.ri-preview-generator/4.12.1",
             "Accept": "application/json,text/javascript,*/*;q=0.8",
         },
     )
@@ -245,37 +245,147 @@ def make_default_card(root: Path, share_dir: Path) -> None:
     canvas.save(share_dir / "midori-default.jpg", "JPEG", quality=90, optimize=True, progressive=True)
 
 
-def make_product_card(src: Path, dest: Path) -> None:
-    """Create a social-safe 1200x630 card with the full portrait product image.
+def _share_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    """Load a stable system font without adding font files to the repository."""
+    candidates = (
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
+        "DejaVuSans.ttf",
+    )
+    for candidate in candidates:
+        try:
+            return ImageFont.truetype(candidate, size=size)
+        except OSError:
+            continue
+    try:
+        return ImageFont.load_default(size=size)
+    except TypeError:  # pragma: no cover - compatibility fallback
+        return ImageFont.load_default()
 
-    The product photo is never blurred into the side areas. It is preserved in a
-    centered 4:5 portrait stage over the Emerald & Cream luxury palette.
+
+def _share_text_width(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.ImageFont) -> int:
+    box = draw.textbbox((0, 0), text, font=font)
+    return max(0, box[2] - box[0])
+
+
+def _ellipsize_share_line(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    font: ImageFont.ImageFont,
+    max_width: int,
+) -> str:
+    if _share_text_width(draw, text, font) <= max_width:
+        return text
+    suffix = "…"
+    trimmed = text.rstrip()
+    while trimmed and _share_text_width(draw, trimmed + suffix, font) > max_width:
+        trimmed = trimmed[:-1].rstrip()
+    return (trimmed + suffix) if trimmed else suffix
+
+
+def _wrap_share_name(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    font: ImageFont.ImageFont,
+    max_width: int,
+    max_lines: int = 2,
+) -> list[str]:
+    words = str(text or "").split()
+    if not words:
+        return ["Produk mi.do.ri"]
+
+    lines: list[str] = []
+    current = ""
+    consumed = 0
+    for word in words:
+        trial = word if not current else f"{current} {word}"
+        if not current or _share_text_width(draw, trial, font) <= max_width:
+            current = trial
+            consumed += 1
+            continue
+        lines.append(current)
+        current = word
+        consumed += 1
+        if len(lines) == max_lines - 1:
+            remainder = " ".join([current] + words[consumed:])
+            lines.append(_ellipsize_share_line(draw, remainder, font, max_width))
+            return lines[:max_lines]
+
+    if current:
+        lines.append(_ellipsize_share_line(draw, current, font, max_width))
+    return lines[:max_lines]
+
+
+def make_product_card(src: Path, dest: Path, product: dict[str, Any]) -> None:
+    """Create an editorial 1080x1350 (4:5) product share image.
+
+    The product image is full-bleed with no empty side panels. A restrained
+    Warm Cream lower overlay carries only brand, product name, and mi.do.ri.
     """
-    img = Image.open(src).convert("RGB")
-    canvas = Image.new("RGB", (1200, 630), (247, 246, 241))
+    width, height = 1080, 1350
+    img = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
+    canvas = ImageOps.fit(
+        img,
+        (width, height),
+        method=Image.Resampling.LANCZOS,
+        centering=(0.5, 0.46),
+    ).convert("RGBA")
 
-    # Subtle editorial side panels; intentionally flat/clean (no photo blur).
-    left_panel = Image.new("RGB", (348, 630), (230, 240, 233))
-    right_panel = Image.new("RGB", (348, 630), (247, 246, 241))
-    canvas.paste(left_panel, (0, 0))
-    canvas.paste(right_panel, (852, 0))
+    # Soft transition into a lightly translucent Warm Cream information panel.
+    overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    overlay_draw = ImageDraw.Draw(overlay)
+    fade_start = 900
+    panel_start = 1008
+    cream = (247, 246, 241)
+    for y in range(fade_start, panel_start):
+        progress = (y - fade_start) / max(1, panel_start - fade_start)
+        alpha = int(218 * progress)
+        overlay_draw.line((0, y, width, y), fill=(*cream, alpha))
+    overlay_draw.rectangle((0, panel_start, width, height), fill=(*cream, 232))
+    canvas = Image.alpha_composite(canvas, overlay)
 
-    # Gold hairlines give the card a restrained boutique finish.
-    gold = (200, 169, 106)
-    for x in (347, 852):
-        for y in range(630):
-            canvas.putpixel((x, y), gold)
+    draw = ImageDraw.Draw(canvas)
+    emerald = (15, 61, 52, 255)
+    muted = (69, 91, 84, 255)
+    gold = (200, 169, 106, 255)
 
-    # 4:5 stage (504 x 630). Contain preserves the complete original image.
-    stage_size = (504, 630)
-    stage = Image.new("RGB", stage_size, (247, 246, 241))
-    fitted = ImageOps.contain(img, stage_size, method=Image.Resampling.LANCZOS)
-    sx = (stage_size[0] - fitted.width) // 2
-    sy = (stage_size[1] - fitted.height) // 2
-    stage.paste(fitted, (sx, sy))
-    canvas.paste(stage, (348, 0))
+    brand = " ".join(str(product.get("brand") or "mi.do.ri").split()).strip()
+    name = " ".join(str(product.get("name") or "Produk mi.do.ri").split()).strip()
 
-    canvas.save(dest, "JPEG", quality=90, optimize=True, progressive=True)
+    left = 76
+    right = width - 76
+    max_text_width = right - left
+
+    # Restrained gold hairline as the only decorative accent.
+    draw.rounded_rectangle((left, 1048, left + 82, 1054), radius=3, fill=gold)
+
+    brand_font = _share_font(27)
+    name_font = _share_font(54)
+    wordmark_font = _share_font(25)
+
+    brand_label = _ellipsize_share_line(draw, brand.upper(), brand_font, max_text_width)
+    draw.text((left, 1078), brand_label, font=brand_font, fill=muted)
+
+    lines = _wrap_share_name(draw, name, name_font, max_text_width, max_lines=2)
+    name_y = 1124
+    line_gap = 7
+    for line in lines:
+        draw.text((left, name_y), line, font=name_font, fill=emerald)
+        box = draw.textbbox((left, name_y), line, font=name_font)
+        name_y = box[3] + line_gap
+
+    wordmark = "mi.do.ri"
+    wordmark_width = _share_text_width(draw, wordmark, wordmark_font)
+    draw.text((right - wordmark_width, 1290), wordmark, font=wordmark_font, fill=emerald)
+
+    canvas.convert("RGB").save(
+        dest,
+        "JPEG",
+        quality=92,
+        optimize=True,
+        progressive=True,
+        subsampling=0,
+    )
 
 
 def local_image_for_product(root: Path, product: dict[str, Any]) -> Path | None:
@@ -316,7 +426,7 @@ def generate_share_images(root: Path, products: list[dict[str, Any]]) -> dict[st
             continue
         dest = share_dir / f"{slug}.jpg"
         try:
-            make_product_card(image, dest)
+            make_product_card(image, dest, product)
             generated[slug] = dest.relative_to(root).as_posix()
         except Exception as exc:
             print(f"[WARN] Gagal membuat preview {slug}: {exc}")
@@ -495,6 +605,7 @@ def product_page(product: dict[str, Any], image_rel: str, has_product_photo: boo
     product_id = _plain_text(product.get("id"))
     share_url = f"{SITE}/produk/{urllib.parse.quote(slug)}/"
     social_image_url = f"{SITE}/{image_rel}"
+    og_width, og_height = (1080, 1350) if has_product_photo else (1200, 630)
     target = f"/katalog.html?produk={urllib.parse.quote(slug)}#katalog"
 
     description = _plain_text(product.get("description"))
@@ -582,8 +693,8 @@ def product_page(product: dict[str, Any], image_rel: str, has_product_photo: boo
   <meta property="og:image" content="{social_image_url}">
   <meta property="og:image:secure_url" content="{social_image_url}">
   <meta property="og:image:type" content="image/jpeg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image:width" content="{og_width}">
+  <meta property="og:image:height" content="{og_height}">
   <meta property="og:image:alt" content="{html.escape(name + ' — ' + brand, quote=True)}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{html.escape(name + ' — ' + brand, quote=True)}">

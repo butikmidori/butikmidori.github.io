@@ -1,9 +1,9 @@
 # mi.do.ri — Project State
 
 ## Baseline
-- Project baseline checkpoint: **v4.12.0 — SEO Foundation & Indexable Product Pages**
+- Project baseline checkpoint: **v4.12.1 — Portrait Product Share Preview**
 - Tanggal checkpoint: **2026-08-26**
-- Frontend/runtime saat checkpoint: **v4.12.0**
+- Frontend/runtime saat checkpoint: **v4.12.1**
 - Repository canonical: `butikmidori/butikmidori.github.io`
 - Branch canonical: `main`
 - GitHub HEAD runtime: lihat branch `main` LIVE; GitHub tetap menjadi authority terbaru.
@@ -29,7 +29,7 @@
 - Generated product share pages: **166**
 - Generated social share images: **133**
 - Catalog source: **live**
-- Runtime/generator: **v4.12.0**
+- Runtime/generator: **v4.12.1**
 
 ## Media Produk
 `FOTO_UTAMA` → `FOTO_2` → `FOTO_3` → `FOTO_4` → `FOTO_5` → `FOTO_6` → `URL_VIDEO`
@@ -111,6 +111,16 @@ window.MIDORI_HOME_CONFIG = {
 - Generator membuat `robots.txt` yang mengizinkan crawling dan menunjuk ke sitemap.
 - Title katalog dibedakan dari homepage.
 - Link internal eksplisit ke `index.html` dinormalisasi ke canonical homepage `/`.
+
+## Product Share Preview — v4.12.1
+- Product-specific social share image memakai portrait **4:5 (1080×1350)**.
+- Foto produk dibuat full-bleed dengan crop cover terpusat; tidak ada panel kosong kiri/kanan.
+- Branding dibuat ringan: brand, nama produk, dan wordmark kecil `mi.do.ri`.
+- Overlay bawah memakai Warm Cream transparan dengan aksen Muted Gold; foto tetap menjadi visual utama.
+- Harga, diskon, badge stok, dan elemen promo tidak dimasukkan ke share image.
+- Metadata Open Graph memakai dimensi 1080×1350 bila share image produk tersedia.
+- Produk tanpa foto lokal tetap memakai fallback social image yang ada; tidak ada foto yang ditebak.
+- `assets/images/share/**` tetap generated dan diregenerasi oleh workflow.
 
 ## Aturan Update Aman
 1. Mulai selalu dari GitHub `main` dan Sheets LIVE terbaru.
