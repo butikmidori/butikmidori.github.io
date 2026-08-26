@@ -244,11 +244,9 @@ def patch_app() -> None:
             raise RuntimeError("renderProductCard anchor not unique")
         text = text.replace(helper_anchor, helpers + helper_anchor, 1)
 
-    card_old = '''  function renderProductCard(product, options = {}) {
-    const images = productImages(product);
+    card_old = '''    const images = productImages(product);
     const secondImage = images[1] || "";'''
-    card_new = '''  function renderProductCard(product, options = {}) {
-    const images = productImages(product);
+    card_new = '''    const images = productImages(product);
     const primaryImage = homepageProductImage(product, options.imageIndex);
     const secondImage = images.find(image => image && image !== primaryImage) || "";'''
     if "const primaryImage = homepageProductImage(product, options.imageIndex);" not in text:
