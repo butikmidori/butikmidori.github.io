@@ -39,7 +39,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 SITE = "https://butikmidori.id"
-VERSION = "4.12.2"
+VERSION = "4.12.3"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -98,7 +98,7 @@ def fetch_live_catalog(root: Path) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "mi.do.ri-preview-generator/4.12.2",
+            "User-Agent": "mi.do.ri-preview-generator/4.12.3",
             "Accept": "application/json,text/javascript,*/*;q=0.8",
         },
     )
@@ -324,52 +324,24 @@ def make_product_card(src: Path, dest: Path, product: dict[str, Any]) -> None:
     """
     width, height = 1080, 1350
     img = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
-    # Build the normal 4:5 cover first.
-    cover = ImageOps.fit(
+    canvas = ImageOps.fit(
         img,
         (width, height),
         method=Image.Resampling.LANCZOS,
         centering=(0.5, 0.46),
-    ).convert("RGB")
+    ).convert("RGBA")
 
-    # Cross-platform safe framing:
-    # Threads-style feed cards often center-crop a portrait OG image into a
-    # wide landscape window. Moving the sharp hero down by ~9% keeps more of
-    # the face / upper outfit inside that center crop. The newly exposed top
-    # area is filled from the same photo with a soft blur, never a blank panel.
-    # The small bottom loss sits underneath the existing cream information
-    # panel, so the WhatsApp 4:5 composition remains visually balanced.
-    safe_shift = 120
-    feather = 84
-    background = cover.filter(ImageFilter.GaussianBlur(radius=22))
-
-    shifted = Image.new("RGB", (width, height), (247, 246, 241))
-    shifted.paste(cover, (0, safe_shift))
-
-    mask = Image.new("L", (width, height), 0)
-    mask_draw = ImageDraw.Draw(mask)
-    for y in range(safe_shift, min(height, safe_shift + feather)):
-        progress = (y - safe_shift) / max(1, feather)
-        mask_draw.line((0, y, width, y), fill=int(255 * progress))
-    if safe_shift + feather < height:
-        mask_draw.rectangle(
-            (0, safe_shift + feather, width, height),
-            fill=255,
-        )
-
-    canvas = Image.composite(shifted, background, mask).convert("RGBA")
-
-    # Soft transition into a lightly translucent Warm Cream information panel.
+    # Refined lower overlay: cleaner, shorter, and less intrusive for WhatsApp.
     overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     overlay_draw = ImageDraw.Draw(overlay)
-    fade_start = 900
-    panel_start = 1008
+    fade_start = 1040
+    panel_start = 1120
     cream = (247, 246, 241)
     for y in range(fade_start, panel_start):
         progress = (y - fade_start) / max(1, panel_start - fade_start)
-        alpha = int(218 * progress)
+        alpha = int(206 * progress)
         overlay_draw.line((0, y, width, y), fill=(*cream, alpha))
-    overlay_draw.rectangle((0, panel_start, width, height), fill=(*cream, 232))
+    overlay_draw.rectangle((0, panel_start, width, height), fill=(*cream, 226))
     canvas = Image.alpha_composite(canvas, overlay)
 
     draw = ImageDraw.Draw(canvas)
@@ -385,18 +357,18 @@ def make_product_card(src: Path, dest: Path, product: dict[str, Any]) -> None:
     max_text_width = right - left
 
     # Restrained gold hairline as the only decorative accent.
-    draw.rounded_rectangle((left, 1048, left + 82, 1054), radius=3, fill=gold)
+    draw.rounded_rectangle((left, 1148, left + 72, 1154), radius=3, fill=gold)
 
-    brand_font = _share_font(27)
-    name_font = _share_font(54)
-    wordmark_font = _share_font(25)
+    brand_font = _share_font(24)
+    name_font = _share_font(48)
+    wordmark_font = _share_font(22)
 
     brand_label = _ellipsize_share_line(draw, brand.upper(), brand_font, max_text_width)
-    draw.text((left, 1078), brand_label, font=brand_font, fill=muted)
+    draw.text((left, 1172), brand_label, font=brand_font, fill=muted)
 
     lines = _wrap_share_name(draw, name, name_font, max_text_width, max_lines=2)
-    name_y = 1124
-    line_gap = 7
+    name_y = 1210
+    line_gap = 5
     for line in lines:
         draw.text((left, name_y), line, font=name_font, fill=emerald)
         box = draw.textbbox((left, name_y), line, font=name_font)
@@ -404,7 +376,7 @@ def make_product_card(src: Path, dest: Path, product: dict[str, Any]) -> None:
 
     wordmark = "mi.do.ri"
     wordmark_width = _share_text_width(draw, wordmark, wordmark_font)
-    draw.text((right - wordmark_width, 1290), wordmark, font=wordmark_font, fill=emerald)
+    draw.text((right - wordmark_width, 1306), wordmark, font=wordmark_font, fill=emerald)
 
     canvas.convert("RGB").save(
         dest,

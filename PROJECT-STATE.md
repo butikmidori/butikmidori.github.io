@@ -1,9 +1,9 @@
 # mi.do.ri — Project State
 
 ## Baseline
-- Project baseline checkpoint: **v4.12.2 — Cross-platform Share Safe Framing**
+- Project baseline checkpoint: **v4.12.3 — Clean Portrait Share Preview Refinement**
 - Tanggal checkpoint: **2026-08-26**
-- Frontend/runtime saat checkpoint: **v4.12.2**
+- Frontend/runtime saat checkpoint: **v4.12.3**
 - Repository canonical: `butikmidori/butikmidori.github.io`
 - Branch canonical: `main`
 - GitHub HEAD runtime: lihat branch `main` LIVE; GitHub tetap menjadi authority terbaru.
@@ -29,7 +29,7 @@
 - Generated product share pages: **166**
 - Generated social share images: **133**
 - Catalog source: **live**
-- Runtime/generator: **v4.12.2**
+- Runtime/generator: **v4.12.3**
 
 ## Media Produk
 `FOTO_UTAMA` → `FOTO_2` → `FOTO_3` → `FOTO_4` → `FOTO_5` → `FOTO_6` → `URL_VIDEO`
@@ -131,6 +131,13 @@ window.MIDORI_HOME_CONFIG = {
 - Overlay Warm Cream, brand, nama produk, wordmark `mi.do.ri`, dan metadata Open Graph 1080×1350 tetap dipertahankan.
 - Tidak ada perubahan pada foto sumber, data Google Sheets, katalog, canonical URL, sitemap, robots.txt, DNS, atau HTTPS.
 - Hasil final tetap dapat berbeda antar-platform karena crop preview ditentukan oleh platform.
+
+## Clean Portrait Share Preview Refinement — v4.12.3
+- Komposisi foto dikembalikan ke portrait clean full-bleed tanpa blur top fill.
+- Social share image produk tetap **1080×1350 (4:5)**.
+- Overlay bawah dipendekkan agar foto produk lebih dominan, khususnya pada preview WhatsApp.
+- Isi share image tetap ringan: brand, nama produk, dan wordmark `mi.do.ri`.
+- Tidak ada perubahan pada data Google Sheets LIVE, foto sumber, domain, DNS, HTTPS, canonical URL, sitemap, robots.txt, atau struktur katalog.
 
 ## Aturan Update Aman
 1. Mulai selalu dari GitHub `main` dan Sheets LIVE terbaru.
