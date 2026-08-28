@@ -1,9 +1,9 @@
 # mi.do.ri — Project State
 
 ## Baseline
-- Project baseline checkpoint: **v4.12.3 — Clean Portrait Share Preview Refinement**
-- Tanggal checkpoint: **2026-08-26**
-- Frontend/runtime saat checkpoint: **v4.12.3**
+- Project baseline checkpoint: **v4.12.4 — Photo-first Share Preview**
+- Tanggal checkpoint: **2026-08-28**
+- Frontend/runtime saat checkpoint: **v4.12.4**
 - Repository canonical: `butikmidori/butikmidori.github.io`
 - Branch canonical: `main`
 - GitHub HEAD runtime: lihat branch `main` LIVE; GitHub tetap menjadi authority terbaru.
@@ -27,9 +27,9 @@
 - Brand: **22**
 - Total stok: **609**
 - Generated product share pages: **166**
-- Generated social share images: **133**
+- Generated social share images: **134**
 - Catalog source: **live**
-- Runtime/generator: **v4.12.3**
+- Runtime/generator: **v4.12.4**
 
 ## Media Produk
 `FOTO_UTAMA` → `FOTO_2` → `FOTO_3` → `FOTO_4` → `FOTO_5` → `FOTO_6` → `URL_VIDEO`
@@ -138,6 +138,15 @@ window.MIDORI_HOME_CONFIG = {
 - Overlay bawah dipendekkan agar foto produk lebih dominan, khususnya pada preview WhatsApp.
 - Isi share image tetap ringan: brand, nama produk, dan wordmark `mi.do.ri`.
 - Tidak ada perubahan pada data Google Sheets LIVE, foto sumber, domain, DNS, HTTPS, canonical URL, sitemap, robots.txt, atau struktur katalog.
+
+## Photo-first Share Preview — v4.12.4
+- Product-specific social share image tetap **1080×1350 (4:5)** dengan foto clean full-bleed.
+- Panel/overlay bawah, nama brand, nama produk, dan aksen dekoratif dihapus dari gambar agar tidak menduplikasi judul/deskripsi link card WhatsApp.
+- Identitas visual pada gambar hanya wordmark kecil `mi.do.ri` di kanan bawah, **tanpa badge/pill/background panel**.
+- Warna wordmark menyesuaikan terang/gelap area foto secara otomatis: Deep Emerald pada area terang, Warm Cream pada area gelap.
+- Metadata Open Graph tetap memuat judul, brand, deskripsi, canonical URL, dan dimensi 1080×1350 sehingga informasi produk tetap tampil pada link card platform.
+- Tidak ada perubahan pada data Google Sheets LIVE, foto sumber, SKU/varian/harga/stok, domain, DNS, HTTPS, canonical URL, sitemap, robots.txt, atau struktur katalog.
+- Crop akhir pada Threads/platform lain tetap mengikuti kebijakan masing-masing platform.
 
 ## Aturan Update Aman
 1. Mulai selalu dari GitHub `main` dan Sheets LIVE terbaru.

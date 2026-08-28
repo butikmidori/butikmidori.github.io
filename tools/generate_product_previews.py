@@ -39,7 +39,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 SITE = "https://butikmidori.id"
-VERSION = "4.12.3"
+VERSION = "4.12.4"
 CATALOG_PREFIX = "window.MIDORI_CATALOG = "
 IMAGE_EXTENSIONS = {".webp", ".jpg", ".jpeg", ".png"}
 
@@ -98,7 +98,7 @@ def fetch_live_catalog(root: Path) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "mi.do.ri-preview-generator/4.12.3",
+            "User-Agent": "mi.do.ri-preview-generator/4.12.4",
             "Accept": "application/json,text/javascript,*/*;q=0.8",
         },
     )
@@ -319,8 +319,9 @@ def _wrap_share_name(
 def make_product_card(src: Path, dest: Path, product: dict[str, Any]) -> None:
     """Create an editorial 1080x1350 (4:5) product share image.
 
-    The product image is full-bleed with no empty side panels. A restrained
-    Warm Cream lower overlay carries only brand, product name, and mi.do.ri.
+    The product image is full-bleed with no empty side panels. The image
+    carries only a small adaptive mi.do.ri wordmark; product copy is left to
+    the platform link card to avoid duplicated information in WhatsApp.
     """
     width, height = 1080, 1350
     img = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
@@ -331,52 +332,49 @@ def make_product_card(src: Path, dest: Path, product: dict[str, Any]) -> None:
         centering=(0.5, 0.46),
     ).convert("RGBA")
 
-    # Refined lower overlay: cleaner, shorter, and less intrusive for WhatsApp.
-    overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    overlay_draw = ImageDraw.Draw(overlay)
-    fade_start = 1040
-    panel_start = 1120
-    cream = (247, 246, 241)
-    for y in range(fade_start, panel_start):
-        progress = (y - fade_start) / max(1, panel_start - fade_start)
-        alpha = int(206 * progress)
-        overlay_draw.line((0, y, width, y), fill=(*cream, alpha))
-    overlay_draw.rectangle((0, panel_start, width, height), fill=(*cream, 226))
-    canvas = Image.alpha_composite(canvas, overlay)
-
+    # Photo-first branding: no panel, no duplicate product/brand copy.
+    # WhatsApp already renders title + description below the OG image, so the
+    # image itself stays editorial and carries only a small `mi.do.ri` wordmark.
     draw = ImageDraw.Draw(canvas)
-    emerald = (15, 61, 52, 255)
-    muted = (69, 91, 84, 255)
-    gold = (200, 169, 106, 255)
-
-    brand = " ".join(str(product.get("brand") or "mi.do.ri").split()).strip()
-    name = " ".join(str(product.get("name") or "Produk mi.do.ri").split()).strip()
-
-    left = 76
-    right = width - 76
-    max_text_width = right - left
-
-    # Restrained gold hairline as the only decorative accent.
-    draw.rounded_rectangle((left, 1148, left + 72, 1154), radius=3, fill=gold)
-
-    brand_font = _share_font(24)
-    name_font = _share_font(48)
-    wordmark_font = _share_font(22)
-
-    brand_label = _ellipsize_share_line(draw, brand.upper(), brand_font, max_text_width)
-    draw.text((left, 1172), brand_label, font=brand_font, fill=muted)
-
-    lines = _wrap_share_name(draw, name, name_font, max_text_width, max_lines=2)
-    name_y = 1210
-    line_gap = 5
-    for line in lines:
-        draw.text((left, name_y), line, font=name_font, fill=emerald)
-        box = draw.textbbox((left, name_y), line, font=name_font)
-        name_y = box[3] + line_gap
-
     wordmark = "mi.do.ri"
-    wordmark_width = _share_text_width(draw, wordmark, wordmark_font)
-    draw.text((right - wordmark_width, 1306), wordmark, font=wordmark_font, fill=emerald)
+    wordmark_font = _share_font(24)
+    text_box = draw.textbbox((0, 0), wordmark, font=wordmark_font)
+    text_width = max(0, text_box[2] - text_box[0])
+    text_height = max(0, text_box[3] - text_box[1])
+
+    margin_x = 44
+    margin_y = 42
+    text_x = width - margin_x - text_width - text_box[0]
+    text_y = height - margin_y - text_height - text_box[1]
+
+    # Pick wordmark color from the local photo brightness. This keeps the mark
+    # readable without adding a badge, pill, gradient, or solid backing panel.
+    sample_left = max(0, int(text_x) - 24)
+    sample_top = max(0, int(text_y) - 18)
+    sample_right = min(width, int(text_x) + text_width + 24)
+    sample_bottom = min(height, int(text_y) + text_height + 18)
+    sample = canvas.convert("RGB").crop(
+        (sample_left, sample_top, sample_right, sample_bottom)
+    ).convert("L")
+    histogram = sample.histogram()
+    pixel_count = max(1, sum(histogram))
+    brightness = sum(level * count for level, count in enumerate(histogram)) / pixel_count
+
+    if brightness >= 150:
+        fill = (15, 61, 52, 238)      # Deep Emerald on light photography.
+        stroke = (247, 246, 241, 96)  # Very light 1px edge, not a badge.
+    else:
+        fill = (247, 246, 241, 238)   # Warm Cream on dark photography.
+        stroke = (15, 61, 52, 96)
+
+    draw.text(
+        (text_x, text_y),
+        wordmark,
+        font=wordmark_font,
+        fill=fill,
+        stroke_width=1,
+        stroke_fill=stroke,
+    )
 
     canvas.convert("RGB").save(
         dest,
