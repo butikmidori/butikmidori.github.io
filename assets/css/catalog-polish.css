@@ -1,0 +1,157 @@
+/* =========================================================
+   mi.do.ri — Catalog Visual Polish
+   Shorter intro · clearer microcopy · quieter filter bar · tighter closing rhythm
+   ========================================================= */
+
+/* Move shoppers to the catalogue a little sooner without losing the editorial feel. */
+body[data-page="catalog"] .catalog-page-intro {
+  padding: 50px 0 38px;
+}
+
+body[data-page="catalog"] .catalog-page-intro .breadcrumb {
+  margin-bottom: 20px;
+}
+
+body[data-page="catalog"] .catalog-page-intro .eyebrow {
+  margin-bottom: 10px;
+}
+
+body[data-page="catalog"] .catalog-page-intro p {
+  margin-top: 16px;
+}
+
+.catalog-intro-link {
+  font-size: 13px;
+}
+
+/* Supporting information: still quiet, but easier to read. */
+.catalog-context-heading > div > p,
+.catalog-context-count,
+.catalog-meta-v41,
+.catalog-load-more p {
+  color: #65736D;
+}
+
+.catalog-meta-v41 {
+  line-height: 1.55;
+}
+
+.catalog-note {
+  color: #6B7872;
+}
+
+.catalog-quick-chip {
+  font-size: 12px;
+}
+
+.catalog-load-more p {
+  font-size: 12px;
+}
+
+.catalog-load-more-button {
+  font-size: 13px;
+}
+
+.catalog-visit-compact p {
+  font-size: 13px;
+}
+
+.catalog-visit-actions a {
+  font-size: 12px;
+}
+
+/* Quieter utility surface: less card-like, while preserving 50px touch targets. */
+.catalog-command-bar {
+  padding: 8px;
+  border-color: rgba(15,61,52,.08);
+  border-radius: 15px;
+  background: rgba(251,250,246,.94);
+  box-shadow: 0 7px 22px rgba(15,61,52,.035);
+}
+
+.catalog-search-box {
+  background: #FFFFFF !important;
+  box-shadow: inset 0 0 0 1px #E1E7E3;
+}
+
+.catalog-filter-trigger,
+.catalog-sort-box select {
+  border-color: #DCE4DF !important;
+  background: #FDFCF9 !important;
+}
+
+.catalog-filter-trigger {
+  transition: border-color .18s ease, background .18s ease, color .18s ease;
+}
+
+.catalog-filter-trigger:hover,
+.catalog-filter-trigger:focus-visible {
+  border-color: #C8D6CE !important;
+  background: #FFFFFF !important;
+  outline: none;
+}
+
+.catalog-sort-box select:hover {
+  border-color: #C8D6CE !important;
+}
+
+/* Closing rhythm: catalogue → visit card → footer should read as one sequence. */
+body[data-page="catalog"] .catalog-section-v41 {
+  padding-bottom: 50px;
+}
+
+.catalog-load-more {
+  margin-top: 40px;
+}
+
+.catalog-visit-compact {
+  padding-bottom: 42px;
+}
+
+.catalog-visit-compact-inner {
+  min-height: 140px;
+}
+
+body[data-page="catalog"] .site-footer {
+  margin-top: 0;
+}
+
+@media (max-width: 780px) {
+  body[data-page="catalog"] .catalog-page-intro {
+    padding: 36px 0 30px;
+  }
+
+  body[data-page="catalog"] .catalog-page-intro .breadcrumb {
+    margin-bottom: 17px;
+  }
+
+  body[data-page="catalog"] .catalog-section-v41 {
+    padding: 38px 0 44px;
+  }
+
+  .catalog-load-more {
+    margin-top: 36px;
+  }
+
+  .catalog-visit-compact {
+    padding-bottom: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  body[data-page="catalog"] .catalog-page-intro {
+    padding: 30px 0 26px;
+  }
+
+  .catalog-command-bar {
+    box-shadow: 0 6px 18px rgba(15,61,52,.035);
+  }
+
+  .catalog-quick-chip {
+    font-size: 11px;
+  }
+
+  .catalog-load-more p {
+    font-size: 11px;
+  }
+}
