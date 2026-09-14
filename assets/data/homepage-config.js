@@ -25,8 +25,8 @@
 window.MIDORI_HOME_CONFIG = {
   editorialSection: {
     eyebrow: "The mi.do.ri Edit",
-    title: "Lagi cari yang seperti apa?",
-    description: "Coba mulai dari gaya atau momen yang paling pas buat kamu."
+    title: "Lagi butuh outfit buat momen apa nih?",
+    description: "Yuk, sesuaikan sama mood atau rencanamu hari ini. Biar kami bantu cari yang paling pas."
   },
 
   editorialEdits: {
