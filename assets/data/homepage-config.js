@@ -59,13 +59,17 @@ window.MIDORI_HOME_CONFIG = {
       href: "katalog.html?segmen=Anak#katalog",
       collectionText: ""
     }
+  },
+
+  visualPolish: {
+    minFreshProducts: 2
   }
 };
 
 /*
  * Presentation bridge.
  * app.js tetap menangani data produk, fallback, jumlah produk, dan quick view.
- * Bagian kecil ini hanya menerapkan copy/link dari konfigurasi di atas setelah
+ * Bagian kecil ini menerapkan copy/link dari konfigurasi di atas setelah
  * card editorial selesai dirender. Dengan begitu perubahan editorial tetap
  * cukup dilakukan di satu file ini.
  */
@@ -73,6 +77,7 @@ window.MIDORI_HOME_CONFIG = {
   "use strict";
 
   const keys = ["mixMatch", "specialMoment", "kids"];
+  const polishStyleId = "midori-home-visual-polish";
 
   function setText(element, value) {
     if (!element || typeof value !== "string" || element.textContent === value) return;
@@ -130,22 +135,144 @@ window.MIDORI_HOME_CONFIG = {
     });
   }
 
-  function start() {
-    applyEditorialConfig();
-    const grid = document.querySelector("#editorialEditGrid");
-    if (!grid) return;
+  function installVisualPolishStyles() {
+    if (document.getElementById(polishStyleId)) return;
 
+    const style = document.createElement("style");
+    style.id = polishStyleId;
+    style.textContent = `
+      /* mi.do.ri homepage visual polish — readability + editorial rhythm */
+      body[data-page="home"] .editorial-category-section .category-card h3 {
+        margin-top: 13px;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.35;
+      }
+      body[data-page="home"] .editorial-category-section .category-card p {
+        margin-top: 4px;
+        color: #68766F;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      body[data-page="home"] .editorial-edit-copy > span,
+      body[data-page="home"] .brand-discovery-index {
+        font-size: 11px;
+      }
+      body[data-page="home"] .editorial-edit-actions a,
+      body[data-page="home"] .editorial-edit-actions button,
+      body[data-page="home"] .brand-discovery-copy p,
+      body[data-page="home"] .campaign-stage-meta {
+        font-size: 12px;
+      }
+      body[data-page="home"] .brand-discovery-copy > span {
+        font-size: 11px;
+      }
+      body[data-page="home"] .brand-discovery-copy p {
+        line-height: 1.5;
+      }
+
+      /* Fresh should look intentional when only a few products are marked BARU. */
+      @media (min-width: 981px) {
+        body[data-page="home"] .fresh-section.fresh-count-2 .home-product-grid {
+          width: min(100%, 620px);
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        body[data-page="home"] .fresh-section.fresh-count-3 .home-product-grid {
+          width: min(100%, 920px);
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      /* Slightly tighter transition around navigation / campaign sections. */
+      body[data-page="home"] .editorial-category-section {
+        padding-top: 54px;
+        padding-bottom: 46px;
+      }
+      body[data-page="home"] .campaign-stage {
+        padding-top: 42px;
+        padding-bottom: 52px;
+      }
+      body[data-page="home"] .brand-discovery-section {
+        padding-top: 62px;
+        padding-bottom: 60px;
+      }
+      body[data-page="home"] .continue-section {
+        padding-top: 58px;
+        padding-bottom: 58px;
+      }
+
+      @media (max-width: 780px) {
+        body[data-page="home"] .editorial-category-section,
+        body[data-page="home"] .campaign-stage,
+        body[data-page="home"] .brand-discovery-section,
+        body[data-page="home"] .continue-section {
+          padding-block: 44px;
+        }
+        body[data-page="home"] .editorial-category-section .category-card h3 {
+          font-size: 13px;
+        }
+        body[data-page="home"] .editorial-category-section .category-card p,
+        body[data-page="home"] .brand-discovery-copy p {
+          font-size: 11px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function applyFreshDensity() {
+    const section = document.querySelector("#fresh");
+    const grid = document.querySelector("#freshGrid");
+    if (!section || !grid) return;
+
+    const cards = [...grid.querySelectorAll(".product-card")];
+    const minimum = Math.max(1, Number(window.MIDORI_HOME_CONFIG?.visualPolish?.minFreshProducts) || 2);
+
+    section.classList.remove("fresh-count-2", "fresh-count-3", "fresh-count-4");
+
+    if (cards.length > 0 && cards.length < minimum) {
+      section.hidden = true;
+      section.dataset.polishHidden = "low-count";
+      return;
+    }
+
+    if (section.dataset.polishHidden === "low-count" && cards.length >= minimum) {
+      section.hidden = false;
+      delete section.dataset.polishHidden;
+    }
+
+    if (cards.length >= 2) {
+      section.classList.add(`fresh-count-${Math.min(cards.length, 4)}`);
+    }
+  }
+
+  function applyAll() {
+    applyEditorialConfig();
+    applyFreshDensity();
+  }
+
+  function start() {
+    installVisualPolishStyles();
+    applyAll();
+
+    const editorialGrid = document.querySelector("#editorialEditGrid");
+    const freshGrid = document.querySelector("#freshGrid");
     let scheduled = false;
-    const observer = new MutationObserver(() => {
+
+    const scheduleApply = () => {
       if (scheduled) return;
       scheduled = true;
       requestAnimationFrame(() => {
         scheduled = false;
-        applyEditorialConfig();
+        applyAll();
       });
-    });
+    };
 
-    observer.observe(grid, { childList: true, subtree: true });
+    const observer = new MutationObserver(scheduleApply);
+    if (editorialGrid) observer.observe(editorialGrid, { childList: true, subtree: true });
+    if (freshGrid) observer.observe(freshGrid, { childList: true, subtree: true });
+
+    window.addEventListener("load", scheduleApply, { once: true });
   }
 
   if (document.readyState === "loading") {
