@@ -33,9 +33,9 @@ window.MIDORI_HOME_CONFIG = {
     mixMatch: {
       product: "puru-kambera-arine-blazer",
       coverImage: "",
-      kicker: "01 · Padu padan",
-      title: "Gampang Dipadu",
-      description: "Luaran dan rajut yang tinggal dipadukan dengan yang sudah ada di lemari.",
+      kicker: "01 · Gampang Dipadu",
+      title: "Biar Gampang Mix & Match",
+      description: "Luaran cantik yang siap bikin koleksi bajumu di lemari jadi tampil beda.",
       href: "katalog.html?kelompok=outerwear#katalog",
       collectionText: ""
     },
@@ -44,8 +44,8 @@ window.MIDORI_HOME_CONFIG = {
       product: "anindyascarf-rafea-dress",
       coverImage: "",
       kicker: "02 · Momen spesial",
-      title: "Buat Hari Spesial",
-      description: "Dress dan set buat kondangan, acara keluarga, atau saat ingin tampil sedikit lebih istimewa.",
+      title: "Untuk Hari Istimewamu",
+      description: "Pilihan elegan yang pas banget buat kondangan atau acara kumpul keluarga.",
       href: "katalog.html?kelompok=dress-set#katalog",
       collectionText: ""
     },
@@ -54,8 +54,8 @@ window.MIDORI_HOME_CONFIG = {
       product: "heart-troops-niaz-koko-kids",
       coverImage: "",
       kicker: "03 · Si kecil",
-      title: "Yang lucu-lucu buat si kecil.",
-      description: "Nyaman dipakai, gampang disukai.",
+      title: "Gaya Gemas Si Kecil.",
+      description: "Koleksi super nyaman yang bikin waktu mainnya makin seru tanpa rewel.",
       href: "katalog.html?segmen=Anak#katalog",
       collectionText: ""
     }
