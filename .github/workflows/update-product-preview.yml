@@ -32,7 +32,24 @@ jobs:
         run: python tools/ensure_photo_first_share_preview.py
 
       - name: Generate product pages, sitemap, and share previews
-        run: python tools/generate_product_previews.py --source live --write-fallback
+        run: python tools/generate_product_previews.py --source auto --write-fallback
+
+      - name: Report catalog source
+        shell: bash
+        run: |
+          SOURCE_USED="$(python -c 'import json; print(json.load(open("tools/preview-generation-report.json", encoding="utf-8"))["catalog_source"])')"
+          echo "Catalog source used: ${SOURCE_USED}"
+          if [ "${SOURCE_USED}" != "live" ]; then
+            echo "::warning::Google Sheets LIVE tidak dapat diakses. Preview dibuat dari catalog-data.js lokal agar workflow tetap aman dan tidak gagal."
+            {
+              echo "### ⚠️ Google Sheets LIVE unavailable"
+              echo "Preview berhasil dibuat menggunakan fallback lokal assets/data/catalog-data.js."
+              echo "Data katalog baru dari Google Sheets belum tersinkron sampai endpoint LIVE kembali tersedia."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### ✅ Google Sheets LIVE" >> "$GITHUB_STEP_SUMMARY"
+            echo "Preview dibuat dari katalog LIVE." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Commit generated previews
         shell: bash
